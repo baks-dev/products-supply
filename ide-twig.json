@@ -1,0 +1,8 @@
+{
+  "namespaces": [
+    {
+      "namespace": "products-supply",
+      "path": "Resources/view"
+    }
+  ]
+}
