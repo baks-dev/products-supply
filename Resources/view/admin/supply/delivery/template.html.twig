@@ -1,0 +1,20 @@
+{% trans_default_domain('products-supply.admin') %}
+
+{% extends Template('/admin/base.html.twig') %}
+
+{% block title %}{{ 'page.delivery'|trans }}{% endblock %}
+
+ {% block stylesheets %}
+     <link href="/assets/{{ version }}/plugins/datepicker/datepicker.min.css" rel="stylesheet">
+ {% endblock %}
+
+{% block content %}
+    {{ include(_self|replace({ "template.html.twig":baks_settings.device~"/content.html.twig" })) }}
+{% endblock %}
+
+{% block javascript %}
+
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/plugins/datepicker/datepicker.min.js?v={{ version }}"
+            defer class="lazy"></script>
+
+{% endblock %}

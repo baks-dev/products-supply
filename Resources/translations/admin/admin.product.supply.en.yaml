@@ -1,0 +1,6 @@
+breadcrumb: 'ProductSupply Management'
+new: 'ProductSupply create'
+
+file:
+  success: 'Files uploaded successfully'
+  danger: '%s: Error while downloading files'

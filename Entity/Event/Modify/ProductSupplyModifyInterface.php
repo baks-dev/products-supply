@@ -22,16 +22,11 @@
  *
  */
 
-declare(strict_types=1);
+namespace BaksDev\Products\Supply\Entity\Event\Modify;
 
-namespace BaksDev\Products\Supply;
+use BaksDev\Core\Type\Modify\ModifyAction;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
+interface ProductSupplyModifyInterface
 {
-    public const string NAMESPACE = __NAMESPACE__.'\\';
-
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
+    public function getAction(): ModifyAction;
 }

@@ -1,0 +1,37 @@
+{{ include(_self|replace({ "content.html.twig": baks_settings.device~"/content.html.twig" })) }}
+
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/js/copy.min.js?v={{ version }}"
+        class="lazy"></script>
+
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/users-address/script.min.js?v={{ version }}"
+        class="lazy"></script>
+
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/js/print.min.js?v={{ version }}"
+        class="lazy"></script>
+
+{# вешаем события на модальные ссылки #}
+<script nonce='{{ csp_nonce() }}' class="lazy">
+
+    document.querySelectorAll('[data-bs-toggle="modal"]')
+        .forEach(function(item, i, arr)
+        {
+            modalLink(item);
+        });
+
+    document.querySelectorAll(".dropdown-item").forEach(item =>
+    {
+
+        item.addEventListener("click", function(e)
+        {
+
+            document.querySelectorAll(".dropdown-item").forEach(el =>
+            {
+                el.classList.remove("active");
+                el.style.color = ""; // Сбрасываем цвет, если он был установлен через style
+            });
+
+            this.classList.add("text-success");
+            this.classList.add("fw-bolder");
+        });
+    });
+</script>

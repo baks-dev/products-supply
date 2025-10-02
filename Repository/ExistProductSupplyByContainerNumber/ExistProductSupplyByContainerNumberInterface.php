@@ -22,16 +22,25 @@
  *
  */
 
-declare(strict_types=1);
+namespace BaksDev\Products\Supply\Repository\ExistProductSupplyByContainerNumber;
 
-namespace BaksDev\Products\Supply;
+use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
+use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusInterface;
+use BaksDev\Products\Supply\UseCase\Admin\New\Invariable\NewProductSupplyInvariableDTO;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\User\Entity\User;
+use BaksDev\Users\User\Type\Id\UserUid;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
+/**
+ * Проверяет существование записи с поставкой по номеру контейнера и принадлежности к пользователю
+ */
+interface ExistProductSupplyByContainerNumberInterface
 {
-    public const string NAMESPACE = __NAMESPACE__.'\\';
+    public function forStatus(ProductSupplyStatus|ProductSupplyStatusInterface|string $status): self;
 
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
+    public function forUser(User|UserUid $user): self;
+
+    public function forProfile(UserProfileUid $profile): self;
+
+    public function isExist(NewProductSupplyInvariableDTO $container): bool;
 }

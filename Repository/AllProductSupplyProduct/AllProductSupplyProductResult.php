@@ -22,16 +22,42 @@
  *
  */
 
-declare(strict_types=1);
+namespace BaksDev\Products\Supply\Repository\AllProductSupplyProduct;
 
-namespace BaksDev\Products\Supply;
+use BaksDev\Products\Supply\Repository\OneProductSupplyByEvent\ProductSupplyProductResult;
+use Generator;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
+final readonly class AllProductSupplyProductResult
 {
-    public const string NAMESPACE = __NAMESPACE__.'\\';
+    public function __construct(
+        private string $supply_products,
+    ) {}
 
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
+    /**
+     * @return Generator<int, ProductSupplyProductResult>|false
+     */
+    public function getProducts(): Generator|false
+    {
+        if(is_null($this->supply_products))
+        {
+            return false;
+        }
+
+        if(false === json_validate($this->supply_products))
+        {
+            return false;
+        }
+
+        $products = json_decode($this->supply_products, true, 512, JSON_THROW_ON_ERROR);
+
+        if(null === current($products))
+        {
+            return false;
+        }
+
+        foreach($products as $product)
+        {
+            yield new ProductSupplyProductResult(...$product);
+        }
+    }
 }

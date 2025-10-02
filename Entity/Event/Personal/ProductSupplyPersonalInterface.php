@@ -22,16 +22,14 @@
  *
  */
 
-declare(strict_types=1);
+namespace BaksDev\Products\Supply\Entity\Event\Personal;
 
-namespace BaksDev\Products\Supply;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\User\Type\Id\UserUid;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
+interface ProductSupplyPersonalInterface
 {
-    public const string NAMESPACE = __NAMESPACE__.'\\';
+    public function getUsr(): UserUid;
 
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
+    public function getProfile(): UserProfileUid;
 }

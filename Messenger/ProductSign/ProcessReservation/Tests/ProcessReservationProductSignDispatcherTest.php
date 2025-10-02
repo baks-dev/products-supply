@@ -1,0 +1,100 @@
+<?php
+/*
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is furnished
+ *  to do so, subject to the following conditions:
+ *  
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *  
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ *
+ */
+
+declare(strict_types=1);
+
+namespace BaksDev\Products\Supply\Messenger\ProductSign\ProcessReservation\Tests;
+
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
+use BaksDev\Products\Supply\Entity\Event\Product\ProductSupplyProduct;
+use BaksDev\Products\Supply\Entity\ProductSupply;
+use BaksDev\Products\Supply\Messenger\ProductSign\ProcessReservation\ProcessReservationProductSignDispatcher;
+use BaksDev\Products\Supply\Messenger\ProductSign\ProcessReservation\ProcessReservationProductSignMessage;
+use BaksDev\Products\Supply\Type\ProductSupplyUid;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\User\Type\Id\UserUid;
+use Doctrine\ORM\EntityManagerInterface;
+use NewProductSupplyHandlerTest;
+use PHPUnit\Framework\Attributes\DependsOnClass;
+use PHPUnit\Framework\Attributes\Group;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Input\StringInput;
+use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\DependencyInjection\Attribute\When;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+
+#[Group('products-supply-process')]
+#[When(env: 'test')]
+class ProcessReservationProductSignDispatcherTest extends KernelTestCase
+{
+    #[DependsOnClass(NewProductSupplyHandlerTest::class)]
+    public function testUseCase(): void
+    {
+        self::assertTrue(true);
+
+        // Бросаем событие консольной команды
+        $dispatcher = self::getContainer()->get(EventDispatcherInterface::class);
+        $event = new ConsoleCommandEvent(new Command(), new StringInput(''), new NullOutput());
+        $dispatcher->dispatch($event, 'console.command');
+
+        /** @var ProcessReservationProductSignDispatcher $ProductSignProcessDispatcher */
+        $ProductSignProcessDispatcher = self::getContainer()->get(ProcessReservationProductSignDispatcher::class);
+
+        /** @var EntityManagerInterface $em */
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+
+        $ProductSupply = $em->getRepository(ProductSupply::class)
+            ->find(ProductSupplyUid::TEST);
+
+        $ProductSupplyProducts = $em->getRepository(ProductSupplyProduct::class)
+            ->findBy(['event' => $ProductSupply->getEvent()]);
+
+        /** @var ProductSupplyProduct $product */
+        foreach($ProductSupplyProducts as $product)
+        {
+            $total = $product->getTotal();
+
+            /** Запускаем процесс бронирования на каждую единицу продукции в поставке */
+            for($i = 0; $i < $total; $i++)
+            {
+                $ProductSignProcessMessage = new ProcessReservationProductSignMessage(
+                    supply: new ProductSupplyUid,
+                    user: new UserUid,
+                    profile: new UserProfileUid,
+                    product: new ProductUid,
+                    offer: new ProductOfferConst,
+                    variation: new ProductVariationConst,
+                    modification: new ProductModificationConst,
+                );
+
+                $ProductSignProcessDispatcher($ProductSignProcessMessage);
+            }
+        }
+    }
+}

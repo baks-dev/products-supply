@@ -1,0 +1,34 @@
+{# <style></style> #}
+
+<link href="/assets/{{ version }}/plugins/datepicker/datepicker.min.css" rel="stylesheet">
+
+{{ include(_self|replace({ "content.html.twig" : baks_settings.device~"/content.html.twig" })) }}
+
+<script nonce='{{ csp_nonce() }}' async
+        data-src="/assets/{{ version }}/plugins/datepicker/datepicker.min.js?v={{ version }}"
+        defer class="lazy"></script>
+
+<script nonce='{{ csp_nonce() }}' class='lazy'>
+
+    executeFunc(function()
+    {
+        /** Имя формы */
+        let forms = document.forms.delivery_product_supply_form;
+
+        if(!forms)
+        {
+            return false;
+        }
+
+        /** Cобытие отправки формы */
+        forms.addEventListener("submit", function(event)
+        {
+            event.preventDefault();
+            submitModalForm(forms);
+            return true;
+        });
+
+        return true;
+    });
+
+</script>

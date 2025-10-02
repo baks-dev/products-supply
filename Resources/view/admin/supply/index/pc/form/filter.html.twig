@@ -1,0 +1,21 @@
+<div class="col-6">
+    {{ form_start(filter) }}
+    <div class="w-100 d-flex gap-3 justify-content-end mb-2" style="height: 40px;">
+
+        <div class="d-flex justify-content-around radio-buttons clearfix" data-buttons="true">
+            <label class="btn p-1 border-dotted rounded-3 w-100 ">
+                <div class="d-flex">
+                    {{ form_widget(filter.all, { label: false }) }}
+                    <div class="form-check ps-0"> Все</div>
+                </div>
+            </label>
+        </div>
+
+
+        <div class="w-50">
+            {{ form_row(filter.delivery, { placeholder : 'Любой способ доставки ...', attr : { 'data-select' : 'select2' } }) }}
+        </div>
+
+    </div>
+    {{ form_end(filter) }}
+</div>

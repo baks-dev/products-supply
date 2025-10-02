@@ -1,0 +1,119 @@
+{% trans_default_domain 'products-supply.status' %}
+
+<div class="offcanvas-header">
+    <button type="button" class="btn-close icon rounded-circle" style="width: 35px; height: 35px;"
+            data-bs-dismiss="offcanvas"
+            title="Close">
+
+    </button>
+</div>
+
+{{ form_start(form, { attr: { class: 'offcanvas-body w-100 p-0' } }) }}
+
+{% set status = form.vars.data.status %}
+{% set container = form.vars.data.invariable.container %}
+
+<div class='px-3 mb-3'>
+
+    {# ЗАГОЛОВОК #}
+    <div class='d-flex gap-3 align-items-center'>
+
+        <div class="badge" style='background-color: {{ status.color }};'>
+            {{ status|trans }}
+        </div>
+
+        <h5 class="offcanvas-title flex-grow-1 mb-0 copy pointer d-flex align-items-center gap-2"
+            data-copy="{{ container }}">
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="14"
+                 height="14" fill="text-primary" viewBox="0 0 115.77 122.88">
+                <path d="M89.62,13.96v7.73h12.19h0.01v0.02c3.85,0.01,7.34,1.57,9.86,4.1c2.5,2.51,4.06,5.98,4.07,9.82h0.02v0.02 v73.27v0.01h-0.02c-0.01,3.84-1.57,7.33-4.1,9.86c-2.51,2.5-5.98,4.06-9.82,4.07v0.02h-0.02h-61.7H40.1v-0.02 c-3.84-0.01-7.34-1.57-9.86-4.1c-2.5-2.51-4.06-5.98-4.07-9.82h-0.02v-0.02V92.51H13.96h-0.01v-0.02c-3.84-0.01-7.34-1.57-9.86-4.1 c-2.5-2.51-4.06-5.98-4.07-9.82H0v-0.02V13.96v-0.01h0.02c0.01-3.85,1.58-7.34,4.1-9.86c2.51-2.5,5.98-4.06,9.82-4.07V0h0.02h61.7 h0.01v0.02c3.85,0.01,7.34,1.57,9.86,4.1c2.5,2.51,4.06,5.98,4.07,9.82h0.02V13.96L89.62,13.96z M79.04,21.69v-7.73v-0.02h0.02 c0-0.91-0.39-1.75-1.01-2.37c-0.61-0.61-1.46-1-2.37-1v0.02h-0.01h-61.7h-0.02v-0.02c-0.91,0-1.75,0.39-2.37,1.01 c-0.61,0.61-1,1.46-1,2.37h0.02v0.01v64.59v0.02h-0.02c0,0.91,0.39,1.75,1.01,2.37c0.61,0.61,1.46,1,2.37,1v-0.02h0.01h12.19V35.65 v-0.01h0.02c0.01-3.85,1.58-7.34,4.1-9.86c2.51-2.5,5.98-4.06,9.82-4.07v-0.02h0.02H79.04L79.04,21.69z M105.18,108.92V35.65v-0.02 h0.02c0-0.91-0.39-1.75-1.01-2.37c-0.61-0.61-1.46-1-2.37-1v0.02h-0.01h-61.7h-0.02v-0.02c-0.91,0-1.75,0.39-2.37,1.01 c-0.61,0.61-1,1.46-1,2.37h0.02v0.01v73.27v0.02h-0.02c0,0.91,0.39,1.75,1.01,2.37c0.61,0.61,1.46,1,2.37,1v-0.02h0.01h61.7h0.02 v0.02c0.91,0,1.75-0.39,2.37-1.01c0.61-0.61,1-1.46,1-2.37h-0.02V108.92L105.18,108.92z"></path>
+            </svg>
+
+            <span>Поставка #{{ container }}</span>
+
+        </h5>
+    </div>
+
+    <hr>
+
+    {# ТАБЫ - ЗАГОЛОВКИ #}
+    <ul class="nav nav-pills d-flex gap-3 pb-4 sticky-top bg-body" id="pills-tab" role="tablist">
+
+        <li class="nav-item" role="presentation">
+            <button class="btn nav-link fw-bolder rounded-3 border active"
+                    id="products"
+                    data-bs-toggle="pill"
+                    data-bs-target="#pills-products"
+                    aria-controls="pills-products"
+                    type="button" role="tab"
+                    aria-selected="true">
+                <span class="text-uppercase px-3">Продукты</span>
+            </button>
+        </li>
+
+        {# @TODO не реализованно #}
+        {#        <li class="nav-item" role="presentation"> #}
+        {#            <button class="btn nav-link fw-bolder rounded-3 border" #}
+        {#                    id="history" #}
+        {#                    data-bs-toggle="pill" #}
+        {#                    data-bs-target="#pills-history" #}
+        {#                    aria-controls="pills-history" #}
+        {#                    type="button" #}
+        {#                    role="tab" #}
+        {#                    aria-selected="false" tabindex="-1"> #}
+
+        {#                <span class="text-uppercase px-3">История</span> #}
+        {#            </button> #}
+        {#        </li> #}
+
+        {# ДОКУМЕНТЫ #}
+        {{ include(_self|replace({ "content.html.twig": "includes/docs/docs.html.twig" })) }}
+
+    </ul>
+
+    {# ТАБЫ - КОНТЕНТ #}
+    <div class="tab-content w-100 h-100 pt-3" id="pills-tabContent">
+
+        <div class="tab-pane fade active show" role="tabpanel"
+             id="pills-order"
+             tabindex="0">
+
+            {# ТАБ - ПРОДУКЦИЯ #}
+            {{ include(_self|replace({ "content.html.twig": "includes/products.html.twig" })) }}
+
+            {# @TODO не реализованно #}
+            {# ИСТОРИЯ #}
+            {#    {{ include(_self|replace({ "content.html.twig": "includes/history.html.twig" })) }} #}
+
+        </div>
+
+    </div>
+
+    {# Кнопки управления канвасом #}
+    <div class="w-100 d-flex justify-content-between align-items-center sticky-bottom bottom-0 bg-light p-3 gap-3">
+
+        <div>
+            {% if status != 'completed' %}
+                {{ form_widget(form.product_supply_edit, { label: '
+                    <span class="text-nowrap">'~ 'Сохранить изменения'|trans({}, 'core.btn') ~'</span>
+                    <span class="spinner-border spinner-border-sm vertical-middle d-none"></span>
+		        ', attr: { class: 'btn-danger', title : "Сохранить изменения" }
+                }) }}
+            {% endif %}
+        </div>
+
+        <div class="w-50 d-flex gap-3 align-items-end justify-content-end">
+
+            <button type="button"
+                    class="btn btn-light border text-secondary"
+                    data-bs-dismiss="offcanvas"
+                    title="Close">
+                <span class="text-nowrap">Закрыть без изменений</span>
+            </button>
+
+        </div>
+    </div>
+
+</div>
+
+{{ form_end(form) }}

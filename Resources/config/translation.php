@@ -22,16 +22,15 @@
  *
  */
 
-declare(strict_types=1);
+namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-namespace BaksDev\Products\Supply;
+use BaksDev\Products\Supply\BaksDevProductsSupplyBundle;
+use Symfony\Config\FrameworkConfig;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+return static function(FrameworkConfig $config) {
 
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
-{
-    public const string NAMESPACE = __NAMESPACE__.'\\';
+    $config
+        ->translator()
+        ->paths([BaksDevProductsSupplyBundle::PATH.implode(DIRECTORY_SEPARATOR, ['Resources', 'translations', ''])]);
 
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
-}
+};

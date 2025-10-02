@@ -22,16 +22,16 @@
  *
  */
 
-declare(strict_types=1);
+namespace BaksDev\Products\Supply\Repository\AllProductSupplyProduct;
 
-namespace BaksDev\Products\Supply;
+use BaksDev\Products\Supply\Type\ProductSupplyUid;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
+interface AllProductSupplyProductInterface
 {
-    public const string NAMESPACE = __NAMESPACE__.'\\';
+    public function forSupply(ProductSupplyUid $supply): self;
 
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
+    /**
+     * Возвращает продукты из поставки
+     */
+    public function findAll(): AllProductSupplyProductResult|false;
 }

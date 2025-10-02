@@ -22,16 +22,35 @@
  *
  */
 
-declare(strict_types=1);
 
-namespace BaksDev\Products\Supply;
+namespace BaksDev\Products\Supply\UseCase\Admin\Edit;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+use BaksDev\Core\Entity\AbstractHandler;
+use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
+use BaksDev\Products\Supply\Entity\Event\ProductSupplyEventInterface;
+use BaksDev\Products\Supply\Entity\ProductSupply;
+use BaksDev\Products\Supply\Messenger\ProductSupplyMessage;
 
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
+final class EditProductSupplyHandler extends AbstractHandler
 {
-    public const string NAMESPACE = __NAMESPACE__.'\\';
+    public function handle(ProductSupplyEventInterface $command): ProductSupply|string
+    {
+        $this->setCommand($command);
+        $this->preEventPersistOrUpdate(ProductSupply::class, ProductSupplyEvent::class);
 
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
+        /** Валидация всех объектов */
+        if($this->validatorCollection->isInvalid())
+        {
+            return $this->validatorCollection->getErrorUniqid();
+        }
+
+        $this->flush();
+
+        $this->messageDispatch
+            ->addClearCacheOther('products-sign')
+            ->dispatch(
+                message: new ProductSupplyMessage($this->main->getId(), $this->main->getEvent(), $command->getEvent()));
+
+        return $this->main;
+    }
 }

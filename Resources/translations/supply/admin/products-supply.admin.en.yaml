@@ -1,0 +1,30 @@
+page:
+  index: 'ProductSupply management'
+  all: 'List of supplys'
+  new: 'Add supply'
+  edit: 'Edit supply'
+  delete: 'Delete supply'
+  add: 'Add products to supply'
+  decommission: 'Product decommission'
+
+breadcrumb:
+  index: 'ProductSupply management'
+  all: 'ProductSupply list'
+  new: 'Add supply'
+  edit: 'Edit supply'
+  delete: 'Delete supply'
+  add: 'Add products to supply'
+
+success:
+  new: 'ProductSupply added successfully'
+  update: 'ProductSupply successfully updated'
+  delete: 'The supply was successfully added to the cart'
+  restore: 'ProductSupply successfully restored'
+  add: 'Products added successfully'
+
+danger:
+  new: '%s: Error adding supply'
+  update: '%s: Error updating supply'
+  delete: '%s: Error deleting supply'
+  restore: '%s: Error while restoring supply'
+  add: '%s: Error adding products'

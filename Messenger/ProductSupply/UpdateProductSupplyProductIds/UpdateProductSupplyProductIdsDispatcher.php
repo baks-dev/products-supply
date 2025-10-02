@@ -1,0 +1,158 @@
+<?php
+/*
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is furnished
+ *  to do so, subject to the following conditions:
+ *  
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *  
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ *
+ */
+
+declare(strict_types=1);
+
+namespace BaksDev\Products\Supply\Messenger\ProductSupply\UpdateProductSupplyProductIds;
+
+use BaksDev\Core\Messenger\MessageDispatchInterface;
+use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
+use BaksDev\Products\Supply\Entity\ProductSupply;
+use BaksDev\Products\Supply\Messenger\ProductSign\UpdateProductIds\UpdateProductSignProductsIdsMessage;
+use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductSupplyEventInterface;
+use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyDTO;
+use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
+use BaksDev\Products\Supply\UseCase\Admin\Edit\Product\EditProductSupplyProductDTO;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+/**
+ * Обновляет идентификаторы продукта в поставке при изменении соответствующего продукта в системе
+ * prev @see FindProductSupplyProductForUpdateDispatcher
+ */
+#[AsMessageHandler(priority: 0)]
+final readonly class UpdateProductSupplyProductIdsDispatcher
+{
+    public function __construct(
+        #[Target('productsSupplyLogger')] private LoggerInterface $logger,
+        private MessageDispatchInterface $messageDispatch,
+        private CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
+        private EditProductSupplyHandler $editProductSupplyHandler,
+    ) {}
+
+    public function __invoke(UpdateProductSupplyProductIdsMessage $message): void
+    {
+        /**
+         * Обновляем идентификаторы продукции в поставке
+         */
+
+        /** Активное событие поставки c продуктом без идентификаторов */
+        $currentSupply = $this->currentProductSupplyEventRepository->find($message->getSupply());
+
+        if(false === ($currentSupply instanceof ProductSupplyEvent))
+        {
+            $this->logger->critical(
+                message: 'Не найдено событие ProductSupplyEvent',
+                context: [
+                    self::class.':'.__LINE__,
+                    var_export($message, true),
+                ],
+            );
+
+            return;
+        }
+
+        $EditProductSupplyDTO = new EditProductSupplyDTO($currentSupply->getId());
+        $currentSupply->getDto($EditProductSupplyDTO);
+
+        /** Находим продукт в поставке, штрихкод которого совпадает со штрихкодом из обновляемого продукта */
+        $productForUpdate = $EditProductSupplyDTO->getProduct()->findFirst(function($key, $product) use ($message) {
+            return $product->getBarcode()->equals($message->getBarcode());
+        });
+
+        if(false === $productForUpdate instanceof EditProductSupplyProductDTO)
+        {
+            $this->logger->critical(
+                message: sprintf(
+                    'Не удалось найли продукт в поставке %s для обновления его идентификаторов',
+                    $currentSupply->getMain()),
+                context: [
+                    self::class.':'.__LINE__,
+                    var_export($message, true),
+                ],
+            );
+
+            return;
+        }
+
+        /** Обновляем идентификаторы у продукта в поставке */
+        $productForUpdate
+            ->setProduct($message->getProduct())
+            ->setOfferConst($message->getOfferConst())
+            ->setVariationConst($message->getVariationConst())
+            ->setModificationConst($message->getModificationConst());
+
+        /** Обновляем поставку, изменяя только идентификаторы продукта */
+        $handle = $this->editProductSupplyHandler->handle($EditProductSupplyDTO);
+
+        if(false === $handle instanceof ProductSupply)
+        {
+            $this->logger->critical(
+                message: sprintf(
+                    '%s: Ошибка обновления продуктов в поставке %s',
+                    $handle, $currentSupply->getMain()
+                ),
+                context: [
+                    self::class.':'.__LINE__,
+                    var_export($message, true),
+                ],
+            );
+        }
+
+        if(true === $handle instanceof ProductSupply)
+        {
+            $this->logger->info(
+                message: sprintf(
+                    'Успешно обновили идентификаторы продукта в поставке %s',
+                    $handle->getId()
+                ),
+                context: [
+                    'продукты' => $EditProductSupplyDTO->getProduct()->toArray(),
+                    self::class.':'.__LINE__
+                ],
+            );
+
+            /**
+             * Процесс обновления идентификаторов продукта у Честного знака
+             */
+
+            /**
+             * Бросаем сообщение для обновления идентификаторов продуктов у Честных знаков,
+             * зарезервированных на эту поставку
+             */
+            $this->messageDispatch
+                ->dispatch(
+                    message: new UpdateProductSignProductsIdsMessage(
+                        supply: $handle->getId(),
+                        barcode: $productForUpdate->getBarcode(),
+                        usr: $EditProductSupplyDTO->getPersonal()->getUsr(),
+                        profile: $EditProductSupplyDTO->getPersonal()->getProfile(),
+                    ),
+                    transport: 'products-sign',
+                );
+        }
+
+    }
+}

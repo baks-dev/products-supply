@@ -22,16 +22,15 @@
  *
  */
 
-declare(strict_types=1);
+namespace BaksDev\Products\Supply\Entity\Event;
 
-namespace BaksDev\Products\Supply;
+use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
+interface ProductSupplyEventInterface
 {
-    public const string NAMESPACE = __NAMESPACE__.'\\';
+    public function getEvent(): ?ProductSupplyEventUid;
 
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
+    //    public function getStatus(): ?ProductSupplyStatus;
+
+    //    public function getPersonal(): ?ProductSupplyPersonalInterface;
 }
