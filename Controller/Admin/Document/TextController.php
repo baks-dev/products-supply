@@ -55,13 +55,14 @@ final class TextController extends AbstractController
         methods: ['GET'])
     ]
     public function text(
-        ProductSignCodesBySupplyInterface $productSignCodesBySupplyRepositories,
-
         string $size,
-        #[ParamConverter(ProductSupplyUid::class)] ProductSupplyUid $supply,
         string $article,
         string $part,
-        #[ParamConverter(ProductUid::class)] ?ProductUid $product = null,
+
+        ProductSignCodesBySupplyInterface $productSignCodesBySupplyRepositories,
+
+        #[ParamConverter(ProductSupplyUid::class)] ProductSupplyUid $supply,
+        #[ParamConverter(ProductUid::class)] ProductUid $product,
         #[ParamConverter(ProductOfferConst::class)] ?ProductOfferConst $offer = null,
         #[ParamConverter(ProductVariationConst::class)] ?ProductVariationConst $variation = null,
         #[ParamConverter(ProductModificationConst::class)] ?ProductModificationConst $modification = null,

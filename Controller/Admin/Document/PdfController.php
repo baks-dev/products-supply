@@ -61,17 +61,18 @@ final class PdfController extends AbstractController
         methods: ['GET'])
     ]
     public function pdf(
-        #[Autowire('%kernel.project_dir%')] $projectDir,
-        #[Target('productsSignLogger')] LoggerInterface $logger,
+        string $article,
+        string $part,
+
         ProductSignCodesBySupplyInterface $productSignCodesBySupplyRepositories,
         ImagePathExtension $ImagePathExtension,
         BarcodeWrite $BarcodeWrite,
         Filesystem $filesystem,
 
+        #[Autowire('%kernel.project_dir%')] $projectDir,
+        #[Target('productsSignLogger')] LoggerInterface $logger,
         #[ParamConverter(ProductSupplyUid::class)] ProductSupplyUid $supply,
-        string $article,
-        string $part,
-        #[ParamConverter(ProductUid::class)] ?ProductUid $product = null,
+        #[ParamConverter(ProductUid::class)] ProductUid $product,
         #[ParamConverter(ProductOfferConst::class)] ?ProductOfferConst $offer = null,
         #[ParamConverter(ProductVariationConst::class)] ?ProductVariationConst $variation = null,
         #[ParamConverter(ProductModificationConst::class)] ?ProductModificationConst $modification = null,
@@ -104,7 +105,8 @@ final class PdfController extends AbstractController
         $paths[] = $dirName;
         $paths[] = (string) $supply;
         !$part ?: $paths[] = $part;
-        !$product ?: $paths[] = (string) $product;
+
+        $paths[] = (string) $product;
         !$offer ?: $paths[] = (string) $offer;
         !$variation ?: $paths[] = (string) $variation;
         !$modification ?: $paths[] = (string) $modification;

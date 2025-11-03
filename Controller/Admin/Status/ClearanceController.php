@@ -59,7 +59,7 @@ final class ClearanceController extends AbstractController
     private array $numbers = [];
 
     /**
-     * Расстаможка поставок
+     * Растаможка поставок
      */
     #[Route('/admin/products/supply/clearance', name: 'admin.supply.clearance', methods: ['GET', 'POST'])]
     public function clearance(
@@ -73,7 +73,7 @@ final class ClearanceController extends AbstractController
         $clearanceProductSupplyForm = $this
             ->createForm(
                 ClearanceProductSupplyForm::class,
-                $ClearanceProductSupplysDTO = new ClearanceProductSupplyDTO(),
+                $ClearanceProductSuppliesDTO = new ClearanceProductSupplyDTO(),
                 ['action' => $this->generateUrl('products-supply:admin.supply.clearance')],
             )
             ->handleRequest($request);
@@ -90,7 +90,7 @@ final class ClearanceController extends AbstractController
             /**
              * @var ProductSupplyIdDTO $ProductSupplyIdDTO
              */
-            foreach($ClearanceProductSupplysDTO->getSupplys() as $ProductSupplyIdDTO)
+            foreach($ClearanceProductSuppliesDTO->getSupplys() as $ProductSupplyIdDTO)
             {
                 /** Скрываем поставку у всех пользователей */
                 $publish
@@ -151,7 +151,7 @@ final class ClearanceController extends AbstractController
                 }
 
                 /** Присваиваем номер ГТД - единый для всех выбранных поставок */
-                $ProductSupplyStatusClearanceDTO->getInvariable()->setNumber($ClearanceProductSupplysDTO->getNumber());
+                $ProductSupplyStatusClearanceDTO->getInvariable()->setNumber($ClearanceProductSuppliesDTO->getNumber());
 
                 $handle = $editProductSupplyHandler->handle($ProductSupplyStatusClearanceDTO);
 
@@ -196,7 +196,7 @@ final class ClearanceController extends AbstractController
         /**
          * @var ProductSupplyIdDTO $supply
          */
-        foreach($ClearanceProductSupplysDTO->getSupplys() as $supply)
+        foreach($ClearanceProductSuppliesDTO->getSupplys() as $supply)
         {
             /** Активное событие поставки */
             $supplyEvent = $currentProductSupplyEventRepository->find($supply->getId());

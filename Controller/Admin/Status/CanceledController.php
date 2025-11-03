@@ -66,20 +66,21 @@ final class CanceledController extends AbstractController
         CentrifugoPublishInterface $publish,
     ): Response
     {
-        $canceledProductSupplysForm = $this->createForm(
-            type: CanceledProductSupplyForm::class,
-            data: $CancelProductSupplyDTO = new CanceledProductSupplyDTO(),
-            options: ['action' => $this->generateUrl('products-supply:admin.supply.canceled')],
-        )
+        $canceledProductSuppliesForm = $this
+            ->createForm(
+                type: CanceledProductSupplyForm::class,
+                data: $CancelProductSupplyDTO = new CanceledProductSupplyDTO(),
+                options: ['action' => $this->generateUrl('products-supply:admin.supply.canceled')],
+            )
             ->handleRequest($request);
 
         if(
-            $canceledProductSupplysForm->isSubmitted() &&
-            $canceledProductSupplysForm->isValid() &&
-            $canceledProductSupplysForm->has('canceled')
+            $canceledProductSuppliesForm->isSubmitted() &&
+            $canceledProductSuppliesForm->isValid() &&
+            $canceledProductSuppliesForm->has('canceled')
         )
         {
-            $this->refreshTokenForm($canceledProductSupplysForm);
+            $this->refreshTokenForm($canceledProductSuppliesForm);
 
             /**
              * @var ProductSupplyIdDTO $ProductSupplyIdDTO
@@ -96,7 +97,7 @@ final class CanceledController extends AbstractController
                     $logger->critical(
                         message: sprintf('Не найдено событие ProductSupplyEvent по ID: %s',
                             $ProductSupplyIdDTO->getId()),
-                        context: [self::class.':'.__LINE__]
+                        context: [self::class.':'.__LINE__],
                     );
 
                     continue;
@@ -112,7 +113,7 @@ final class CanceledController extends AbstractController
                     $logger->info(
                         message: sprintf('Статус поставки %s изменен на %s',
                             $handle->getId(), $ProductSupplyStatusCanceledDTO->getStatus()),
-                        context: [self::class.':'.__LINE__]
+                        context: [self::class.':'.__LINE__],
                     );
                 }
 
@@ -146,7 +147,6 @@ final class CanceledController extends AbstractController
         }
 
         /**
-         *
          * @var ProductSupplyIdDTO $supply
          */
         foreach($CancelProductSupplyDTO->getSupplys() as $supply)
@@ -171,7 +171,7 @@ final class CanceledController extends AbstractController
         }
 
         return $this->render([
-            'form' => $canceledProductSupplysForm->createView(),
+            'form' => $canceledProductSuppliesForm->createView(),
             'numbers' => $this->numbers,
         ]);
     }
