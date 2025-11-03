@@ -1,17 +1,17 @@
 <?php
 /*
  *  Copyright 2025.  Baks.dev <admin@baks.dev>
- *
+ *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is furnished
  *  to do so, subject to the following conditions:
- *
+ *  
  *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
- *
+ *  
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,16 +22,26 @@
  *
  */
 
-declare(strict_types=1);
+namespace BaksDev\Products\Supply\Repository\ProductSign\AllProductSignEventsRelatedProductSupply;
 
-namespace BaksDev\Products\Supply;
+use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
+use BaksDev\Products\Supply\Entity\ProductSupply;
+use BaksDev\Products\Supply\Type\ProductSupplyUid;
+use Generator;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
+interface AllProductSignEventsRelatedProductSupplyInterface
 {
-    public const string NAMESPACE = __NAMESPACE__.'\\';
+    /** Идентификатор поставки */
+    public function forSupply(ProductSupply|ProductSupplyUid $supply): self;
 
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
+    /** Фильтр по статусу Честного знака */
+    public function forStatus(ProductSignStatus|ProductSignStatusInterface $status): self;
+
+    /**
+     * Возвращает объекты Честного знака, связанные с поставкой
+     * @return Generator<int, ProductSignEvent>|false
+     */
+    public function findAll(): Generator|false;
 }

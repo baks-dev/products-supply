@@ -1,0 +1,29 @@
+<style></style>
+
+{{ include(_self|replace({ "content.html.twig": baks_settings.device~"/content.html.twig" })) }}
+
+
+<script nonce='{{ csp_nonce() }}' class='lazy'>
+
+    executeFunc(function()
+    {
+        /** Имя формы */
+        let forms = document.forms.canceled_product_supply_form;
+
+        if(!forms)
+        {
+            return false;
+        }
+
+        /** Cобытие отправки формы */
+        forms.addEventListener("submit", function(event)
+        {
+            event.preventDefault();
+            submitModalForm(forms);
+            return true;
+        });
+
+        return true;
+    });
+
+</script>

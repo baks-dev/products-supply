@@ -1,0 +1,10 @@
+# Роль
+ROLE_PRODUCT_SUPPLY:
+  name: 'Поставка продукции'
+  desc: 'Поставка продукции'
+  header: 'Поставка продукции'
+
+# Правила
+ROLE_PRODUCT_SUPPLY_INDEX:
+  name: 'Просмотр'
+  desc: ''

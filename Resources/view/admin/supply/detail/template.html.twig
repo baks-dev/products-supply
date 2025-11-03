@@ -1,0 +1,17 @@
+{# {% trans_default_domain('orders-order.admin') %} #} {# @TODO  #}
+
+{% extends Template('/admin/base.html.twig') %}
+
+{% block title %}
+    Редактировать поставку
+{% endblock %}
+
+{% block stylesheets %}
+    <link href="/assets/{{ version }}/plugins/nice-select2/nice-select2.min.css" rel="stylesheet">
+    <link href="/assets/{{ version }}/plugins/datepicker/datepicker.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+    {{ include(_self|replace({ "template.html.twig": "content.html.twig" })) }}
+{% endblock %}

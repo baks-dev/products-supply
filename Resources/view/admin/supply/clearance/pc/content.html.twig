@@ -1,0 +1,79 @@
+{% trans_default_domain 'products-supply.status' %}
+
+<div class="modal-dialog modal-dialog-centered" style="max-width: 800px;">
+
+    {{ form_start(form) }}
+
+    <div class="modal-content p-3 border-bottom border-5 border-primary">
+        <div class="modal-header align-items-center">
+
+            <h5 class="modal-title">
+                {# Заголовок модального окна #}
+                Изменить статус на {{ status|trans }}:
+            </h5>
+
+            <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" title="Close">
+                <span class="svg-icon svg-icon-2x"></span>
+            </div>
+        </div>
+
+        <div class="modal-body" id="modal-body">
+
+            <div class="card-body pb-0">
+
+                <div class="alert alert-warning w-100" role="alert">
+                    <div class="d-flex align-items-baseline gap-3">
+                        <div>
+                            <div class="icon rounded-circle bg-contain p-2 bg-primary text-white"
+                                 style="width: 10px; height: 10px;"><span class="small">!</span></div>
+                        </div>
+
+                        <div class="small lh-1">
+                            Поставкам с номерами контейнеров: <b>{{ numbers|join(', ') }}</b> будет присвоем единый
+                            номер ГТД
+                        </div>
+                    </div>
+                </div>
+
+                {{ form_row(form.number, {
+                    label: false, attr: { placeholder : 'Номер грузовой таможенной декларации (ГТД)' }
+                }) }}
+
+                {% for supply in form.supplys %}
+
+                    <div id='{{ form.supplys.vars.id }}-collection' class='d-flex align-items-center gap-3 mb-3'>
+
+                        <div class="input-group w-100">
+                            {{ form_row(supply.id) }}
+                        </div>
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+            <div class="d-flex gap-3">
+                {# Отмена #}
+
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                    {{ 'btn.cancel'|trans({}, 'core.btn') }}
+                </button>
+
+                {# Удалить #}
+                {{ form_widget(form.clearance, { label: '
+				<span>'~ 'btn.save'|trans({}, 'core.btn') ~'</span>
+				<span class="spinner-border spinner-border-sm vertical-middle d-none"></span>
+			'}) }}
+            </div>
+        </div>
+    </div>
+
+    {{ form_end(form) }}
+</div>
+
+

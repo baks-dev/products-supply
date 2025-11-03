@@ -1,0 +1,75 @@
+{% trans_default_domain 'products-supply.admin' %}
+
+{% extends Template('/admin/base.html.twig') %}
+
+ {% block title %} Управления поставками {% endblock %}
+
+ {% block stylesheets %}
+     <link href="/assets/plugins/draggable/draggable.min.css" rel="stylesheet" type="text/css">
+     <link href="/assets/plugins/nice-select2/nice-select2.min.css" rel="stylesheet" type="text/css">
+     <link href="/assets//plugins/datepicker/datepicker.min.css" rel="stylesheet">
+     <link href="/assets/css/print.min.css" rel="stylesheet">
+ {% endblock %}
+
+
+{% block content %}
+
+    {{ include(_self|replace({ "template.html.twig": baks_settings.device~"/content.html.twig" })) }}
+
+{% endblock %}
+
+{% block javascript %}
+
+<script nonce='{{ csp_nonce() }}' async data-src="https://api-maps.yandex.ru/2.1/?apikey={{ MAPS_YANDEX_API }}&lang={{ app.request.locale|lower }}" class='lazy'></script>
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/plugins/nice-select2/nice-select2.min.js" class="lazy"></script>
+<script nonce='{{ csp_nonce() }}' async data-src='/assets/{{ version }}/plugins/datepicker/datepicker.js' class='lazy'></script>
+
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/plugins/draggable/draggable.bundle.min.js" class="lazy"></script>
+
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/products-supply/supply_draggable.min.js" class='lazy'></script>
+
+<script nonce='{{ csp_nonce() }}' async  data-src="/assets/{{ version }}/js/copy.min.js" class="lazy"></script>
+
+{#  Сокеты  #}
+
+<script nonce="{{ csp_nonce() }}">
+    window.centrifugo_dsn = "{{ centrifugo_dsn }}";
+    window.centrifugo_token = "{{ token }}";
+</script>
+
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/centrifugo/centrifuge.min.js" class='lazy'></script>
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/centrifugo/socket.min.js" class='lazy'></script>
+
+<script nonce="{{ csp_nonce() }}">
+
+    let hfgsZAPeF = 100;
+
+    setTimeout(function xA1wFjaW7B()
+    {
+        if(typeof centrifuge !== 'object')
+        {
+            if(hfgsZAPeF > 1000) { return; }
+
+            hfgsZAPeF = hfgsZAPeF * 2;
+            return setTimeout(xA1wFjaW7B, hfgsZAPeF);
+        }
+
+
+        const publish = centrifuge.newSubscription('orders');
+
+        publish.on('publication', function(ctx)
+        {
+            if(ctx.data.profile !== '{{ current_profile }}')
+            {
+                /* Удаляем у остальных менеджеров заказ */
+                document.getElementById(ctx.data.order)?.remove();
+            }
+
+        }).subscribe();
+
+    }, 100);
+
+</script>
+
+{% endblock %}
+

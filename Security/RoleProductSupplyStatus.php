@@ -24,14 +24,18 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Supply;
+namespace BaksDev\Products\Supply\Security;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+use BaksDev\Users\Profile\Group\Security\RoleInterface;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
+#[AutoconfigureTag('baks.security.role')]
+class RoleProductSupplyStatus implements RoleInterface
 {
-    public const string NAMESPACE = __NAMESPACE__.'\\';
+    public const string ROLE = 'ROLE_PRODUCT_SUPPLY_STATUS';
 
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
+    public function getRole(): string
+    {
+        return self::ROLE;
+    }
 }

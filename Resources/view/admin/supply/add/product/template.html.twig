@@ -1,0 +1,23 @@
+{% trans_default_domain('orders-order.admin') %}
+
+{% extends Template('/admin/base.html.twig') %}
+
+{% block title %}{{ 'page.new'|trans }}{% endblock %}
+
+ {% block stylesheets %}
+     <link href="/assets/{{ version }}/plugins/nice-select2/nice-select2.min.css" rel="stylesheet">
+ {% endblock %}
+
+{% block content %}
+    {{ include(_self|replace({ "template.html.twig": "content.html.twig" })) }}
+{% endblock %}
+
+{% block javascript %}
+
+<script nonce='{{ csp_nonce() }}' async data-src='/assets/{{ version }}/plugins/nice-select2/nice-select2.min.js?v={{ version }}'
+            class='lazy'></script>
+
+    {# @TODO min #}
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/products-supply/add-product.js?v={{ version }}" class='lazy'></script>
+
+{% endblock %}

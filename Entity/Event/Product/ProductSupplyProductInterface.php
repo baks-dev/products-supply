@@ -22,16 +22,6 @@
  *
  */
 
-declare(strict_types=1);
+namespace BaksDev\Products\Supply\Entity\Event\Product;
 
-namespace BaksDev\Products\Supply;
-
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
-{
-    public const string NAMESPACE = __NAMESPACE__.'\\';
-
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
-}
+interface ProductSupplyProductInterface { }

@@ -22,16 +22,29 @@
  *
  */
 
-declare(strict_types=1);
+namespace BaksDev\Products\Supply\Repository\OneProductSupplyProduct;
 
-namespace BaksDev\Products\Supply;
+use BaksDev\Products\Product\Entity\Product;
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
+use BaksDev\Products\Supply\Type\ProductSupplyUid;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
+interface OneProductSupplyProductInterface
 {
-    public const string NAMESPACE = __NAMESPACE__.'\\';
+    public function forSupply(ProductSupplyUid $supply): self;
 
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
+    public function forProduct(Product|ProductUid $product): self;
+
+    public function forOffer(ProductOfferConst|null $offer): self;
+
+    public function forVariation(ProductVariationConst|null $variation): self;
+
+    public function forModification(ProductModificationConst|null $modification): self;
+
+    /**
+     * Возвращает продукт из поставки по его идентификаторам
+     */
+    public function find(): OneProductSupplyProductResult|false;
 }

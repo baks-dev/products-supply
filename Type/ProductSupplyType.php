@@ -22,16 +22,19 @@
  *
  */
 
-declare(strict_types=1);
+namespace BaksDev\Products\Supply\Type;
 
-namespace BaksDev\Products\Supply;
+use BaksDev\Core\Type\UidType\UidType;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
+class ProductSupplyType extends UidType
 {
-    public const string NAMESPACE = __NAMESPACE__.'\\';
+    public function getClassType(): string
+    {
+        return ProductSupplyUid::class;
+    }
 
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
+    public function getName(): string
+    {
+        return ProductSupplyUid::TYPE;
+    }
 }

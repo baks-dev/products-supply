@@ -24,14 +24,57 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Supply;
+namespace BaksDev\Products\Supply\UseCase\Admin\Edit\Personal;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+use BaksDev\Products\Supply\Entity\Event\Personal\ProductSupplyPersonalInterface;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\User\Type\Id\UserUid;
+use Symfony\Component\Validator\Constraints as Assert;
 
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
+/**
+ * Объект с информацией о пользователе
+ * @see ProductSupplyPersonal
+ */
+final class EditProductSupplyPersonalDTO implements ProductSupplyPersonalInterface
 {
-    public const string NAMESPACE = __NAMESPACE__.'\\';
+    /**
+     * Пользователь
+     */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private UserUid $usr;
 
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
+    /**
+     * Профиль
+     */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private UserProfileUid $profile;
+
+    /**
+     * User
+     */
+    public function getUsr(): UserUid
+    {
+        return $this->usr;
+    }
+
+    public function setUsr(UserUid $usr): void
+    {
+        $this->usr = $usr;
+    }
+
+    /**
+     * Profile
+     */
+    public function getProfile(): UserProfileUid
+    {
+        return $this->profile;
+    }
+
+
+    public function setProfile(UserProfileUid $profile): void
+    {
+        $this->profile = $profile;
+    }
 }

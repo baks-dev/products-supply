@@ -24,14 +24,14 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Supply;
+namespace BaksDev\Products\Supply\Type\Product;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+use BaksDev\Core\Type\UidType\Uid;
 
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
+final class ProductSupplyProductUid extends Uid
 {
-    public const string NAMESPACE = __NAMESPACE__.'\\';
+    /** Тестовый идентификатор */
+    public const string TEST = '37f47a69-f9d0-7145-8d3b-a4c8e0c137d2';
 
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
+    public const string TYPE = 'product_supply_product';
 }

@@ -24,14 +24,20 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Supply;
+namespace BaksDev\Products\Supply\Type\Event;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+use BaksDev\Core\Type\UidType\Uid;
+use Symfony\Component\Uid\AbstractUid;
 
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
+final class ProductSupplyEventUid extends Uid
 {
-    public const string NAMESPACE = __NAMESPACE__.'\\';
+    /** Тестовый идентификатор */
+    public const string TEST = '46f3b9c0-e747-75e0-9391-829485e76b39';
 
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
+    public const string TYPE = 'product_supply_event';
+
+    public function __construct(false|AbstractUid|string|Uid|null $value = null, bool $test = true)
+    {
+        parent::__construct($value, $test);
+    }
 }

@@ -24,14 +24,35 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Supply;
+namespace BaksDev\Products\Supply\Type\Status;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\Type;
 
-/** Индекс сортировки 199 */
-class BaksDevProductsSupplyBundle extends AbstractBundle
+final class ProductSupplyStatusType extends Type
 {
-    public const string NAMESPACE = __NAMESPACE__.'\\';
+    public function convertToDatabaseValue($value, AbstractPlatform $platform): string
+    {
+        return (string) new ProductSupplyStatus($value);
+    }
 
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
+    public function convertToPHPValue($value, AbstractPlatform $platform): ?ProductSupplyStatus
+    {
+        return !empty($value) ? new ProductSupplyStatus($value) : null;
+    }
+
+    public function getName(): string
+    {
+        return ProductSupplyStatus::TYPE;
+    }
+
+    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
+    {
+        return true;
+    }
+
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    {
+        return $platform->getStringTypeDeclarationSQL($column);
+    }
 }
