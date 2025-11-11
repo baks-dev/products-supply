@@ -1,0 +1,25 @@
+# Role
+ROLE_PRODUCT_SUPPLY:
+  name: 'Product Supply'
+  desc: 'Supply of products'
+  header: 'Delivery of products'
+
+# Rules
+ROLE_PRODUCT_SUPPLY_INDEX:
+  name: 'Browse'
+  desc: ''
+
+ROLE_PRODUCT_SUPPLY_STATUS:
+  name: 'Delivery statuses'
+  desc: 'Product Delivery Statuses'
+
+ROLE_PRODUCT_SUPPLY_STATUS_CANCEL:
+  name: 'Cancel'
+ROLE_PRODUCT_SUPPLY_STATUS_CLEARANCE:
+  name: 'Customs clearance'
+ROLE_PRODUCT_SUPPLY_STATUS_COMPLETED:
+  name: 'Completed'
+ROLE_PRODUCT_SUPPLY_STATUS_DELIVERY:
+  name: 'Deliverable'
+ROLE_PRODUCT_SUPPLY_STATUS_NEW:
+  name: 'New'
