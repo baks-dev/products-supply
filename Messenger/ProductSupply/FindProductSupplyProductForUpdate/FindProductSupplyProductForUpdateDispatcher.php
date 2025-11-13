@@ -57,16 +57,26 @@ final readonly class FindProductSupplyProductForUpdateDispatcher
             ->forProduct($message->getId())
             ->findAll();
 
-        if(false !== $updatedProductIds && $updatedProductIds->valid())
+        if(false === $updatedProductIds || false === $updatedProductIds->valid())
         {
-            $this->logger->info(
-                message: sprintf('Обновляем идентификаторы продукта %s в поставках', $message->getId()),
+            $this->logger->warning(
+                message: sprintf('Идентификаторы для обновления продукции %s в поставках не найдено', $message->getId()),
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),
                 ],
             );
+
+            return;
         }
+
+        $this->logger->info(
+            message: sprintf('Обновляем идентификаторы продукта %s в поставках', $message->getId()),
+            context: [
+                self::class.':'.__LINE__,
+                var_export($message, true),
+            ],
+        );
 
         foreach($updatedProductIds as $productIds)
         {
@@ -78,7 +88,7 @@ final readonly class FindProductSupplyProductForUpdateDispatcher
                         product: $productIds->getProductId(),
                         offerConst: $productIds->getProductOfferConst(),
                         variationConst: $productIds->getProductVariationConst(),
-                        modificationConst: $productIds->getProductModificationConst()
+                        modificationConst: $productIds->getProductModificationConst(),
                     ),
                     transport: 'products-supply',
                 );
