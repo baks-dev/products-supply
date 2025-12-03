@@ -76,7 +76,7 @@ final class ProcessReservationProductSignMessage
     /**
      * ProductSupply
      */
-    public function getProductSupply(): ProductSupplyUid
+    public function getSupply(): ProductSupplyUid
     {
         return new ProductSupplyUid($this->supply);
     }

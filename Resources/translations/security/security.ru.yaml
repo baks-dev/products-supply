@@ -5,6 +5,7 @@ ROLE_PRODUCT_SUPPLY:
   header: 'Поставка продукции'
 
 # Правила
+
 ROLE_PRODUCT_SUPPLY_INDEX:
   name: 'Просмотр'
   desc: ''
@@ -22,9 +23,6 @@ ROLE_PRODUCT_SUPPLY_DETAIL:
   desc: ''
 
 
-
-
-
 ROLE_PRODUCT_SUPPLY_STATUS:
   name: 'Статусы поставок'
   desc: 'Статусы поставок продукции'
@@ -34,7 +32,7 @@ ROLE_PRODUCT_SUPPLY_STATUS_CANCEL:
   desc: ''
 
 ROLE_PRODUCT_SUPPLY_STATUS_CLEARANCE:
-  name: 'Растамаживаются'
+  name: 'Растаможены'
   desc: ''
 
 ROLE_PRODUCT_SUPPLY_STATUS_COMPLETED:

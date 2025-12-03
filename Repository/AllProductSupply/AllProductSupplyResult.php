@@ -26,13 +26,15 @@ namespace BaksDev\Products\Supply\Repository\AllProductSupply;
 
 use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
+use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
 
 final readonly class AllProductSupplyResult
 {
     public function __construct(
         private string $id,
         private string $event,
-        private string $supply_container,
+        private string $supply_status,
+        private string $supply_number,
         private string $supply_products,
     ) {}
 
@@ -46,9 +48,14 @@ final readonly class AllProductSupplyResult
         return new ProductSupplyEventUid($this->event);
     }
 
-    public function getSupplyContainer(): string
+    public function getSupplyStatus(): ProductSupplyStatus
     {
-        return $this->supply_container;
+        return new ProductSupplyStatus($this->supply_status);
+    }
+
+    public function getSupplyNumber(): string
+    {
+        return $this->supply_number;
     }
 
     public function getSupplyProducts(): array|null

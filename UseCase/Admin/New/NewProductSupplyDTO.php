@@ -30,8 +30,10 @@ use BaksDev\Products\Supply\Entity\Event\ProductSupplyEventInterface;
 use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusNew;
+use BaksDev\Products\Supply\UseCase\Admin\File\ProductSupplyFilesDTO;
 use BaksDev\Products\Supply\UseCase\Admin\New\Invariable\NewProductSupplyInvariableDTO;
 use BaksDev\Products\Supply\UseCase\Admin\New\Personal\NewProductSupplyPersonalDTO;
+use BaksDev\Products\Supply\UseCase\Admin\New\PreProduct\PreProductDTO;
 use BaksDev\Products\Supply\UseCase\Admin\New\Product\NewProductSupplyProductDTO;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -62,12 +64,30 @@ final class NewProductSupplyDTO implements ProductSupplyEventInterface
      * @var ArrayCollection<int, NewProductSupplyProductDTO> $product
      */
     #[Assert\Valid]
+    #[Assert\Count(min: 1)]
     private ArrayCollection $product;
+
+    /**
+     * Коллекция загружаемых файлов
+     */
+    private ProductSupplyFilesDTO $files;
+
+    /**
+     * Поля для заполнения DTO
+     */
+
+    private PreProductDTO $preProduct;
 
     public function __construct()
     {
         $this->status = new ProductSupplyStatus(ProductSupplyStatusNew::class);
+        $this->invariable = new NewProductSupplyInvariableDTO();
+        $this->personal = new NewProductSupplyPersonalDTO();
+
+        $this->files = new ProductSupplyFilesDTO();
+
         $this->product = new ArrayCollection();
+        $this->preProduct = new PreProductDTO();
     }
 
     /**
@@ -131,12 +151,17 @@ final class NewProductSupplyDTO implements ProductSupplyEventInterface
     public function addProduct(NewProductSupplyProductDTO $product): void
     {
         /**
-         * При создании поставки добавляем проверяем продукт на уникальность по штрихкоду
+         * При создании поставки добавляем проверяем продукт на уникальность в коллекции
          */
-
         $exist = $this->product->exists(function($k, $value) use ($product) {
-            /** @var NewProductSupplyProductDTO $product */
-            return $value->getBarcode()->equals($product->getBarcode());
+
+            return $value->getProduct()->equals($product->getProduct())
+                &&
+                ((is_null($value->getOfferConst()) && is_null($product->getOfferConst())) || $value->getOfferConst()->equals($product->getOfferConst()))
+                &&
+                ((is_null($value->getVariationConst()) && is_null($product->getVariationConst())) || $value->getVariationConst()->equals($product->getVariationConst()))
+                &&
+                ((is_null($value->getModificationConst()) && is_null($product->getModificationConst())) || $value->getModificationConst()->equals($product->getModificationConst()));
         });
 
         if(false === $exist)
@@ -148,5 +173,38 @@ final class NewProductSupplyDTO implements ProductSupplyEventInterface
     public function removeProduct(NewProductSupplyProductDTO $product): void
     {
         $this->product->removeElement($product);
+    }
+
+    /**
+     * Files
+     */
+
+    public function getFiles(): ProductSupplyFilesDTO
+    {
+        return $this->files;
+    }
+
+    public function setFiles(ProductSupplyFilesDTO $files): self
+    {
+        $this->files = $files;
+        return $this;
+    }
+
+    /**
+     * Поля для заполнения DTO
+     */
+
+    /**
+     * PreProduct
+     */
+    public function getPreProduct(): PreProductDTO
+    {
+        return $this->preProduct;
+    }
+
+    public function setPreProduct(PreProductDTO $preProduct): self
+    {
+        $this->preProduct = $preProduct;
+        return $this;
     }
 }

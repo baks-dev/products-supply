@@ -52,6 +52,7 @@ final class ProductSupplyFilesDTO
     private UserProfileUid $profile;
 
     /**
+     * Коллекция загружаемых файлов
      * @var ArrayCollection<int, ProductSupplyFileDTO> $files
      */
     #[Assert\Valid]

@@ -63,10 +63,10 @@ final readonly class OneProductSupplyByEventRepository implements OneProductSupp
                 type: ProductSupplyUid::TYPE,
             );
 
-        /** Контейнер */
+        /** Invariable */
         $dbal
-            ->addSelect('product_supply_invariable.container AS supply_container')
             ->addSelect('product_supply_invariable.number AS supply_number')
+            ->addSelect('product_supply_invariable.declaration AS supply_declaration')
             ->join(
                 'event',
                 ProductSupplyInvariable::class,
@@ -88,7 +88,6 @@ final readonly class OneProductSupplyByEventRepository implements OneProductSupp
 			( 
 					JSONB_BUILD_OBJECT
 					(
-						'barcode', product_supply_product.barcode,
 						'product', product_supply_product.product,
 						'offer_const', product_supply_product.offer_const,
 						'variation_const', product_supply_product.variation_const,

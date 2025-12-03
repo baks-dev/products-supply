@@ -41,7 +41,7 @@ class ProductSupplyStatusCompleted implements ProductSupplyStatusInterface, Vote
 {
     public const string STATUS = 'completed';
 
-    private static int $sort = 400;
+    private static int $sort = 500;
 
     private static string $color = '#198754';
 

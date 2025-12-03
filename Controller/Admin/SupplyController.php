@@ -28,9 +28,11 @@ namespace BaksDev\Products\Supply\Controller\Admin;
 
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
-use BaksDev\Products\Supply\UseCase\Admin\File\ProductSupplyFilesDTO;
-use BaksDev\Products\Supply\UseCase\Admin\File\ProductSupplyFilesForm;
+use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\UseCase\Admin\File\ProductSupplyFilesHandler;
+use BaksDev\Products\Supply\UseCase\Admin\New\NewProductSupplyDTO;
+use BaksDev\Products\Supply\UseCase\Admin\New\NewProductSupplyForm;
+use BaksDev\Products\Supply\UseCase\Admin\New\NewProductSupplyHandler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -40,34 +42,54 @@ use Symfony\Component\Routing\Attribute\Route;
 #[RoleSecurity('ROLE_PRODUCT_SUPPLY_NEW')]
 final class SupplyController extends AbstractController
 {
-    #[Route('/admin/products/supply/new', name: 'admin.supply.new', methods: ['GET', 'POST'])]
+    public const string NAME = 'admin.supply.new';
+
+    #[Route(path: '/admin/products/supply/new', name: self::NAME, methods: ['GET', 'POST'])]
     public function new(
         Request $request,
+        NewProductSupplyHandler $productSupplyHandler,
         ProductSupplyFilesHandler $ProductSupplyFilesHandler,
     ): Response
     {
+        $NewProductSupplyDTO = new NewProductSupplyDTO();
+
         $ProductSupplyFilesForm = $this->createForm(
-            ProductSupplyFilesForm::class,
-            $ProductSupplyFilesDTO = new ProductSupplyFilesDTO(),
-            ['action' => $this->generateUrl('products-supply:admin.supply.new')]
+            type: NewProductSupplyForm::class,
+            data: $NewProductSupplyDTO,
+            options: ['action' => $this->generateUrl('products-supply:'.self::NAME)]
         )
             ->handleRequest($request);
 
         if(
             $ProductSupplyFilesForm->isSubmitted() &&
             $ProductSupplyFilesForm->isValid() &&
-            $ProductSupplyFilesForm->has('product_supply_files')
+            $ProductSupplyFilesForm->has('product_supply_new')
         )
         {
             $this->refreshTokenForm($ProductSupplyFilesForm);
 
-            $handle = $ProductSupplyFilesHandler->handle($ProductSupplyFilesDTO);
+            $ProductSupply = $productSupplyHandler->handle($NewProductSupplyDTO);
 
             $this->addFlash(
-                true === $handle ? 'success' : 'danger',
-                true === $handle ? 'file.success' : 'file.danger',
-                'products-supply.admin'
+                $ProductSupply instanceof ProductSupply ? 'success' : 'danger',
+                $ProductSupply instanceof ProductSupply ? 'success.new' : 'danger.new',
+                'products-supply.admin',
+                $ProductSupply instanceof ProductSupply ? null : $ProductSupply,
             );
+
+            /** DTO с файлами */
+            $ProductSupplyFilesDTO = $NewProductSupplyDTO->getFiles();
+
+            if(false === empty($ProductSupplyFilesDTO->getFiles()->current()->files))
+            {
+                $handleFiles = $ProductSupplyFilesHandler->handle($ProductSupplyFilesDTO);
+
+                $this->addFlash(
+                    true === $handleFiles ? 'success' : 'danger',
+                    true === $handleFiles ? 'file.success' : 'file.danger',
+                    'products-supply.admin'
+                );
+            }
 
             return $this->redirectToReferer();
         }

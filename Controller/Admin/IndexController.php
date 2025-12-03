@@ -63,7 +63,6 @@ final class IndexController extends AbstractController
         $searchForm = $this->createForm(SearchForm::class, $search);
         $searchForm->handleRequest($request);
 
-
         /** @var ProductSupplyStatus $status */
         foreach(ProductSupplyStatus::cases() as $status)
         {
@@ -80,14 +79,16 @@ final class IndexController extends AbstractController
             $productSupply = $allProductSupplyRepository
                 ->search($search)
                 ->status($status)
+                ->forUser($this->getUsr())
+                ->forProfile($this->getProfileUid())
                 ->findAll();
 
             /** Получаем список поставок с ключом их статуса */
-            $this->supplys[$status->getProductSupplyStatusValue()] =
+            $this->supplys[$status->getStatusValue()] =
                 (false !== $productSupply) ? iterator_to_array($productSupply) : null;
 
             /** Текущие статусы поставок */
-            $this->statuses[$status->getProductSupplyStatus()::priority()] = $status->getProductSupplyStatus();
+            $this->statuses[$status->getStatus()::priority()] = $status->getStatus();
         }
 
         return $this->render(

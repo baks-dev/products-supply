@@ -36,6 +36,10 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ * Данная форма используется вложенно
+ * @see NewProductSupplyForm
+ */
 final class ProductSupplyFilesForm extends AbstractType
 {
     public function __construct(
@@ -51,15 +55,9 @@ final class ProductSupplyFilesForm extends AbstractType
             'by_reference' => false,
             'allow_delete' => true,
             'allow_add' => true,
+            'required' => false,
             'prototype_name' => '__supply_file__',
         ]);
-
-        $builder->add('product_supply_files', SubmitType::class, [
-                'label' => 'Save',
-                'label_html' => true,
-                'attr' => ['class' => 'btn-primary']
-            ]
-        );
 
         /**
          * События формы
@@ -77,6 +75,17 @@ final class ProductSupplyFilesForm extends AbstractType
 
                 $profile = $this->userProfileTokenStorageRepository->getProfile();
                 $data->setProfile($profile);
+
+                /** Добавляем кнопку, только если текущая форма - родитель */
+                if(null === $event->getForm()->getParent())
+                {
+                    $event->getForm()->add('product_supply_files', SubmitType::class, [
+                            'label' => 'Save',
+                            'label_html' => true,
+                            'attr' => ['class' => 'btn-primary']
+                        ]
+                    );
+                }
             });
     }
 

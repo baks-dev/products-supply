@@ -30,6 +30,7 @@ use BaksDev\Barcode\Writer\BarcodeFormat;
 use BaksDev\Barcode\Writer\BarcodeType;
 use BaksDev\Barcode\Writer\BarcodeWrite;
 use BaksDev\Core\Controller\AbstractController;
+use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Files\Resources\Twig\ImagePathExtension;
 use BaksDev\Products\Product\Type\Id\ProductUid;
@@ -52,6 +53,7 @@ use Symfony\Component\Routing\Attribute\Route;
 /**
  * Формирует документ с кодом Честного знака в формате .pdf
  */
+#[RoleSecurity(['ROLE_PRODUCT_SUPPLY_EDIT'])]
 #[AsController]
 final class PdfController extends AbstractController
 {
@@ -70,7 +72,7 @@ final class PdfController extends AbstractController
         Filesystem $filesystem,
 
         #[Autowire('%kernel.project_dir%')] $projectDir,
-        #[Target('productsSignLogger')] LoggerInterface $logger,
+        #[Target('productsSupplyLogger')] LoggerInterface $logger,
         #[ParamConverter(ProductSupplyUid::class)] ProductSupplyUid $supply,
         #[ParamConverter(ProductUid::class)] ProductUid $product,
         #[ParamConverter(ProductOfferConst::class)] ?ProductOfferConst $offer = null,
