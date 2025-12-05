@@ -32,7 +32,7 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Объект для добавления комментария Честному знаку при назначении статуса clearance (Растормаживается)
+ * Объект для добавления комментария Честному знаку при назначении статуса cleared (Растаможены)
  *
  * @see ProductSignEvent
  */

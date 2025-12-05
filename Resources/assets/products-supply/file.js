@@ -23,23 +23,21 @@
 
 executeFunc(function productsSignPdf()
 {
-    /* Имя формы */
-    ProductSupplyFilesForm = document.forms.product_supply_files_form;
+    const fileAddCollectionButton = document.getElementById('file-add-collection');
 
-    if(ProductSupplyFilesForm === null || typeof ProductSupplyFilesForm === 'undefined')
+    if(fileAddCollectionButton === null || typeof fileAddCollectionButton === 'undefined')
     {
         return false;
     }
 
-    ProductSupplyFilesForm.querySelector('#file-add-collection').addEventListener('click', addFile);
+    fileAddCollectionButton.addEventListener('click', addFile);
 
     return true;
 });
 
-
 function addFile()
 {
-    /* Получаем прототип формы */
+    /** Получаем прототип формы */
     let newForm = this.dataset.prototype;
     let index = this.dataset.index * 1;
     let call = this.dataset.call * 1;
@@ -64,5 +62,3 @@ function deleteFile()
 {
     document.getElementById('item_' + this.dataset.delete).remove();
 }
-
-

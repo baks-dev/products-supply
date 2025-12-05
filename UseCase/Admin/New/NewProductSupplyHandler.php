@@ -32,12 +32,16 @@ use BaksDev\Files\Resources\Upload\File\FileUploadInterface;
 use BaksDev\Files\Resources\Upload\Image\ImageUploadInterface;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Entity\ProductSupply;
+use BaksDev\Products\Supply\Messenger\ProductSupplyMessage;
 use BaksDev\Products\Supply\Repository\ExistProductSupplyByContainerNumber\ExistProductSupplyByContainerNumberInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 
 final class NewProductSupplyHandler extends AbstractHandler
 {
     public function __construct(
+        #[Target('productsSupplyLogger')] private readonly LoggerInterface $logger,
         private readonly ExistProductSupplyByContainerNumberInterface $existProductSupplyByContainerNumber,
 
         EntityManagerInterface $entityManager,
@@ -50,7 +54,7 @@ final class NewProductSupplyHandler extends AbstractHandler
         parent::__construct($entityManager, $messageDispatch, $validatorCollection, $imageUpload, $fileUpload);
     }
 
-    public function handle(NewProductSupplyDTO $command): ProductSupply|string|false
+    public function handle(NewProductSupplyDTO $command): ProductSupply|string
     {
         $personal = $command->getPersonal();
 
@@ -61,9 +65,21 @@ final class NewProductSupplyHandler extends AbstractHandler
             ->forProfile($personal->getProfile())
             ->isExist($command->getInvariable());
 
-        if($isExistsSupply === true)
+        if(true === $isExistsSupply)
         {
-            return false;
+            $error = uniqid();
+
+            $this->logger->warning(
+                message: sprintf('%s: Поставка с данным номером уже существует: %s',
+                    $error,
+                    $command->getInvariable()->getNumber()),
+                context: [
+                    self::class.':'.__LINE__,
+                    $command,
+                ],
+            );
+
+            return $error;
         }
 
         $this
@@ -79,9 +95,11 @@ final class NewProductSupplyHandler extends AbstractHandler
         $this->flush();
 
         $this->messageDispatch
-            ->addClearCacheOther('products-supply')
-            ->addClearCacheOther('products-sign');
-        //            ->dispatch(message: new ProductSupplyMessage($this->main->getId(), $this->main->getEvent(), $command->getEvent()));
+            ->addClearCacheOther('products-sign')
+            ->dispatch(
+                message: new ProductSupplyMessage($this->main->getId(), $this->main->getEvent(), $command->getEvent()),
+                transport: 'products-supply'
+            );
 
         return $this->main;
     }

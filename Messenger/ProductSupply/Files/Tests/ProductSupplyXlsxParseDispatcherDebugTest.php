@@ -143,7 +143,7 @@ class ProductSupplyXlsxParseDispatcherDebugTest extends KernelTestCase
 
                         /** Номер контейнера */
                         $ProductSupplyContainerDTO = new NewProductSupplyInvariableDTO();
-                        $ProductSupplyContainerDTO->setContainer($containerNumber);
+                        $ProductSupplyContainerDTO->setNumber($containerNumber);
                         $ProductSupplyDTO->setInvariable($ProductSupplyContainerDTO);
 
                         /** Сохраняем открытую поставку */

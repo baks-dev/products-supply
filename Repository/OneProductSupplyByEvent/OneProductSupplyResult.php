@@ -35,8 +35,8 @@ final readonly class OneProductSupplyResult
         private string $id,
         private string $event,
         private string $supply_status,
-        private string $supply_container,
-        private ?string $supply_number,
+        private string $supply_number,
+        private ?string $supply_declaration,
         private string $supply_products,
     ) {}
 
@@ -50,14 +50,14 @@ final readonly class OneProductSupplyResult
         return new ProductSupplyEventUid($this->event);
     }
 
-    public function getContainer(): string
-    {
-        return $this->supply_container;
-    }
-
-    public function getNumber(): ?string
+    public function getNumber(): string
     {
         return $this->supply_number;
+    }
+
+    public function getDeclaration(): ?string
+    {
+        return $this->supply_declaration;
     }
 
     public function getStatus(): ProductSupplyStatus

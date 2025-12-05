@@ -60,7 +60,7 @@ final class ProductSupplyStatus
 
         if($status instanceof self)
         {
-            $this->status = $status->getProductSupplyStatus();
+            $this->status = $status->getStatus();
             return;
         }
 
@@ -69,7 +69,7 @@ final class ProductSupplyStatus
         {
             $instance = new self($declare);
 
-            if($instance->getProductSupplyStatusValue() === $status)
+            if($instance->getStatusValue() === $status)
             {
                 $this->status = new $declare();
                 return;
@@ -84,12 +84,12 @@ final class ProductSupplyStatus
         return $this->status->getValue();
     }
 
-    public function getProductSupplyStatus(): ProductSupplyStatusInterface
+    public function getStatus(): ProductSupplyStatusInterface
     {
         return $this->status;
     }
 
-    public function getProductSupplyStatusValue(): string
+    public function getStatusValue(): string
     {
         return $this->status->getValue();
     }
@@ -102,7 +102,43 @@ final class ProductSupplyStatus
     public function equals(mixed $status): bool
     {
         $status = new self($status);
-        return $this->getProductSupplyStatusValue() === $status->getProductSupplyStatusValue();
+        return $this->getStatusValue() === $status->getStatusValue();
+    }
+
+    /** Находит предыдущий статус поставки относительно переданного */
+    public function previous(ProductSupplyStatusInterface|string $currentStatus): ProductSupplyStatus|null
+    {
+        $prevStatus = null;
+
+        if(false === $currentStatus instanceof ProductSupplyStatusInterface)
+        {
+            $currentStatus = new ProductSupplyStatus($currentStatus)->getStatus();
+        }
+
+        /** @var ProductSupplyStatus $status */
+        foreach(self::cases() as $status)
+        {
+            if(null === $prevStatus)
+            {
+                $prevStatus = $status;
+
+                if($status->equals($currentStatus))
+                {
+                    break;
+                }
+
+                continue;
+            }
+
+            if($status->equals($currentStatus))
+            {
+                break;
+            }
+
+            $prevStatus = $status;
+        }
+
+        return $prevStatus;
     }
 
     public static function cases(): array
@@ -123,6 +159,7 @@ final class ProductSupplyStatus
 
         return $case;
     }
+
 
     private static function getDeclared(): array
     {

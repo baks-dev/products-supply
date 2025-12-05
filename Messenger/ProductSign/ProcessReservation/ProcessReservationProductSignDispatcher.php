@@ -42,7 +42,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * Бронирует Честный знак за продутом из поставки
- * prev @see XlsxParseProductSupplyDispatcher
+ * @see NewStatusProductSupplyDispatcher
  */
 #[AsMessageHandler(priority: 0)]
 final readonly class ProcessReservationProductSignDispatcher
@@ -59,7 +59,7 @@ final readonly class ProcessReservationProductSignDispatcher
     {
         /** Текущее событие поставки */
         $ProductSupplyEvent = $this->currentProductSupplyEventRepository
-            ->find($message->getProductSupply());
+            ->find($message->getSupply());
 
         if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
         {
@@ -106,7 +106,7 @@ final readonly class ProcessReservationProductSignDispatcher
         }
 
         /** Редактируем текущее событие */
-        $ProductSignProcessDTO = new ProcessReservationProductSignDTO($message->getProductSupply());
+        $ProductSignProcessDTO = new ProcessReservationProductSignDTO($message->getSupply());
         $ProductSignEvent->getDto($ProductSignProcessDTO);
 
         $handle = $this->ProductSignStatusHandler->handle($ProductSignProcessDTO);

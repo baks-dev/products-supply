@@ -28,7 +28,6 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\Entity\Event\Product;
 
 use BaksDev\Core\Entity\EntityEvent;
-use BaksDev\Products\Product\Type\Barcode\ProductBarcode;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
@@ -68,12 +67,6 @@ class ProductSupplyProduct extends EntityEvent
     #[Assert\NotBlank]
     #[ORM\Column(type: Types::INTEGER, nullable: false)]
     private readonly int $total;
-
-    /**
-     * Штрихкод товара
-     */
-    #[ORM\Column(type: ProductBarcode::TYPE, nullable: false)]
-    private readonly ProductBarcode $barcode;
 
     /**
      * Продукт

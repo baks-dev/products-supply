@@ -33,14 +33,14 @@ use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Messenger\ProductSupplyMessage;
 use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductSupplyEventInterface;
 use BaksDev\Products\Supply\Repository\ProductSign\AllProductSignEventsRelatedProductSupply\AllProductSignEventsRelatedProductSupplyInterface;
-use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusClearance;
+use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusCleared;
 use BaksDev\Products\Supply\UseCase\Admin\ProductsSign\Edit\AddCommentProductSignDTO;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
- * При присвоении поставке статуса clearance "Растормаживается" -
+ * При присвоении поставке статуса cleared "Растормаживается" -
  * присваивает ГТД для связанных Честных знаков в виде комментария
  */
 #[AsMessageHandler(priority: 0)]
@@ -72,8 +72,8 @@ final readonly class AddCommentProductSignDispatcher
             return;
         }
 
-        /** Если статус поставки не clearance (Растормаживается) - прерываем работу */
-        if(false === $ProductSupplyEvent->getStatus()->equals(ProductSupplyStatusClearance::class))
+        /** Если статус поставки не cleared (Растаможены) - прерываем работу */
+        if(false === $ProductSupplyEvent->getStatus()->equals(ProductSupplyStatusCleared::class))
         {
             return;
         }
@@ -106,7 +106,7 @@ final readonly class AddCommentProductSignDispatcher
             $productSign->getDto($CommentProductSignDTO);
 
             /** Присваиваем номер ГТД из поставки Честному знаку в виде комментария */
-            $CommentProductSignDTO->setComment($ProductSupplyEvent->getInvariable()->getNumber());
+            $CommentProductSignDTO->setComment($ProductSupplyEvent->getInvariable()->getDeclaration());
 
             $handle = $this->ProductSignStatusHandler->handle($CommentProductSignDTO);
 

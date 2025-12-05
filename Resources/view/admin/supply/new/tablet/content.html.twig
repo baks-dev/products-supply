@@ -1,1 +1,128 @@
-<div>Временно недоступно</div>
+{% trans_default_domain 'products-stocks.admin' %}
+
+<div class="modal-dialog modal-dialog-centered " style="max-width: 700px;">
+    {{ form_start(form) }}
+
+
+    <div class="modal-content p-3 border-bottom border-5 border-primary">
+
+        <div class="modal-header">
+            <h5 class="modal-title">
+                {{ 'Добавить заявку на перемещение продукции'|trans }}
+            </h5>
+        </div>
+
+        <div class="modal-body">
+
+            <div class="d-flex gap-3">
+                <div class="w-100" id="preProduct">
+
+                    {{ form_row(form.preProduct, {
+                        label: 'Продукт',
+                        placeholder: 'Выберите продукцию из списка...',
+                        attr: { 'data-select' : 'select2', placeholder: form.preProduct.vars.data ?: 'Продукция на складе отстутсвует', } }) }}
+                </div>
+            </div>
+
+            <div id="preOffer" class="d-flex w-100 gap-3">
+
+                <div>{{ form_row(form.preOffer) }}</div>
+
+                <div id="preVariation" class="d-flex w-100 gap-3">
+                    <div>{{ form_row(form.preVariation) }}</div>
+
+                    <div id="preModification">
+                        <div>{{ form_row(form.preModification) }}</div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            {# <div class="d-flex justify-content-evenly gap-1 align-items-end">
+                <div class="p-1">
+                    <div class="mb-3"><button type="button" id="category_form_sections_0_DeleteSection" name="category_form[sections][0][DeleteSection]" class="btn btn-sm  btn-light-danger del-item-section btn"><span class="svg-icon svg-icon-2 text-nowrap">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+                                    <rect opacity="0.5" x="7.05025" y="15.5356" width="12" height="2" rx="1" transform="rotate(-45 7.05025 15.5356)" fill="black"></rect>
+                                    <rect x="8.46447" y="7.05029" width="12" height="2" rx="1" transform="rotate(45 8.46447 7.05029)" fill="black"></rect>
+                                </svg>Удалить секцию</span></button></div>
+
+                </div>
+
+                <div class="w-100">
+                    <div class="mb-3"><label for="category_form_sections_0_sort" class="form-label required">Сортировка секции</label><input type="number" id="category_form_sections_0_sort" name="category_form[sections][0][sort]" required="required" min="0" max="999" class="form-control" value="110">        </div>
+                </div>
+            </div> #}
+
+
+            <div class="w-100 d-flex justify-content-between align-items-end gap-2">
+
+                <div class="w-100" id="targetWarehouse">
+                    {{ form_row(form.targetWarehouse, { label: 'Склад отгрузки', placeholder: 'Выберите целевой склад...', attr: { 'data-select' : 'select2' } }) }}
+                </div>
+
+                <div class="w-100">
+                    {{ form_row(form.destinationWarehouse, { label: 'Склад назначения', placeholder: 'Выберите Cклад назначения...', attr: { 'data-select' : 'select2' } }) }}
+                </div>
+
+                <div class="w-25">
+                    {{ form_row(form.preTotal, { label: 'Количество', attr: { min : 1 } }) }}
+                </div>
+
+
+                <div class="mb-3 w-25">
+
+                    <button type="button" id="{{ form.vars.id }}_addMoving"
+                            class="btn btn-outline-primary border-0 text-nowrap"
+                            data-index="0"
+                            data-prototype="{{ include(_self|replace({ "content.html.twig": "prototype.product.html.twig"}))|e('html_attr') }}"
+                    >
+                    <span class="svg-icon svg-icon-2">
+                        <svg
+                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none"><rect opacity="0.5" x="11" y="18" width="12" height="2" rx="1"
+                                                  transform="rotate(-90 11 18)" fill="currentColor">
+
+                            </rect>
+                            <rect x="6"
+                                  y="11"
+                                  width="12"
+                                  height="2"
+                                  rx="1"
+                                  fill="currentColor"></rect>
+                        </svg>
+                    </span>
+                        Переместить
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="modal-footer" id="collectionStock">
+
+        </div>
+
+
+        <div class="modal-footer ">
+            {{ form_widget(form.comment, { attr: { placeholder : 'Комментарий'} }) }}
+
+            <div class="d-flex gap-3">
+                {# Отмена #}
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                    {{ 'btn.cancel'|trans({}, 'core.btn') }}
+                </button>
+
+                {# Сохранить #}
+                {{ form_widget(form.moving, { label: '
+                    <span>'~ 'btn.save'|trans({}, 'core.btn') ~'</span>
+                    <span class="spinner-border spinner-border-sm vertical-middle d-none"></span>
+			    '}) }}
+            </div>
+        </div>
+
+
+    </div>
+
+    {{ form_end(form) }}
+</div>

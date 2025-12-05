@@ -241,7 +241,7 @@ final readonly class ScannerProductSupplyDispatcher
                     if(false === $product instanceof ProductIdsByBarcodesResult)
                     {
                         $this->logger->warning(message: sprintf(
-                            'Не удалось найти продукт по штрихкоду %s из Честного знака. Честный знак будет создан без продукта',
+                            'Не удалось найти продукт по штрихкоду %s из Честного знака. Честный знак НЕ БУДЕТ СОЗДАН',
                             $partCode
                         ),
                             context: [
@@ -249,6 +249,10 @@ final readonly class ScannerProductSupplyDispatcher
                                 self::class.':'.__LINE__,
                             ]
                         );
+
+                        /** Удаляем после обработки файл PDF */
+                        $this->filesystem->remove($scanProcessFileName);
+                        continue;
                     }
                 }
             }

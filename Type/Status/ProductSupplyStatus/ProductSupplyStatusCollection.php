@@ -42,7 +42,7 @@ final readonly class ProductSupplyStatusCollection
         $case = null;
 
         /** @var ProductSupplyStatusInterface $status */
-        foreach($this->status as $key => $status)
+        foreach($this->status as $status)
         {
 
             $case[$status::priority()] = new $status();
@@ -65,6 +65,6 @@ final readonly class ProductSupplyStatusCollection
             }
         }
 
-        throw new InvalidArgumentException(sprintf('ProductSupplyStatus not found by name %s', $name));
+        throw new InvalidArgumentException(sprintf('ProductSupplyStatus не найден по имени класса %s', $name));
     }
 }

@@ -34,7 +34,6 @@ use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusInterface;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
-use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Entity\User;
 use BaksDev\Users\User\Type\Id\UserUid;
@@ -44,13 +43,16 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
 {
     private SearchDTO|false $search = false;
 
-    private ?ProductSupplyStatus $status = null;
+    private UserUid|false $user = false;
+
+    private UserProfileUid|false $profile = false;
+
+    private ProductSupplyStatus|false $status = false;
 
     private ?int $limit = null;
 
     public function __construct(
         private readonly DBALQueryBuilder $DBALQueryBuilder,
-        private readonly UserProfileTokenStorageInterface $UserProfileTokenStorage,
     ) {}
 
     public function search(SearchDTO $search): self
@@ -64,7 +66,6 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
         $this->limit = $limit;
         return $this;
     }
-
 
     public function status(ProductSupplyStatus|ProductSupplyStatusInterface|string $status): self
     {
@@ -107,6 +108,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
         $status = $this->status instanceof ProductSupplyStatus;
 
         $dbal
+            ->addSelect('product_supply_event.status AS supply_status')
             ->join(
                 'product_supply',
                 ProductSupplyEvent::class,
@@ -124,9 +126,9 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
             );
         }
 
-        /** Контейнер */
+        /** Invariable */
         $dbal
-            ->addSelect('product_supply_invariable.container AS supply_container')
+            ->addSelect('product_supply_invariable.number AS supply_number')
             ->join(
                 'product_supply_event',
                 ProductSupplyInvariable::class,
@@ -134,7 +136,12 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 'product_supply_invariable.event = product_supply_event.id'
             );
 
-        /** Пользователь */
+        /**
+         * Пользователь
+         */
+
+        $profile = $this->profile instanceof UserProfileUid;
+
         $dbal
             //            ->addSelect('product_supply_personal.usr AS supply_usr')
             //            ->addSelect('product_supply_personal.profile AS supply_profile')
@@ -144,13 +151,26 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 'product_supply_personal',
                 '
                     product_supply_personal.event = product_supply_event.id AND
-                    product_supply_personal.profile = :profile
-                '
+                    product_supply_personal.usr = :usr'.
+                (
+                $profile
+                    ? ' AND product_supply_personal.profile = :profile'
+                    : ' AND product_supply_personal.profile IS NULL'
+                )
             )->setParameter(
+                key: 'usr',
+                value: $this->user,
+                type: UserUid::TYPE,
+            );
+
+        if($profile)
+        {
+            $dbal->setParameter(
                 key: 'profile',
-                value: $this->UserProfileTokenStorage->getProfile(),
+                value: $this->profile,
                 type: UserProfileUid::TYPE,
             );
+        }
 
         /** Продукты в Поставке */
         $dbal
@@ -166,7 +186,6 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
 			( 
 					JSONB_BUILD_OBJECT
 					(
-						'barcode', product_supply_product.barcode,
 						'product', product_supply_product.product,
 						'offer_const', product_supply_product.offer_const,
 						'variation_const', product_supply_product.variation_const,
@@ -181,7 +200,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
             $dbal
                 ->createSearchQueryBuilder($this->search)
                 ->addSearchLike('product_supply_product.barcode')
-                ->addSearchLike('product_supply_invariable.container');
+                ->addSearchLike('product_supply_invariable.number');
         }
 
         if(null !== $this->limit)

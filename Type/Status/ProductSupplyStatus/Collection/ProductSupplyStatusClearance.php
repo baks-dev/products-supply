@@ -33,7 +33,7 @@ use BaksDev\Users\Profile\Group\Security\VoterInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 /**
- * Статус clearance (Растормаживается)
+ * Статус clearance (Растомаживаются)
  */
 #[AutoconfigureTag('baks.products.supply.status')]
 #[AutoconfigureTag('baks.security.voter')]
@@ -43,7 +43,7 @@ class ProductSupplyStatusClearance implements ProductSupplyStatusInterface, Vote
 
     private static int $sort = 200;
 
-    private static string $color = '#68b4f4';
+    private static string $color = '#0489f8';
 
     /** Возвращает значение (value) */
     public function getValue(): string

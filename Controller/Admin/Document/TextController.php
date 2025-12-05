@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\Controller\Admin\Document;
 
 use BaksDev\Core\Controller\AbstractController;
+use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
@@ -42,6 +43,7 @@ use Symfony\Component\Routing\Attribute\Route;
 /**
  * Формирует документ с кодами Честного знака в формате .txt (small, big)
  */
+#[RoleSecurity(['ROLE_PRODUCT_SUPPLY_EDIT'])]
 #[AsController]
 final class TextController extends AbstractController
 {

@@ -35,7 +35,10 @@ use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-/** Загружает файлы на сервер */
+/**
+ * Загружает файлы на сервер
+ * @see
+ */
 final readonly class ProductSupplyFilesHandler
 {
     public function __construct(
@@ -53,19 +56,18 @@ final readonly class ProductSupplyFilesHandler
 
         $uploadDir = implode(DIRECTORY_SEPARATOR, [
             $this->project_dir,
-            'public', 'upload', 'barcode', 'products-supply', $command->getUsr(), $command->getProfile(),
+            'public', 'upload', 'barcode', 'products-supply', $command->getUsr(), $command->getProfile(), 'pdf'
         ]);
+
+        /**
+         * Создаем директорию, если не была создана
+         */
 
         if(false === $this->filesystem->exists($uploadDir))
         {
-            $dirs = [
-                $uploadDir.DIRECTORY_SEPARATOR.'xlsx',
-                $uploadDir.DIRECTORY_SEPARATOR.'pdf'
-            ];
-
             try
             {
-                $this->filesystem->mkdir($dirs);
+                $this->filesystem->mkdir($uploadDir);
             }
             catch(IOExceptionInterface $exception)
             {
@@ -73,7 +75,7 @@ final readonly class ProductSupplyFilesHandler
                     message: 'Ошибка при создании директорий',
                     context: [
                         $exception->getMessage(),
-                        $dirs,
+                        $uploadDir,
                         self::class.':'.__LINE__,
                     ],
                 );
@@ -110,21 +112,6 @@ final readonly class ProductSupplyFilesHandler
 
                     $fileName = uniqid('original_', true).'.pdf';
                     $file->move($ProductSupplyPdfDir, $fileName);
-
-                    continue;
-                }
-
-                if('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' === $file->getMimeType())
-                {
-                    $ProductSupplyXlsxDir = $uploadDir.DIRECTORY_SEPARATOR.'xlsx';
-
-                    if(false === $this->filesystem->exists($ProductSupplyXlsxDir))
-                    {
-                        $this->filesystem->mkdir($ProductSupplyXlsxDir);
-                    }
-
-                    $fileName = uniqid('original_', true).'.xlsx';
-                    $file->move($ProductSupplyXlsxDir, $fileName);
                 }
             }
         }

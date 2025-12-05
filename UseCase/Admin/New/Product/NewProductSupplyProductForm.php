@@ -26,9 +26,14 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\UseCase\Admin\New\Product;
 
-use BaksDev\Products\Supply\UseCase\Admin\Edit\Product\EditProductSupplyProductDTO;
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -38,16 +43,74 @@ final class NewProductSupplyProductForm extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // Продукт
+
         $builder->add('product', HiddenType::class);
+
+        $builder->get('product')->addModelTransformer(
+            new CallbackTransformer(
+                function($product) {
+                    return $product instanceof ProductUid ? $product->getValue() : $product;
+                },
+                function($product) {
+                    return new ProductUid($product);
+                }
+            )
+        );
+
+        // Торговое предложение
+
         $builder->add('offerConst', HiddenType::class);
+
+        $builder->get('offerConst')->addModelTransformer(
+            new CallbackTransformer(
+                function($offer) {
+                    return $offer instanceof ProductOfferConst ? $offer->getValue() : $offer;
+                },
+                function($offer) {
+                    return $offer ? new ProductOfferConst($offer) : null;
+                }
+            )
+        );
+
+        // Множественный вариант
+
         $builder->add('variationConst', HiddenType::class);
+
+        $builder->get('variationConst')->addModelTransformer(
+            new CallbackTransformer(
+                function($variation) {
+                    return $variation instanceof ProductVariationConst ? $variation->getValue() : $variation;
+                },
+                function($variation) {
+                    return $variation ? new ProductVariationConst($variation) : null;
+                }
+            )
+        );
+
+        // Модификация множественного варианта
+
         $builder->add('modificationConst', HiddenType::class);
+
+        $builder->get('modificationConst')->addModelTransformer(
+            new CallbackTransformer(
+                function($modification) {
+                    return $modification instanceof ProductModificationConst ? $modification->getValue() : $modification;
+                },
+                function($modification) {
+
+                    return $modification ? new ProductModificationConst($modification) : null;
+                }
+            )
+        );
+
+        $builder->add('total', HiddenType::class, ['required' => false]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => EditProductSupplyProductDTO::class,
+            'data_class' => NewProductSupplyProductDTO::class,
             'method' => 'POST',
             'attr' => ['class' => 'w-100'],
         ]);

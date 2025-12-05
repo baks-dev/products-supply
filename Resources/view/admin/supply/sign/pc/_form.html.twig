@@ -1,0 +1,43 @@
+{% trans_default_domain 'products-supply.sign' %}
+
+{{ form_start(form) }}
+
+<div class="modal-content p-3 border-bottom border-5 border-primary">
+    <div class="modal-header align-items-center">
+
+        <h5 class="modal-title">
+            {# Заголовок модального окна #}
+            {{ 'new'|trans }}:
+        </h5>
+
+        <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" title="Close">
+            <span class="svg-icon svg-icon-2x"></span>
+        </div>
+    </div>
+
+    <div class="modal-body" id="modal-body">
+
+        {{ include(_self|replace({ "_form.html.twig": "form/files/files.html.twig" }) ) }}
+
+    </div>
+
+    <div class="modal-footer">
+
+        <div class="d-flex gap-3">
+            {# Отмена #}
+
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                {{ 'btn.cancel'|trans({}, 'core.btn') }}
+            </button>
+
+            {# Удалить #}
+            {{ form_widget(form.product_supply_files, { label: '
+				<span>'~ 'btn.save'|trans({}, 'core.btn') ~'</span>
+				<span class="spinner-border spinner-border-sm vertical-middle d-none"></span>
+			'}) }}
+        </div>
+    </div>
+</div>
+{{ form_end(form) }}
+
+

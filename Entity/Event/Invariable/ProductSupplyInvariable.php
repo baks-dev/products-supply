@@ -61,13 +61,13 @@ class ProductSupplyInvariable extends EntityReadonly
      * Номер контейнера
      */
     #[ORM\Column(type: Types::STRING, nullable: false)]
-    private readonly string $container;
+    private readonly string $number;
 
     /**
      * Грузовая таможенная декларация (номер)
      */
     #[ORM\Column(type: Types::STRING, nullable: true)]
-    private ?string $number = null;
+    private ?string $declaration = null;
 
     public function __construct(ProductSupplyEvent $event)
     {
@@ -97,13 +97,13 @@ class ProductSupplyInvariable extends EntityReadonly
             'Class %s interface error in %s', $dto::class, self::class.':'.__LINE__));
     }
 
-    public function getContainer(): string
-    {
-        return $this->container;
-    }
-
-    public function getNumber(): ?string
+    public function getNumber(): string
     {
         return $this->number;
+    }
+
+    public function getDeclaration(): ?string
+    {
+        return $this->declaration;
     }
 }

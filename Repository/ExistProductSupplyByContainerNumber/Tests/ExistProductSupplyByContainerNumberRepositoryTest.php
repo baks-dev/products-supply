@@ -51,7 +51,7 @@ class ExistProductSupplyByContainerNumberRepositoryTest extends KernelTestCase
 
         $user = $_SERVER['TEST_USER'] ?? UserUid::TEST;
         $profile = $_SERVER['TEST_PROFILE'] ?? UserProfileUid::TEST;
-        $container = (new NewProductSupplyInvariableDTO)->setContainer('DEXU240453');
+        $container = (new NewProductSupplyInvariableDTO)->setNumber('DEXU240453');
 
         /** @var ExistProductSupplyByContainerNumberInterface $ExistProductSupplyByContainerNumberInterface */
         $ExistProductSupplyByContainerNumberInterface = self::getContainer()->get(ExistProductSupplyByContainerNumberInterface::class);

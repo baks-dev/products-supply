@@ -1,4 +1,5 @@
 new: 'Новые'
 clearance: 'Растамаживаются'
-delivery: 'Доставляются'
+cleared: 'Растаможены'
+delivery: 'В доставке'
 completed: 'Выполнены'

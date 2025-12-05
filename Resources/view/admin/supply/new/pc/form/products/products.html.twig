@@ -1,0 +1,78 @@
+<div class="clearfix d-flex gap-3 align-items-center my-2">
+    <strong class="text-nowrap">Выбор продуктов для поставки</strong>
+    <div class="w-100">
+        <hr class="m-0">
+    </div>
+</div>
+
+
+<div class="d-flex gap-3 align-content-center">
+
+    <div class="w-100">
+        {{ form_row(form.preProduct.category, {
+            label: 'Категория',
+            placeholder: 'Выберите категорию из списка...',
+            attr: { 'data-select' : 'select2' } }) }}
+    </div>
+
+    <div class="w-100 d-none" id="preProduct">
+        {{ form_row(form.preProduct.preProduct, {
+            label: 'Продукт',
+            placeholder: 'Выберите продукцию из списка...',
+            attr: { 'data-select' : 'select2', placeholder: form.preProduct.preProduct.vars.data ?: 'Продукция на складе отстутсвует', } }) }}
+    </div>
+
+    <div class="w-100 d-none" id="preOfferConst">
+        {{ form_row(form.preProduct.preOfferConst) }}
+    </div>
+
+    <div class="w-100 d-none" id="preVariationConst">
+        {{ form_row(form.preProduct.preVariationConst) }}
+    </div>
+
+    <div class="w-100 d-none" id="preModificationConst">
+        {{ form_row(form.preProduct.preModificationConst) }}
+    </div>
+
+</div>
+
+<div class="w-100 d-flex justify-content-between align-items-end gap-2">
+
+    {# Количество продукции #}
+    <div class="w-100" id="preTotal">
+        {{ form_row(form.preProduct.preTotal, { label: 'Количество продукции', attr: { min : 1 } }) }}
+    </div>
+
+    {# Кнопка "Добавить в заказ" #}
+    <div class="mb-3 w-25 text-end">
+
+        <button type="button" id="{{ form.vars.name }}_addProduct"
+                class="btn btn-outline-primary border-0 text-nowrap"
+                data-index="0"
+                data-prototype="{{ include(_self|replace({ "products.html.twig": "prototype.product.html.twig"}))|e('html_attr') }}">
+                    <span class="svg-icon svg-icon-2">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <rect opacity="0.5" x="11" y="18" width="12" height="2" rx="1" transform="rotate(-90 11 18)"
+                                  fill="currentColor">
+                            </rect>
+                            <rect x="6"
+                                  y="11"
+                                  width="12"
+                                  height="2"
+                                  rx="1"
+                                  fill="currentColor">
+                            </rect>
+                        </svg>
+
+                    </span>
+
+            Добавить в поставку
+        </button>
+    </div>
+
+</div>
+
+<div class="modal-footer" id="collectionProductSupply">
+
+</div>
