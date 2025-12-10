@@ -26,7 +26,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\Messenger\ProductSupply\Files\Tests;
 
-use BaksDev\Products\Product\Repository\CurrentProductByArticle\CurrentProductDTO;
+use BaksDev\Products\Product\Repository\CurrentProductByArticle\CurrentProductByBarcodeResult;
 use BaksDev\Products\Product\Repository\CurrentProductByArticle\ProductConstByBarcodeInterface;
 use BaksDev\Products\Supply\UseCase\Admin\New\Invariable\NewProductSupplyInvariableDTO;
 use BaksDev\Products\Supply\UseCase\Admin\New\NewProductSupplyDTO;
@@ -165,11 +165,11 @@ class ProductSupplyXlsxParseDispatcherDebugTest extends KernelTestCase
                         $CurrentProductDTO = $productConstByBarcodeRepository->find($barcode);
 
                         /** Поставка создается без продукта */
-                        if(false === $CurrentProductDTO instanceof CurrentProductDTO)
+                        if(false === $CurrentProductDTO instanceof CurrentProductByBarcodeResult)
                         {
                         }
 
-                        if(true === $CurrentProductDTO instanceof CurrentProductDTO)
+                        if(true === $CurrentProductDTO instanceof CurrentProductByBarcodeResult)
                         {
                             $ProductSupplyProductDTO
                                 ->setProduct($CurrentProductDTO->getProduct())
