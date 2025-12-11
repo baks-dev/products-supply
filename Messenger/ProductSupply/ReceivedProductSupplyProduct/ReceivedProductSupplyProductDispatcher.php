@@ -49,7 +49,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * Отмечает продукт в поставке при его поступления на склад
- * next @see ReceivedProductSupplyProductDispatcher
+ * next @see CompletedStatusProductSupplyDispatcher
  */
 #[AsMessageHandler(priority: 0)]
 final readonly class ReceivedProductSupplyProductDispatcher
@@ -96,7 +96,7 @@ final readonly class ReceivedProductSupplyProductDispatcher
         }
 
         /**
-         * Если статус НЕ является Incoming «Приход на склад»
+         * Если статус НЕ является Incoming «Приход на склад» - прерываем
          */
         if(false === $ProductStockEvent->equalsProductStockStatus(ProductStockStatusIncoming::class))
         {
@@ -152,7 +152,10 @@ final readonly class ReceivedProductSupplyProductDispatcher
         $EditProductSupplyDTO = new EditProductSupplyDTO($supplyProductBySupplyStock->getEvent());
         $ProductSupplyEvent->getDto($EditProductSupplyDTO);
 
-        /** @var EditProductSupplyProductDTO|null $supplyProductForReceived */
+        /**
+         * Проверяем соответствие продукта ИЗ ПОСТАВКИ продукту ИЗ ЗАЯВКИ
+         * @var EditProductSupplyProductDTO|null $supplyProductForReceived
+         */
         $supplyProductForReceived = $EditProductSupplyDTO
             ->getProduct()
             ->findFirst(function($k, EditProductSupplyProductDTO $editProductSupplyProductDTO)
@@ -185,14 +188,14 @@ final readonly class ReceivedProductSupplyProductDispatcher
         /** флаг received = true */
         $supplyProductForReceived->received();
 
-        $handle = $this->editProductSupplyHandler->handle($EditProductSupplyDTO);
+        $ProductSupply = $this->editProductSupplyHandler->handle($EditProductSupplyDTO);
 
-        if(false === $handle instanceof ProductSupply)
+        if(false === $ProductSupply instanceof ProductSupply)
         {
             $this->logger->critical(
                 message: sprintf(
                     '%s: Ошибка обновления продукта в поставке %s при принятии складской заявки',
-                    $handle, $ProductSupplyEvent->getMain(),
+                    $ProductSupply, $ProductSupplyEvent->getMain(),
                 ),
                 context: [
                     self::class.':'.__LINE__,
@@ -201,19 +204,17 @@ final readonly class ReceivedProductSupplyProductDispatcher
             );
         }
 
-        if(true === $handle instanceof ProductSupply)
+        if(true === $ProductSupply instanceof ProductSupply)
         {
             $this->logger->info(
                 message: sprintf(
-                    'Успешно обновили продукт %s (%s) при принятии складской заявки %s в поставке %s',
+                    'Успешно обновили продукт %s (%s) при принятии складской заявки %s в поставке',
                     $supplyProductForReceived->getId(),
-                    $supplyProductForReceived->getBarcode(),
+                    //                    $supplyProductForReceived->getBarcode(),
                     $message->getId(),
-                    $handle->getId()
+                    $ProductSupply->getId()
                 ),
-                context: [
-                    self::class.':'.__LINE__
-                ],
+                context: [self::class.':'.__LINE__],
             );
 
             /**
@@ -222,10 +223,9 @@ final readonly class ReceivedProductSupplyProductDispatcher
              */
             $this->messageDispatch
                 ->dispatch(
-                    message: new CompletedStatusProductSupplyMessage(supply: $handle->getId()),
+                    message: new CompletedStatusProductSupplyMessage(supply: $ProductSupply->getId()),
                     transport: 'products-supply',
                 );
         }
-
     }
 }

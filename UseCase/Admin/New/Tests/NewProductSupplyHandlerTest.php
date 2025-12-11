@@ -98,7 +98,7 @@ class NewProductSupplyHandlerTest extends KernelTestCase
          * Номер контейнера
          */
         $NewProductSupplyInvariableDTO = new NewProductSupplyInvariableDTO();
-        $NewProductSupplyInvariableDTO->setContainer('xd1qXZ6g_test');
+        $NewProductSupplyInvariableDTO->setNumber('xd1qXZ6g_test');
         $NewProductSupplyDTO->setInvariable($NewProductSupplyInvariableDTO);
 
         /**

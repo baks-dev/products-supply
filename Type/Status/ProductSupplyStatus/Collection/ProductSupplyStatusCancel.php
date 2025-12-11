@@ -41,7 +41,7 @@ class ProductSupplyStatusCancel implements ProductSupplyStatusInterface, VoterIn
 {
     public const string STATUS = 'cancel';
 
-    private static int $sort = 500;
+    private static int $sort = 600;
 
     private static string $color = '#ff3945';
 

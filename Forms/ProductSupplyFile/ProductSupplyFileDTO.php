@@ -45,8 +45,8 @@ final class ProductSupplyFileDTO
                 'application/x-pdf',
                 'image/pdf',
 
-                /** XLSX */
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                //                /** XLSX */
+                //                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ]),
         ],
         allowExtraFields: true,

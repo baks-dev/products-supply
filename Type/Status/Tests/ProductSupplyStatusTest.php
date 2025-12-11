@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\Type\Status\Tests;
 
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
+use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusDelivery;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusCollection;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusInterface;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatusType;
@@ -44,7 +45,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 #[When(env: 'test')]
 final class ProductSupplyStatusTest extends KernelTestCase
 {
-    public function testUseCase(): void
+    public function testStatusCollection(): void
     {
         // Бросаем событие консольной команды
         $dispatcher = self::getContainer()->get(EventDispatcherInterface::class);
@@ -54,15 +55,24 @@ final class ProductSupplyStatusTest extends KernelTestCase
         /** @var ProductSupplyStatusCollection $ProductSupplyStatusCollection */
         $ProductSupplyStatusCollection = self::getContainer()->get(ProductSupplyStatusCollection::class);
 
-        /** @var ProductSupplyStatusInterface $case */
-        foreach($ProductSupplyStatusCollection->cases() as $case)
+        $statuses = $ProductSupplyStatusCollection->cases();
+
+        dump($statuses);
+
+        $prev = $ProductSupplyStatusCollection->previous(ProductSupplyStatusDelivery::class);
+
+        dump($prev);
+
+        dd();
+
+        /** @var ProductSupplyStatusInterface $status */
+        foreach($statuses as $status)
         {
+            $ProductSupplyStatus = new ProductSupplyStatus($status->getValue());
 
-            $ProductSupplyStatus = new ProductSupplyStatus($case->getValue());
-
-            self::assertTrue($ProductSupplyStatus->equals($case::class)); // немспейс интерфейса
-            self::assertTrue($ProductSupplyStatus->equals($case)); // объект интерфейса
-            self::assertTrue($ProductSupplyStatus->equals($case->getValue())); // срока
+            self::assertTrue($ProductSupplyStatus->equals($status::class)); // немспейс интерфейса
+            self::assertTrue($ProductSupplyStatus->equals($status)); // объект интерфейса
+            self::assertTrue($ProductSupplyStatus->equals($status->getValue())); // срока
             self::assertTrue($ProductSupplyStatus->equals($ProductSupplyStatus)); // объект класса
 
             $ProductSupplyStatusType = new ProductSupplyStatusType();
@@ -71,11 +81,11 @@ final class ProductSupplyStatusTest extends KernelTestCase
                 ->getMock();
 
             $convertToDatabase = $ProductSupplyStatusType->convertToDatabaseValue($ProductSupplyStatus, $platform);
-            self::assertEquals($ProductSupplyStatus->getProductSupplyStatusValue(), $convertToDatabase);
+            self::assertEquals($ProductSupplyStatus->getStatusValue(), $convertToDatabase);
 
             $convertToPHP = $ProductSupplyStatusType->convertToPHPValue($convertToDatabase, $platform);
             self::assertInstanceOf(ProductSupplyStatus::class, $convertToPHP);
-            self::assertEquals($case, $convertToPHP->getProductSupplyStatus());
+            self::assertEquals($status, $convertToPHP->getStatus());
         }
 
         self::assertTrue(true);

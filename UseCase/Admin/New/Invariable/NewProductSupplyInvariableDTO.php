@@ -32,18 +32,31 @@ use Symfony\Component\Validator\Constraints as Assert;
 /** @see ProductSupplyInvariable */
 final class NewProductSupplyInvariableDTO implements ProductSupplyInvariableInterface
 {
-    /** Номер контейнера */
-    #[Assert\NotBlank]
-    private string $container;
+    /**
+     * Номер поставки
+     */
+    //    #[Assert\NotBlank]
+    private string $number;
 
-    public function getContainer(): string
+    public function __construct()
     {
-        return $this->container;
+        $this->number = number_format((microtime(true) * 100), 0, '.', '.');
     }
 
-    public function setContainer(string $value): self
+    public function getNumber(): string
     {
-        $this->container = $value;
+        return $this->number;
+    }
+
+    public function setNumber(string $number): self
+    {
+        if(empty($number))
+        {
+            return $this;
+        }
+
+        $this->number = $number;
+
         return $this;
     }
 }

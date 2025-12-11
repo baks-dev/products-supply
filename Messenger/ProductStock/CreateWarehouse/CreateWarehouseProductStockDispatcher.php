@@ -48,7 +48,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final readonly class CreateWarehouseProductStockDispatcher
 {
     public function __construct(
-        #[Target('productsStocksLogger')] private LoggerInterface $logger,
+        #[Target('productsSupplyLogger')] private LoggerInterface $logger,
         private OneProductSupplyByEventInterface $oneProductSupplyByEventRepository,
         private UserByUserProfileInterface $userByUserProfileRepository,
         private WarehouseProductStockHandler $WarehouseProductStockHandler,
@@ -110,7 +110,7 @@ final readonly class CreateWarehouseProductStockDispatcher
             $WarehouseProductStockDTO->getInvariable()
                 ->setUsr($user->getId())
                 ->setProfile($message->getProfile())
-                ->setNumber($OneProductSupply->getContainer());
+                ->setNumber($OneProductSupply->getNumber());
 
             /** Связь с поставкой */
             $ProductStockSupplyDTO = new ProductStockSupplyDTO();

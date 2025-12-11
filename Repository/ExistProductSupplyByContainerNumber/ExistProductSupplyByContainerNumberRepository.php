@@ -100,19 +100,19 @@ final class ExistProductSupplyByContainerNumberRepository implements ExistProduc
                 type: ProductSupplyStatus::TYPE,
             );
 
-        /** Контейнер */
+        /** Invariable */
         $dbal
-            ->addSelect('product_supply_invariable.container AS supply_container')
+            ->addSelect('product_supply_invariable.number AS supply_number')
             ->join(
                 'product_supply_event',
                 ProductSupplyInvariable::class,
                 'product_supply_invariable',
                 '
                     product_supply_invariable.event = product_supply_event.id AND
-                    product_supply_invariable.container = :container'
+                    product_supply_invariable.number = :number'
             )->setParameter(
-                key: 'container',
-                value: $container->getContainer(),
+                key: 'number',
+                value: $container->getNumber(),
                 type: Types::STRING,
             );
 

@@ -41,7 +41,7 @@ class ProductSupplyStatusDelivery implements ProductSupplyStatusInterface, Voter
 {
     public const string STATUS = 'delivery';
 
-    private static int $sort = 300;
+    private static int $sort = 400;
 
     private static string $color = '#FFC107';
 

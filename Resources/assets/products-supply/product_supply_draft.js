@@ -1,0 +1,636 @@
+/*
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is furnished
+ *  to do so, subject to the following conditions:
+ *  
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *  
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ *
+ */
+
+executeFunc((function newProductSupply()
+{
+    const form = document.forms.new_product_supply_form;
+
+    if(typeof form === "undefined" || form === null)
+    {
+        return false;
+    }
+
+    const product_category = document.getElementById("new_product_supply_form_preProduct_category");
+
+    if(typeof product_category === "undefined" || product_category === null)
+    {
+        return false;
+    }
+
+    /** Событие на изменение категории */
+    product_category.addEventListener("change", function(event)
+    {
+        const forms = this.closest("form");
+        changeCategory(forms);
+
+        /**
+         * Добавление продукта в коллекцию
+         */
+        const addProductButton = document.getElementById("new_product_supply_form_addProduct");
+
+        if(addProductButton)
+        {
+            addProductButton.addEventListener("click", addProductOrder, false);
+        }
+
+        return true;
+    });
+
+    return true;
+}));
+
+/**
+ * Отправка формы при изменении категории
+ */
+async function changeCategory(forms)
+{
+    disabledElementsForm(forms);
+
+    document.getElementById("preProduct")?.classList.add("d-none");
+    document.getElementById("preOfferConst")?.classList.add("d-none");
+    document.getElementById("preVariationConst")?.classList.add("d-none");
+    document.getElementById("preModificationConst")?.classList.add("d-none");
+
+    const data = new FormData(forms);
+    data.delete(forms.name + "[_token]");
+
+    await fetch(forms.action, {
+        method: forms.method, // *GET, POST, PUT, DELETE, etc.
+        //mode: 'same-origin', // no-cors, *cors, same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        headers: {
+            // 'X-Requested-With': 'XMLHttpChange'
+            "X-Requested-With": "XMLHttpRequest",
+        },
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: data, // body data type must match "Content-Type" header
+    })
+
+        //.then((response) => response)
+        .then((response) =>
+        {
+            return response.status !== 200 ? false : response.text();
+
+        }).then((data) =>
+        {
+
+            if(data)
+            {
+                const parser = new DOMParser();
+                const result = parser.parseFromString(data, "text/html");
+
+                let preProduct = result.getElementById("preProduct");
+                document.getElementById("preProduct").replaceWith(preProduct);
+                console.log('preProduct ->', preProduct)
+
+                preProduct ?
+                    document?.getElementById("product")?.replaceWith(preProduct) :
+                    preProduct.innerHTML = "";
+
+                /** SELECT2 */
+                let replacer = document.getElementById(forms.name + "_preProduct_preProduct");
+                replacer && replacer.type !== "hidden" ? preProduct.classList.remove("d-none") : null;
+
+                if(replacer)
+                {
+                    if(replacer.tagName === "SELECT")
+                    {
+                        new NiceSelect(replacer, {searchable: true});
+
+                        let focus = document.getElementById(forms.name + "_preProduct_preProduct_select2");
+                        focus ? focus.click() : null;
+                    }
+                }
+
+                /**
+                 * сбрасываем зависимые поля
+                 */
+
+                let preOffer = document.getElementById("preOfferConst");
+                preOffer ? preOffer.innerHTML = "" : null;
+
+                let preVariation = document.getElementById("preVariationConst");
+                preVariation ? preVariation.innerHTML = "" : null;
+
+                let preModification = document.getElementById("preModificationConst");
+                preModification ? preModification.innerHTML = "" : null;
+
+                /** Событие на изменение продукта */
+                if(replacer)
+                {
+                    replacer.addEventListener("change", function()
+                    {
+                        changePreProduct(forms);
+                        return false;
+                    });
+                }
+            }
+
+            enableElementsForm(forms);
+        });
+}
+
+/**
+ * Отправка формы при изменении продукта
+ */
+async function changePreProduct(forms)
+{
+    disabledElementsForm(forms);
+
+    console.log('forms ->', forms)
+
+    document.getElementById("preOfferConst")?.classList.add("d-none");
+    document.getElementById("preVariationConst")?.classList.add("d-none");
+    document.getElementById("preModificationConst")?.classList.add("d-none");
+
+    const data = new FormData(forms);
+    data.delete(forms.name + "[_token]");
+
+    await fetch(forms.action, {
+        method: forms.method, // *GET, POST, PUT, DELETE, etc.
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+        },
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: data, // body data type must match "Content-Type" header
+    })
+        .then((response) =>
+        {
+
+            if(response.status !== 200)
+            {
+                return false;
+            }
+
+            return response.text();
+
+        }).then((data) =>
+        {
+
+            if(data)
+            {
+
+                const parser = new DOMParser();
+                const result = parser.parseFromString(data, "text/html");
+
+                let preOfferConst = result.getElementById("preOfferConst");
+                preOfferConst ? document.getElementById("preOfferConst").replaceWith(preOfferConst) : preOfferConst.innerHTML = "";
+                console.log('preOfferConst ->', preOfferConst)
+
+                if(preOfferConst)
+                {
+                    /** SELECT2 */
+
+                    let replaceOfferId = forms.name + "_preProduct_preOfferConst";
+
+                    let replacer = document.getElementById(replaceOfferId);
+                    replacer && replacer.type !== "hidden" ? preOfferConst.classList.remove("d-none") : null;
+
+                    if(replacer.tagName === "SELECT")
+                    {
+                        new NiceSelect(replacer, {searchable: true});
+
+                        let focus = document.getElementById(forms.name + "_preProduct_preOfferConst_select2");
+                        focus ? focus.click() : null;
+                    }
+                }
+
+                /** сбрасываем зависимые поля */
+                let preVariation = document.getElementById("preVariationConst");
+                preVariation ? preVariation.innerHTML = "" : null;
+
+                let preModification = document.getElementById("preModificationConst");
+                preModification ? preModification.innerHTML = "" : null;
+
+                let offerChange = document.getElementById(forms.name + "_preProduct_preOfferConst");
+                console.log(' offerChange->', offerChange)
+
+                /** Событие на изменение ТП */
+                if(offerChange)
+                {
+                    offerChange.addEventListener("change", function()
+                    {
+                        changePreOffer(forms);
+                        return false;
+                    });
+                }
+            }
+
+            enableElementsForm(forms);
+        });
+}
+
+/**
+ * Отправка формы при изменении торгового предложения
+ */
+async function changePreOffer(forms)
+{
+    disabledElementsForm(forms);
+
+    document.getElementById("preVariationConst")?.classList.add("d-none");
+    document.getElementById("preModificationConst")?.classList.add("d-none");
+
+    const data = new FormData(forms);
+    data.delete(forms.name + "[_token]");
+
+    await fetch(forms.action, {
+        method: forms.method, // *GET, POST, PUT, DELETE, etc.
+        //mode: 'same-origin', // no-cors, *cors, same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+        },
+
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: data, // body data type must match "Content-Type" header
+    })
+
+        //.then((response) => response)
+        .then((response) =>
+        {
+
+            if(response.status !== 200)
+            {
+                return false;
+            }
+
+            return response.text();
+
+        }).then((data) =>
+        {
+
+            if(data)
+            {
+
+                let parser = new DOMParser();
+                let result = parser.parseFromString(data, "text/html");
+
+                let preVariation = result.getElementById("preVariationConst");
+                console.log('preVariation ->', preVariation)
+
+                if(preVariation)
+                {
+                    document.getElementById("preVariationConst").replaceWith(preVariation);
+
+                    /** SELECT2 */
+
+                    let replacer = document.getElementById(forms.name + "_preProduct_preVariationConst");
+                    replacer && replacer.type !== "hidden" ? preVariation.classList.remove("d-none") : null;
+
+                    if(replacer)
+                    {
+
+                        if(replacer.tagName === "SELECT")
+                        {
+                            new NiceSelect(replacer, {searchable: true});
+
+                            let focus = document.getElementById(forms.name + "_preProduct_preVariationConst_select2");
+                            focus ? focus.click() : null;
+
+                            replacer.addEventListener("change", function(event)
+                            {
+                                changePreVariation(forms);
+                                return false;
+                            });
+                        } else
+                        {
+                            selectTotal(document.getElementById(forms.name + "_preProduct_preOfferConst"));
+                        }
+
+                    }
+
+                }
+
+                let preModification = document.getElementById("preModificationConst");
+                preModification ? preModification.innerHTML = "" : null;
+            }
+
+            enableElementsForm(forms);
+        });
+}
+
+/**
+ * Отправка формы при изменении варианта торгового предложения
+ */
+async function changePreVariation(forms)
+{
+    disabledElementsForm(forms);
+
+    document.getElementById("preModificationConst")?.classList.add("d-none");
+
+    const data = new FormData(forms);
+    data.delete(forms.name + "[_token]");
+
+
+    await fetch(forms.action, {
+        method: forms.method, // *GET, POST, PUT, DELETE, etc.
+        //mode: 'same-origin', // no-cors, *cors, same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+        },
+
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: data, // body data type must match "Content-Type" header
+    })
+
+        //.then((response) => response)
+        .then((response) =>
+        {
+
+            if(response.status !== 200)
+            {
+                return false;
+            }
+
+            return response.text();
+
+        }).then((data) =>
+        {
+
+            if(data)
+            {
+
+                let parser = new DOMParser();
+                let result = parser.parseFromString(data, "text/html");
+
+                let preModification = result.getElementById("preModificationConst");
+                console.log('preModification ->', preModification)
+
+                if(preModification)
+                {
+                    document.getElementById("preModificationConst").replaceWith(preModification);
+
+                    /** SELECT2 */
+                    let replacer = document.getElementById(forms.name + "_preProduct_preModificationConst");
+                    replacer && replacer.type !== "hidden" ? preModification.classList.remove("d-none") : null;
+
+                    /** Событие на изменение модификации */
+                    if(replacer)
+                    {
+                        if(replacer.tagName === "SELECT")
+                        {
+                            new NiceSelect(replacer, {searchable: true});
+
+                            let focus = document.getElementById(forms.name + "_preProduct_preModificationConst_select2");
+                            focus ? focus.click() : null;
+
+                            replacer.addEventListener("change", function(event)
+                            {
+                                selectTotal(this);
+                                return false;
+                            });
+
+                        } else
+                        {
+                            selectTotal(document.getElementById(forms.name + "_preProduct_preVariationConst"));
+                        }
+                    }
+                }
+            }
+
+            enableElementsForm(forms);
+        });
+}
+
+/**
+ * Отправка формы при изменении модификации варианта торгового предложения
+ */
+function selectTotal(element)
+{
+    let index = element.selectedIndex;
+
+    let preProduct_preTotal = document.getElementById("new_product_supply_form_preProduct_preTotal");
+
+    preProduct_preTotal.setAttribute("max", element.options[index].dataset.max);
+
+    setTimeout(function()
+    {
+        let focusTotal = document.getElementById("new_product_supply_form_preProduct_preTotal");
+        focusTotal.value = "";
+        focusTotal ? focusTotal.focus() : null;
+    }, 0);
+}
+
+/**
+ * Добавление продукта в коллекцию
+ */
+
+collectionNewProductSupply = new Map();
+
+function addProductOrder()
+{
+    document.getElementById("preOfferConst")?.classList.add("d-none");
+    document.getElementById("preVariationConst")?.classList.add("d-none");
+    document.getElementById("preModificationConst")?.classList.add("d-none");
+
+    /** Блок для новой коллекции КАТЕГОРИИ */
+    let collectionBlock = document.getElementById("collectionProductSupply");
+
+    let $errorFormHandler = null;
+
+    let header = "Добавить продукцию в поставку";
+
+    let preTotal = document.getElementById("new_product_supply_form_preProduct_preTotal");
+    let $TOTAL = preTotal.value * 1;
+
+    let $totalMax = preTotal.getAttribute("max");
+
+    /**
+     * Сообщения об ошибках с колличеством
+     */
+
+    if($TOTAL === undefined || $TOTAL < 1 || $TOTAL > $totalMax)
+    {
+        if($TOTAL === undefined)
+        {
+            $errorFormHandler = "{ \"type\":\"danger\" , " +
+                "\"header\":\"" + header + "\"  , " +
+                "\"message\" : \"Ошибка при заполнение количество\" }";
+        }
+
+        if($TOTAL > $totalMax)
+        {
+            $warninfFormHandler = "{ \"type\":\"danger\" , " +
+                "\"header\":\"" + header + "\"  , " +
+                "\"message\" : \"На складе отстутсвует необходимое количество продукции\" }";
+
+            createToast(JSON.parse($warninfFormHandler));
+        }
+
+        if($TOTAL < 1)
+        {
+            $errorFormHandler = "{ \"type\":\"danger\" , " +
+                "\"header\":\"" + header + "\"  , " +
+                "\"message\" : \"Не указано количество продукции\" }";
+        }
+    }
+
+    let $preProduct = document.getElementById("new_product_supply_form_preProduct_preProduct");
+
+    if($preProduct.value.length === 0)
+    {
+        $errorFormHandler = "{ \"type\":\"danger\" , " +
+            "\"header\":\"" + header + "\"  , " +
+            "\"message\" : \"" + $preProduct.options[0].textContent + "\" }";
+    }
+
+    let $preOffer = document.getElementById("new_product_supply_form_preProduct_preOfferConst");
+
+    if($preOffer)
+    {
+        if($preOffer.tagName === "SELECT" && $preOffer.value.length === 0)
+        {
+            $errorFormHandler = "{ \"type\":\"danger\" , " +
+                "\"header\":\"" + header + "\"  , " +
+                "\"message\" : \"" + $preOffer.options[0].textContent + "\" }";
+        }
+    }
+
+    let $preVariation = document.getElementById("new_product_supply_form_preProduct_preVariationConst");
+
+    if($preVariation)
+    {
+        if($preVariation.tagName === "SELECT" && $preVariation.value.length === 0)
+        {
+            $errorFormHandler = "{ \"type\":\"danger\" , " +
+                "\"header\":\"" + header + "\"  , " +
+                "\"message\" : \"" + $preVariation.options[0].textContent + "\" }";
+        }
+    }
+
+    let $preModification = document.getElementById("new_product_supply_form_preProduct_preModificationConst");
+
+    if($preModification)
+    {
+        if($preModification.tagName === "SELECT" && $preModification.value.length === 0)
+        {
+            $errorFormHandler = "{ \"type\":\"danger\" , " +
+                "\"header\":\"" + header + "\"  , " +
+                "\"message\" : \"" + $preModification.options[0].textContent + "\" }";
+        }
+    }
+
+    let mapKey = $preProduct ? $preProduct.value : "";
+    mapKey += $preOffer ? $preOffer.value : "";
+    mapKey += $preVariation ? $preVariation.value : "";
+    mapKey += $preModification ? $preModification.value : "";
+
+    if(collectionNewProductSupply.has(mapKey))
+    {
+        $errorFormHandler = "{ \"type\":\"danger\" , " +
+            "\"header\":\"" + header + "\"  , " +
+            "\"message\" : \"Продукция уже добавлена в список\" }";
+    }
+
+    /** Выводим сообщение об ошибке заполнения */
+    if($errorFormHandler)
+    {
+        createToast(JSON.parse($errorFormHandler));
+        return false;
+    }
+
+    /** Получаем прототип коллекции  */
+    let addProductButton = document.getElementById("new_product_supply_form_addProduct");
+
+    let Prototype = addProductButton.dataset.prototype;
+    let index = addProductButton.dataset.index * 1;
+
+    /** Замена '__name__' в HTML-коде прототипа вместо этого будет число, основанное на том, сколько коллекций */
+    Prototype = Prototype.replace(/__product__/g, index);
+
+    /** Вставляем элемент коллекции */
+    let elementCollectionBlock = document.createElement("div");
+
+    elementCollectionBlock.classList.add("item-collection-product");
+    elementCollectionBlock.classList.add("w-100");
+    elementCollectionBlock.innerHTML = Prototype;
+    collectionBlock.append(elementCollectionBlock);
+
+    /**
+     * Строка со значениями полей формы продукта (название, параметры, количество и т.д.)
+     */
+
+    let $productName = "<b>" + $preProduct.options[$preProduct.selectedIndex].dataset.name + "</b>";
+    let $variationName = $preVariation?.tagName === "SELECT" ? "<small class=\"text-muted\">" + document.querySelector("label[for=\"" + $preVariation.id + "\"]").textContent + "</small> <b>" + $preVariation.options[$preVariation.selectedIndex].dataset.name + "</b>" : "";
+    let $modificationName = $preModification?.tagName === "SELECT" ? "<small class=\"text-muted\">" + document.querySelector("label[for=\"" + $preModification.id + "\"]").textContent + "</small> <b>" + $preModification.options[$preModification.selectedIndex].dataset.name + "</b>" : "";
+    let $offerName = $preOffer?.tagName === "SELECT" ? "<small class=\"text-muted\">" + document.querySelector("label[for=\"" + $preOffer.id + "\"]").textContent + "</small> <b>" + $preOffer.options[$preOffer.selectedIndex].dataset.name + "</b>" : "";
+    let $productTextBlock = elementCollectionBlock.querySelector("#product-text-" + index);
+    $productTextBlock.innerHTML = $productName + " " + $offerName + " " + $variationName + " " + $modificationName + "&nbsp; : &nbsp;<b>" + $TOTAL + " шт.</b>";
+
+    /**
+     * Заполняем значения элементов коллекции
+     */
+
+    let Product = elementCollectionBlock.querySelector("#new_product_supply_form_product_" + index + "_product");
+    let OfferConst = elementCollectionBlock.querySelector("#new_product_supply_form_product_" + index + "_offerConst");
+    let VariationConst = elementCollectionBlock.querySelector("#new_product_supply_form_product_" + index + "_variationConst");
+    let ModificationConst = elementCollectionBlock.querySelector("#new_product_supply_form_product_" + index + "_modificationConst");
+    let Total = elementCollectionBlock.querySelector("#new_product_supply_form_product_" + index + "_total");
+
+    Product.value = $preProduct ? $preProduct.value : "";
+    OfferConst.value = $preOffer ? $preOffer.value : "";
+    VariationConst.value = $preVariation ? $preVariation.value : "";
+    ModificationConst.value = $preModification ? $preModification.value : "";
+    Total.value = preTotal.value;
+
+    /** Удаляем при клике колекцию СЕКЦИЙ */
+    elementCollectionBlock.querySelector(".del-item-product").addEventListener("click", function()
+    {
+        console.log(' del-item-product->',)
+        this.closest(".item-collection-product").remove();
+        index = addProductButton.dataset.index * 1;
+        addProductButton.dataset.index = (index - 1).toString();
+
+        collectionNewProductSupply.delete(mapKey);
+    });
+
+    /** Увеличиваем data-index на 1 после вставки новой коллекции */
+    addProductButton.dataset.index = (index + 1).toString();
+
+    /** Обнуляем количество в преформе */
+    preTotal.value = null;
+
+    collectionNewProductSupply.set(mapKey, Total.value);
+
+    document.getElementById("new_product_supply_form_preProduct_preOfferConst")?.remove();
+    document.querySelector("label[for=\"new_product_supply_form_preProduct_preOfferConst\"]")?.remove();
+    document.getElementById("new_product_supply_form_preProduct_preVariationConst")?.remove();
+    document.querySelector("label[for=\"new_product_supply_form_preProduct_preVariationConst\"]")?.remove();
+    document.getElementById("new_product_supply_form_preProduct_preModificationConst")?.remove();
+    document.querySelector("label[for=\"new_product_supply_form_preProduct_preModificationConst\"]")?.remove();
+
+    setTimeout(() =>
+    {
+        document.getElementById("new_product_supply_form_preProduct_preProduct").click();
+    }, 100);
+}

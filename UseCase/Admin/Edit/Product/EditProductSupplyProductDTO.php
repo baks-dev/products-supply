@@ -27,7 +27,6 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\UseCase\Admin\Edit\Product;
 
 use BaksDev\Products\Product\Repository\ProductDetail\ProductDetailByConstResult;
-use BaksDev\Products\Product\Type\Barcode\ProductBarcode;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
@@ -49,10 +48,6 @@ final class EditProductSupplyProductDTO implements ProductSupplyProductInterface
     /** Количество продуктов в поставке */
     #[Assert\NotBlank]
     private readonly int $total;
-
-    /** Штрихкод товара */
-    #[Assert\NotBlank]
-    private readonly ProductBarcode $barcode;
 
     /** ID продукта (не уникальное) */
     #[Assert\Uuid]
@@ -102,26 +97,6 @@ final class EditProductSupplyProductDTO implements ProductSupplyProductInterface
     {
         return $this->total;
     }
-
-    //    public function setTotal(int $total): ProductSupplyProductDTO
-    //    {
-    //        $this->total = $total;
-    //        return $this;
-    //    }
-
-    /**
-     * Barcode
-     */
-    public function getBarcode(): ProductBarcode
-    {
-        return $this->barcode;
-    }
-
-    //    public function setBarcode(ProductBarcode|string $barcode): self
-    //    {
-    //        $this->barcode = false === ($barcode instanceof ProductBarcode) ? new ProductBarcode($barcode) : $barcode;
-    //        return $this;
-    //    }
 
     /**
      * Product

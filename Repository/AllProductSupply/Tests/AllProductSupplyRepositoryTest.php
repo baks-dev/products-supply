@@ -26,6 +26,7 @@ namespace BaksDev\Products\Supply\Repository\AllProductSupply\Tests;
 
 use BaksDev\Products\Supply\Repository\AllProductSupply\AllProductSupplyInterface;
 use BaksDev\Products\Supply\Repository\AllProductSupply\AllProductSupplyResult;
+use BaksDev\Users\User\Type\Id\UserUid;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
@@ -41,7 +42,9 @@ class AllProductSupplyRepositoryTest extends KernelTestCase
         /** @var AllProductSupplyInterface $AllProductSupplyInterface */
         $AllProductSupplyInterface = self::getContainer()->get(AllProductSupplyInterface::class);
 
-        $results = $AllProductSupplyInterface->findAll();
+        $results = $AllProductSupplyInterface
+            ->forUser(new UserUid())
+            ->findAll();
 
         if(false === $results)
         {

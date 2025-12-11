@@ -43,8 +43,8 @@ use BaksDev\Products\Sign\Entity\Event\Supply\ProductSignSupply;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
 use BaksDev\Products\Supply\Entity\ProductSupply;
-use BaksDev\Products\Supply\Type\ProductSign\Status\ProductSignStatusSupply;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use Generator;
 use InvalidArgumentException;
@@ -52,6 +52,8 @@ use InvalidArgumentException;
 final class GroupProductSignsByProductSupplyRepository implements GroupProductSignsByProductSupplyInterface
 {
     private ProductSupplyUid|false $supply = false;
+
+    private ProductSignStatus|false $status = false;
 
     public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder) {}
 
@@ -67,6 +69,18 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
         return $this;
     }
 
+    /** Статус Честного знака */
+    public function forStatus(ProductSignStatus|ProductSignStatusInterface|string $status): self
+    {
+        if(false === $status instanceof ProductSignStatus)
+        {
+            $status = new ProductSignStatus($status);
+        }
+
+        $this->status = $status;
+        return $this;
+    }
+
     /**
      * Находит Честные знаки, забронированные для поставки и группирует их по id поставки
      *
@@ -77,6 +91,11 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
         if(false === ($this->supply instanceof ProductSupplyUid))
         {
             throw new InvalidArgumentException('Не передан обязательный параметр запроса supply');
+        }
+
+        if(false === ($this->status instanceof ProductSignStatus))
+        {
+            throw new InvalidArgumentException('Не передан обязательный параметр запроса status');
         }
 
         $dbal = $this->DBALQueryBuilder
@@ -111,11 +130,11 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
                 'event',
                 '
                     event.id = main.event AND
-                    event.status = :status
+                    event.status = :status 
                 '
             )->setParameter(
                 key: 'status',
-                value: ProductSignStatusSupply::STATUS,
+                value: $this->status,
                 type: ProductSignStatus::TYPE
             );
 

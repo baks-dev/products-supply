@@ -34,7 +34,6 @@ final readonly class ProductSupplyProductResult
 {
     public function __construct(
         private int $total,
-        private string $barcode,
         private ?string $product,
         private ?string $offer_const,
         private ?string $variation_const,
@@ -48,14 +47,6 @@ final readonly class ProductSupplyProductResult
     public function getTotal(): int
     {
         return $this->total;
-    }
-
-    /**
-     * Barcode
-     */
-    public function getBarcode(): ProductBarcode
-    {
-        return new ProductBarcode($this->barcode);
     }
 
     /**

@@ -18,50 +18,46 @@
                      style="cursor: help">
 
                     <div class="d-flex justify-content-between gap-2 lh-1">
-                        #{{ supply.supplyContainer }}
+                        #{{ supply.supplyNumber }}
                     </div>
 
                     <span class="text-muted ">{{ supply.id|uuid_format_date }}</span>
 
-                    <div class="d-flex gap-1 align-items-center fw-bolder">
-
-                        <ul class="mb-0">
-                            {% for product in supply.supplyProducts %}
-
-                                {# @TODO пока такой список #}
-                                <li>{{ product.barcode }} </li>
-                                {{ product.product != NULL
-                                ? '<span class="badge text-bg-success">с продуктом</span>'
-                                : '<span class="badge text-bg-danger">без продукта</span>' }}
-
-                            {% endfor %}
-                        </ul>
-
-                        {#                        <span class="badge text-bg-primary small p-1" style="min-width: 1.7em;">1</span> #}
+                    <div class="d-flex gap-1 align-items-center">
+                        Продуктов в поставке
+                        <span class="badge text-bg-primary small p-1" style="min-width: 1.7em;">
+                                {{ supply.supplyProducts|length }}
+                       </span>
                     </div>
 
                 </div>
 
-                <div class="d-flex flex-column justify-content-between gap-1">
+                {# Не даем перемещать поставку в статусе completed "Выполнен" #}
+                {% if supply.supplyStatus != 'completed' %}
 
-                    <div class="text-end">
+                    <div class="d-flex flex-column justify-content-between gap-1">
 
-                        <button type="button" class="btn btn-sm btn-light draggable-handle shadow-sm"
-                                role="tooltip"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="bottom"
-                                data-bs-delay='{"show":600,"hide":100}'
-                                title="Изменить статус сделки">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                 class="bi bi-arrows-move" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd"
-                                      d="M7.646.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 1.707V5.5a.5.5 0 0 1-1 0V1.707L6.354 2.854a.5.5 0 1 1-.708-.708l2-2zM8 10a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 14.293V10.5A.5.5 0 0 1 8 10zM.146 8.354a.5.5 0 0 1 0-.708l2-2a.5.5 0 1 1 .708.708L1.707 7.5H5.5a.5.5 0 0 1 0 1H1.707l1.147 1.146a.5.5 0 0 1-.708.708l-2-2zM10 8a.5.5 0 0 1 .5-.5h3.793l-1.147-1.146a.5.5 0 0 1 .708-.708l2 2a.5.5 0 0 1 0 .708l-2 2a.5.5 0 0 1-.708-.708L14.293 8.5H10.5A.5.5 0 0 1 10 8z"/>
-                            </svg>
-                        </button>
+                        <div class="text-end">
+
+                            <button type="button" class="btn btn-sm btn-light draggable-handle shadow-sm"
+                                    role="tooltip"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="bottom"
+                                    data-bs-delay='{"show":600,"hide":100}'
+                                    title="Изменить статус сделки">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                     class="bi bi-arrows-move" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd"
+                                          d="M7.646.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 1.707V5.5a.5.5 0 0 1-1 0V1.707L6.354 2.854a.5.5 0 1 1-.708-.708l2-2zM8 10a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 14.293V10.5A.5.5 0 0 1 8 10zM.146 8.354a.5.5 0 0 1 0-.708l2-2a.5.5 0 1 1 .708.708L1.707 7.5H5.5a.5.5 0 0 1 0 1H1.707l1.147 1.146a.5.5 0 0 1-.708.708l-2-2zM10 8a.5.5 0 0 1 .5-.5h3.793l-1.147-1.146a.5.5 0 0 1 .708-.708l2 2a.5.5 0 0 1 0 .708l-2 2a.5.5 0 0 1-.708-.708L14.293 8.5H10.5A.5.5 0 0 1 10 8z"/>
+                                </svg>
+                            </button>
+
+                        </div>
 
                     </div>
 
-                </div>
+                {% endif %}
+
             </div>
 
         </div>

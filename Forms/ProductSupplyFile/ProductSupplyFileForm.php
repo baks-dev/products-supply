@@ -38,7 +38,7 @@ final class ProductSupplyFileForm extends AbstractType
         $builder->add(
             'files', FileType::class, [
                 'label' => false,
-                'attr' => ['accept' => ".pdf, .xlsx"],
+                'attr' => ['accept' => ".pdf"],
                 'multiple' => true,
                 'required' => true,
             ]

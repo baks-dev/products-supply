@@ -39,7 +39,7 @@ use Symfony\Component\Routing\Attribute\Route;
  * Формирует документ для печати с кодами Честного знака
  */
 #[AsController]
-#[RoleSecurity(['ROLE_USER'])]
+#[RoleSecurity(['ROLE_PRODUCT_SUPPLY_EDIT'])]
 final class PrintController extends AbstractController
 {
     #[Route(

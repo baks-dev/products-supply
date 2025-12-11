@@ -168,4 +168,9 @@ class ProductSupplyEvent extends EntityEvent
     {
         return $this->status;
     }
+
+    public function getProduct(): Collection
+    {
+        return $this->product;
+    }
 }

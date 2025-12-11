@@ -34,16 +34,16 @@ final class EditProductSupplyInvariableDTO implements ProductSupplyInvariableInt
 {
     /** Номер контейнера */
     #[Assert\NotBlank]
-    private string $container;
+    private string $number;
 
-    public function getContainer(): string
+    public function getNumber(): string
     {
-        return $this->container;
+        return $this->number;
     }
 
-    public function setContainer(string $value): self
+    public function setNumber(string $value): self
     {
-        $this->container = $value;
+        $this->number = $value;
         return $this;
     }
 }

@@ -1,22 +1,30 @@
-{% trans_default_domain('orders-order.admin') %}
-
+{# ---- ШАБЛОН ------------------------------------------------------------ #}
 {% extends Template('/admin/base.html.twig') %}
 
-{% block title %}{{ 'page.new'|trans }}{% endblock %}
+{# ---- CSS ------------------------------------------------------------ #}
+{% block stylesheets %}
+    <link href="/assets/{{ version }}/plugins/nice-select2/nice-select2.min.css" rel="stylesheet" type="text/css">
+{% endblock %}
 
- {% block stylesheets %}
-     <link href="/assets/{{ version }}/plugins/nice-select2/nice-select2.min.css" rel="stylesheet">
- {% endblock %}
-
+{# ---- КОНТЕНТ-БЛОК ------------------------------------------------------------ #}
 {% block content %}
-    {{ include(_self|replace({ "template.html.twig":baks_settings.device~"/content.html.twig" })) }}
+    {{ include(_self|replace({ "template.html.twig": baks_settings.device~"/content.html.twig" })) }}
 {% endblock %}
 
 {% block javascript %}
 
-<script nonce='{{ csp_nonce() }}' async  data-src="/assets/{{ version }}/js/radio.input.min.js?v={{ version }}" class="lazy"></script>
-<script nonce='{{ csp_nonce() }}' async data-src='/assets/{{ version }}/plugins/nice-select2/nice-select2.min.js?v={{ version }}' class='lazy'></script>
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/plugins/nice-select2/nice-select2.min.js?v={{ version }}"
+            class="lazy"></script>
+
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/js/copy.min.js?v={{ version }}"
+        class="lazy"></script>
 
 <script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/products-supply/file.min.js?v={{ version }}"
         class="lazy"></script>
+
+{# @TODO вернуть min #}
+<script nonce='{{ csp_nonce() }}' async
+        data-src="/assets/{{ version }}/products-supply/product_supply_draft.js?v={{ version }}"
+        class='lazy'></script>
+
 {% endblock %}

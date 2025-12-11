@@ -26,6 +26,8 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\Repository\ProductSign\GroupProductSignsByProductSupply;
 
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use Generator;
@@ -34,6 +36,9 @@ interface GroupProductSignsByProductSupplyInterface
 {
     /** Идентификатор поставки */
     public function forSupply(ProductSupply|ProductSupplyUid $supply): self;
+
+    /** Статус Честного знака */
+    public function forStatus(ProductSignStatus|ProductSignStatusInterface $status): self;
 
     /**
      * Находит Честные знаки, забронированные для поставки и группирует из по id поставки

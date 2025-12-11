@@ -26,18 +26,20 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\Controller\Admin;
 
-use BaksDev\Centrifugo\Server\Publish\CentrifugoPublishInterface;
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Products\Product\Repository\ProductDetail\ProductDetailByConstInterface;
 use BaksDev\Products\Product\Repository\ProductDetail\ProductDetailByConstResult;
 use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductSupplyEventInterface;
 use BaksDev\Products\Supply\Repository\ProductSign\GroupProductSignsByProductSupply\GroupProductSignsByProductSupplyInterface;
+use BaksDev\Products\Supply\Type\ProductSign\Status\ProductSignStatusSupply;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
+use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusCompleted;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyForm;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
@@ -55,7 +57,6 @@ final class DetailController extends AbstractController
     #[Route('/admin/products/supply/detail/{id}', name: 'admin.supply.detail', methods: ['GET', 'POST'])]
     public function index(
         Request $request,
-        CentrifugoPublishInterface $publish,
         CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
         ProductDetailByConstInterface $productDetailByConstRepository,
         GroupProductSignsByProductSupplyInterface $groupProductSignsByProductSupplyRepository,
@@ -63,7 +64,6 @@ final class DetailController extends AbstractController
         #[ParamConverter(ProductSupplyUid::class)] ProductSupplyUid $id,
     ): Response
     {
-
         /** Получаем активное событие */
         $ProductSupplyEvent = $currentProductSupplyEventRepository
             ->find($id);
@@ -91,7 +91,6 @@ final class DetailController extends AbstractController
                     ->modificationConst($product->getModificationConst())
                     ->findResult();
 
-
                 if(true === ($ProductDetailByConstResult instanceof ProductDetailByConstResult))
                 {
                     $product->setCard($ProductDetailByConstResult);
@@ -111,10 +110,9 @@ final class DetailController extends AbstractController
 
         if(false === $request->isXmlHttpRequest() && $form->isSubmitted() && false === $form->isValid())
         {
-
             $this->addFlash(
                 'danger',
-                'admin.danger.update',
+                'danger.update',
                 'products-supply.admin',
             );
 
@@ -147,9 +145,14 @@ final class DetailController extends AbstractController
             return $this->redirectToReferer();
         }
 
+        $productSignStatus = $ProductSupplyEvent->getStatus()->equals(ProductSupplyStatusCompleted::class)
+            ? ProductSignStatusNew::STATUS
+            : ProductSignStatusSupply::STATUS;
+
         /** Честные знаки */
         $ProductSigns = $groupProductSignsByProductSupplyRepository
             ->forSupply($ProductSupplyEvent->getMain())
+            ->forStatus($productSignStatus)
             ->findAll();
 
         return $this->render(
