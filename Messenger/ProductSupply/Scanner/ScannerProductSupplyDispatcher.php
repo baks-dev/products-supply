@@ -37,7 +37,6 @@ use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignHandler;
 use BaksDev\Products\Supply\UseCase\Admin\ProductsSign\New\ProductSignNewDTO;
 use DateTimeImmutable;
-use Exception;
 use Imagick;
 use Psr\Log\LoggerInterface;
 use SplFileInfo;
@@ -117,24 +116,24 @@ final readonly class ScannerProductSupplyDispatcher
             $Imagick->setIteratorIndex($number);
             $Imagick->setImageFormat('png');
 
-            /**
-             * В некоторых случаях может вызывать ошибку.
-             * В таком случае сохраняем без рамки и пробуем отсканировать как есть
-             */
-            try
-            {
-                $Imagick->borderImage('white', 5, 5);
-            }
-            catch(Exception $e)
-            {
-                $this->logger->critical(
-                    message: ' Ошибка при добавлении рамки к изображению. Пробуем отсканировать как есть.',
-                    context: [
-                        $e->getMessage(),
-                        self::class.':'.__LINE__
-                    ]
-                );
-            }
+            //            /**
+            //             * В некоторых случаях может вызывать ошибку.
+            //             * В таком случае сохраняем без рамки и пробуем отсканировать как есть
+            //             */
+            //            try
+            //            {
+            //                $Imagick->borderImage('white', 5, 5);
+            //            }
+            //            catch(Exception $e)
+            //            {
+            //                $this->logger->critical(
+            //                    message: ' Ошибка при добавлении рамки к изображению. Пробуем отсканировать как есть.',
+            //                    context: [
+            //                        $e->getMessage(),
+            //                        self::class.':'.__LINE__
+            //                    ]
+            //                );
+            //            }
 
             /**
              * Записываем изображение в указанное имя файла

@@ -54,5 +54,5 @@ interface OneProductSignEventInterface
     /**
      * Метод возвращает один Честный знак на указанную продукцию со статусом Undefined «Не определен»
      */
-    public function getOne(): ProductSignEvent|string|false;
+    public function getOneUndefined(): ProductSignEvent|string|false;
 }

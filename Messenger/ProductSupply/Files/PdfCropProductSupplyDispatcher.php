@@ -61,8 +61,8 @@ final readonly class PdfCropProductSupplyDispatcher
             if(
                 false === $info->isFile() ||
                 false === $info->getRealPath() ||
-                false === file_exists($info->getRealPath()) ||
                 false === ($info->getExtension() === 'pdf') ||
+                false === file_exists($info->getRealPath()) ||
                 false === str_starts_with($info->getFilename(), 'page')
             )
             {

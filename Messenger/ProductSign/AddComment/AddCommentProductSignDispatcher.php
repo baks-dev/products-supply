@@ -88,7 +88,7 @@ final readonly class AddCommentProductSignDispatcher
             $this->logger->critical(
                 message: sprintf(
                     'products-sign: Не найдено Честных знаков для присвоения комментария при смене статуса %s поставки %s',
-                    $message->getId(), $ProductSupplyEvent->getStatus()
+                    $message->getId(), $ProductSupplyEvent->getStatus(),
                 ),
                 context: [
                     self::class.':'.__LINE__,
@@ -99,11 +99,10 @@ final readonly class AddCommentProductSignDispatcher
             return;
         }
 
-        /** @var ProductSignEvent $productSign */
-        foreach($productSignForComment as $productSign)
+        foreach($productSignForComment as $ProductSignEvent)
         {
             $CommentProductSignDTO = new AddCommentProductSignDTO();
-            $productSign->getDto($CommentProductSignDTO);
+            $ProductSignEvent->getDto($CommentProductSignDTO);
 
             /** Присваиваем номер ГТД из поставки Честному знаку в виде комментария */
             $CommentProductSignDTO->setComment($ProductSupplyEvent->getInvariable()->getDeclaration());
@@ -115,7 +114,7 @@ final readonly class AddCommentProductSignDispatcher
                 $this->logger->critical(
                     message: sprintf(
                         'products-sign: ошибка %s: Не удалось присвоить номер ГТД для Честного знака %s при изменении статуса поставки %s',
-                        $handle, $productSign->getMain(), $message->getId()
+                        $handle, $ProductSignEvent->getMain(), $message->getId(),
                     ),
                     context: [
                         self::class.':'.__LINE__,
@@ -131,7 +130,7 @@ final readonly class AddCommentProductSignDispatcher
                 $this->logger->info(
                     message: sprintf(
                         'products-sign: Успешно присвоили номер ГТД Честного знака %s',
-                        $handle->getId()
+                        $handle->getId(),
                     ),
                     context: [
                         self::class.':'.__LINE__,

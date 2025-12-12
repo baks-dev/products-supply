@@ -93,11 +93,10 @@ final readonly class ProcessNewProductSignDispatcher
             return;
         }
 
-        /** @var ProductSignEvent $productSign */
-        foreach($productSignForProcessNew as $productSign)
+        foreach($productSignForProcessNew as $ProductSignEvent)
         {
             $ProcessNewProductSignDTO = new ProcessNewProductSignDTO();
-            $productSign->getDto($ProcessNewProductSignDTO);
+            $ProductSignEvent->getDto($ProcessNewProductSignDTO);
 
             $handle = $this->ProductSignStatusHandler->handle($ProcessNewProductSignDTO);
 
@@ -106,7 +105,7 @@ final readonly class ProcessNewProductSignDispatcher
                 $this->logger->critical(
                     message: sprintf(
                         'products-sign: Ошибка %s: Не удалось применить статус %s для Честного знака %s. Повторяем попытку через интервал',
-                        $handle, $ProcessNewProductSignDTO->getStatus(), $productSign->getMain()
+                        $handle, $ProcessNewProductSignDTO->getStatus(), $ProductSignEvent->getMain(),
                     ),
                     context: [
                         self::class.':'.__LINE__,

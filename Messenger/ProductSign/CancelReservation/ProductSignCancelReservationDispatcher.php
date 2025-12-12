@@ -88,11 +88,11 @@ final readonly class ProductSignCancelReservationDispatcher
             return;
         }
 
-        /** @var ProductSignEvent $productSign */
-        foreach($productSignForCancelReservation as $productSign)
+
+        foreach($productSignForCancelReservation as $ProductSignEvent)
         {
             $CancelProductSignDTO = new CancelProductSignDTO();
-            $productSign->getDto($CancelProductSignDTO);
+            $ProductSignEvent->getDto($CancelProductSignDTO);
 
             $handle = $this->ProductSignStatusHandler->handle($CancelProductSignDTO);
 
@@ -101,7 +101,7 @@ final readonly class ProductSignCancelReservationDispatcher
                 $this->logger->critical(
                     message: sprintf(
                         'products-sign: Ошибка %s: Не удалось снять резерв Честного знака %s',
-                        $handle, $productSign->getMain()
+                        $handle, $ProductSignEvent->getMain(),
                     ),
                     context: [
                         self::class.':'.__LINE__,

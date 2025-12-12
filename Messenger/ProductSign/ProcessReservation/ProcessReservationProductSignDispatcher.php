@@ -42,6 +42,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * Бронирует Честный знак за продутом из поставки
+ *
  * @see NewStatusProductSupplyDispatcher
  */
 #[AsMessageHandler(priority: 0)]
@@ -74,7 +75,7 @@ final readonly class ProcessReservationProductSignDispatcher
             return;
         }
 
-        /** Ищем свободный честный знак */
+        /** Ищем свободный честный знак в статусе Undefined «Не определен» */
         $ProductSignEvent = $this->productSignSupplyRepository
             ->forUser($message->getUser())
             ->forProfile($message->getProfile())
@@ -82,12 +83,12 @@ final readonly class ProcessReservationProductSignDispatcher
             ->forOfferConst($message->getOfferConst())
             ->forVariationConst($message->getVariationConst())
             ->forModificationConst($message->getModificationConst())
-            ->getOne();
+            ->getOneUndefined();
 
         if(false === ($ProductSignEvent instanceof ProductSignEvent))
         {
             $this->logger->info(
-                message: 'products-sign: Повторная попытка зарезервировать Честный знак на продукт в поставке '.$ProductSupplyEvent->getMain(),
+                message: 'products-sign: Пробуем повторить попытку зарезервировать Честный знак на продукт в поставке позже'.$ProductSupplyEvent->getMain(),
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),

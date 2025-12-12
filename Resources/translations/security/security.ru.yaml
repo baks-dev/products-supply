@@ -23,26 +23,31 @@ ROLE_PRODUCT_SUPPLY_DETAIL:
   desc: ''
 
 
+
 ROLE_PRODUCT_SUPPLY_STATUS:
   name: 'Статусы поставок'
-  desc: 'Статусы поставок продукции'
+  desc: 'Позволяет изменять статусы поставок без преформы'
 
 ROLE_PRODUCT_SUPPLY_STATUS_CANCEL:
   name: 'Отмена'
   desc: ''
 
-ROLE_PRODUCT_SUPPLY_STATUS_CLEARANCE:
-  name: 'Растаможены'
+ROLE_PRODUCT_SUPPLY_STATUS_NEW:
+  name: 'Новый'
   desc: ''
 
-ROLE_PRODUCT_SUPPLY_STATUS_COMPLETED:
-  name: 'Выполнен'
+ROLE_PRODUCT_SUPPLY_STATUS_CLEARANCE:
+  name: 'Растамаживаются'
+  desc: ''
+
+ROLE_PRODUCT_SUPPLY_STATUS_CLEARED:
+  name: 'Растаможены'
   desc: ''
 
 ROLE_PRODUCT_SUPPLY_STATUS_DELIVERY:
   name: 'Доставляются'
   desc: ''
 
-ROLE_PRODUCT_SUPPLY_STATUS_NEW:
-  name: 'Новый'
+ROLE_PRODUCT_SUPPLY_STATUS_COMPLETED:
+  name: 'Выполнен'
   desc: ''

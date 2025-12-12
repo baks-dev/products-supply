@@ -44,6 +44,7 @@ use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Entity\User;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\ORM\Query\Expr\Join;
+use Exception;
 use InvalidArgumentException;
 
 final class OneProductSignEventRepository implements OneProductSignEventInterface
@@ -120,7 +121,7 @@ final class OneProductSignEventRepository implements OneProductSignEventInterfac
     /**
      * Метод возвращает один Честный знак на указанную продукцию со статусом Undefined «Не определен»
      */
-    public function getOne(): ProductSignEvent|string|false
+    public function getOneUndefined(): ProductSignEvent|string|false
     {
         if(
             false === ($this->user instanceof UserUid) ||
@@ -138,7 +139,7 @@ final class OneProductSignEventRepository implements OneProductSignEventInterfac
             ProductSign::class,
             'main',
             Join::WITH,
-            'main.id = invariable.main'
+            'main.id = invariable.main',
         );
 
         $orm
@@ -304,7 +305,7 @@ final class OneProductSignEventRepository implements OneProductSignEventInterfac
             $result = $orm->getOneOrNullResult();
             return $result ?: false;
         }
-        catch(\Exception $exception)
+        catch(Exception $exception)
         {
             return $exception->getMessage();
         }
