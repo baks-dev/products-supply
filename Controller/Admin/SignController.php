@@ -40,7 +40,7 @@ use Symfony\Component\Routing\Attribute\Route;
  * Загрузка Честных знаков на сервер
  */
 #[AsController]
-#[RoleSecurity('ROLE_PRODUCT_SUPPLY_SIGN')]
+#[RoleSecurity('ROLE_PRODUCT_SUPPLY_NEW')]
 final class SignController extends AbstractController
 {
     public const string NAME = 'admin.supply.sign';
