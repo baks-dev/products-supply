@@ -29,6 +29,7 @@ namespace BaksDev\Products\Supply\Messenger\ProductSupply\ReceivedProductSupplyP
 use BaksDev\Core\Deduplicator\DeduplicatorInterface;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Products\Stocks\Entity\Stock\Event\ProductStockEvent;
+use BaksDev\Products\Stocks\Entity\Stock\Event\Supply\ProductStockSupply;
 use BaksDev\Products\Stocks\Entity\Stock\Products\ProductStockProduct;
 use BaksDev\Products\Stocks\Messenger\ProductStockMessage;
 use BaksDev\Products\Stocks\Repository\ProductStocksEvent\ProductStocksEventInterface;
@@ -70,7 +71,7 @@ final readonly class ReceivedProductSupplyProductDispatcher
             ->namespace('products-supply')
             ->deduplication([
                 (string) $message->getId(),
-                self::class
+                self::class,
             ]);
 
         if($DeduplicatorExecuted->isExecuted())
@@ -99,6 +100,14 @@ final readonly class ReceivedProductSupplyProductDispatcher
          * Если статус НЕ является Incoming «Приход на склад» - прерываем
          */
         if(false === $ProductStockEvent->equalsProductStockStatus(ProductStockStatusIncoming::class))
+        {
+            return;
+        }
+
+        /**
+         * Если статус НЕ указана поставка - прерываем
+         */
+        if(false === $ProductStockEvent->getSupply() instanceof ProductStockSupply)
         {
             return;
         }
@@ -154,6 +163,7 @@ final readonly class ReceivedProductSupplyProductDispatcher
 
         /**
          * Проверяем соответствие продукта ИЗ ПОСТАВКИ продукту ИЗ ЗАЯВКИ
+         *
          * @var EditProductSupplyProductDTO|null $supplyProductForReceived
          */
         $supplyProductForReceived = $EditProductSupplyDTO
@@ -174,7 +184,7 @@ final readonly class ReceivedProductSupplyProductDispatcher
         {
             $this->logger->warning(
                 message: sprintf('Не найдено продукта ИЗ ПОСТАВКИ %s, соответствущего продукту ИЗ ЗАЯВКИ %s',
-                    $ProductSupplyEvent->getMain(), $message->getId()
+                    $ProductSupplyEvent->getMain(), $message->getId(),
                 ),
                 context: [
                     self::class.':'.__LINE__,
@@ -200,7 +210,7 @@ final readonly class ReceivedProductSupplyProductDispatcher
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),
-                ]
+                ],
             );
         }
 
@@ -212,7 +222,7 @@ final readonly class ReceivedProductSupplyProductDispatcher
                     $supplyProductForReceived->getId(),
                     //                    $supplyProductForReceived->getBarcode(),
                     $message->getId(),
-                    $ProductSupply->getId()
+                    $ProductSupply->getId(),
                 ),
                 context: [self::class.':'.__LINE__],
             );
