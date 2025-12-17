@@ -22,26 +22,29 @@
  *
  */
 
-declare(strict_types=1);
+namespace BaksDev\Products\Supply\Repository\ProductsProduct\ProductOfferChoice\Tests;
 
-namespace BaksDev\Products\Supply\Repository\ProductsProduct\ProductChoice;
-
-use BaksDev\Products\Category\Entity\CategoryProduct;
-use BaksDev\Products\Category\Type\Id\CategoryProductUid;
-use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Supply\Repository\ProductsProduct\ProductOfferChoice\ProductOfferChoiceInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use BaksDev\Users\User\Entity\User;
-use BaksDev\Users\User\Type\Id\UserUid;
-use Generator;
+use PHPUnit\Framework\Attributes\Group;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\DependencyInjection\Attribute\When;
 
-interface ProductChoiceInterface
+#[Group('products-supply')]
+#[When(env: 'test')]
+class ProductOfferChoiceRepositoryTest extends KernelTestCase
 {
-    public function forProfile(UserProfile|UserProfileUid|null|false $profile): self;
+    public function testRepository(): void
+    {
+        self::assertTrue(true);
 
-    public function forCategory(CategoryProduct|CategoryProductUid $category): self;
+        /** @var ProductOfferChoiceInterface $ProductOfferChoiceInterface */
+        $ProductOfferChoiceInterface = self::getContainer()->get(ProductOfferChoiceInterface::class);
 
-    /**
-     * Метод возвращает все идентификаторы продуктов с названием, имеющиеся в наличии на данном складе
-     */
-    public function findAll(): Generator;
+        $result = $ProductOfferChoiceInterface
+            ->forProfile(new UserProfileUid)
+            ->forProduct(new ProductUid())
+            ->findAll();
+    }
 }

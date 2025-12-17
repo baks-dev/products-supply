@@ -100,7 +100,7 @@ final readonly class ProcessReservationProductSignDispatcher
                 ->dispatch(
                     message: $message,
                     stamps: [new MessageDelay('15 seconds')],
-                    transport: 'products-supply',
+                    transport: 'products-supply-low',
                 );
 
             return;

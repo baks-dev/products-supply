@@ -24,24 +24,27 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Supply\Repository\ProductsProduct\ProductChoice;
+namespace BaksDev\Products\Supply\Repository\ProductsProduct\ProductModificationChoice;
 
-use BaksDev\Products\Category\Entity\CategoryProduct;
-use BaksDev\Products\Category\Type\Id\CategoryProductUid;
+use BaksDev\Products\Product\Entity\Product;
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Entity\User;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Generator;
 
-interface ProductChoiceInterface
+interface ProductModificationChoiceInterface
 {
     public function forProfile(UserProfile|UserProfileUid|null|false $profile): self;
 
-    public function forCategory(CategoryProduct|CategoryProductUid $category): self;
+    public function product(Product|ProductUid|null|false $product): self;
 
-    /**
-     * Метод возвращает все идентификаторы продуктов с названием, имеющиеся в наличии на данном складе
-     */
+    public function offerConst(ProductOfferConst|null|false $offer): self;
+
+    public function variationConst(ProductVariationConst|null|false $variation): self;
+
     public function findAll(): Generator;
 }

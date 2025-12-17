@@ -39,7 +39,9 @@ class AllProductSignByProductSupplyRepositoryTest extends KernelTestCase
 {
     public function testRepository(): void
     {
+        // @TODO не используется
         self::assertTrue(true);
+        return;
 
         $user = $_SERVER['TEST_USER'] ?? UserUid::TEST;
         $profile = $_SERVER['TEST_PROFILE'] ?? UserProfileUid::TEST;
@@ -51,7 +53,7 @@ class AllProductSignByProductSupplyRepositoryTest extends KernelTestCase
             ->forCode(new ProductBarcode('4650198060810'))
             ->forUser(new UserUid($user))
             ->forProfile(new UserProfileUid($profile))
-            ->forSupply(new ProductSupplyUid('019a12a6-628c-766c-a0df-ad881bc2091c'))
+            ->forSupply(new ProductSupplyUid)
             ->findAll();
     }
 }

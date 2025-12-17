@@ -32,10 +32,10 @@ use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
-use BaksDev\Products\Stocks\Repository\ProductModificationChoice\ProductModificationChoiceWarehouseInterface;
-use BaksDev\Products\Stocks\Repository\ProductOfferChoice\ProductOfferChoiceWarehouseInterface;
-use BaksDev\Products\Stocks\Repository\ProductVariationChoice\ProductVariationChoiceWarehouseInterface;
 use BaksDev\Products\Supply\Repository\ProductsProduct\ProductChoice\ProductChoiceInterface;
+use BaksDev\Products\Supply\Repository\ProductsProduct\ProductModificationChoice\ProductModificationChoiceInterface;
+use BaksDev\Products\Supply\Repository\ProductsProduct\ProductOfferChoice\ProductOfferChoiceInterface;
+use BaksDev\Products\Supply\Repository\ProductsProduct\ProductVariationChoice\ProductVariationChoiceInterface;
 use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\Form\AbstractType;
@@ -56,9 +56,9 @@ final class PreProductForm extends AbstractType
         private readonly UserProfileTokenStorageInterface $UserProfileTokenStorage,
         private readonly CategoryChoiceInterface $categoryChoiceRepository,
         private readonly ProductChoiceInterface $productChoiceRepository,
-        private readonly ProductOfferChoiceWarehouseInterface $productOfferChoiceWarehouseRepository,
-        private readonly ProductVariationChoiceWarehouseInterface $productVariationChoiceWarehouseRepository,
-        private readonly ProductModificationChoiceWarehouseInterface $productModificationChoiceWarehouseRepository,
+        private readonly ProductOfferChoiceInterface $productOfferChoiceRepository,
+        private readonly ProductVariationChoiceInterface $productVariationChoiceRepository,
+        private readonly ProductModificationChoiceInterface $productModificationChoiceRepository,
     ) {}
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -185,7 +185,6 @@ final class PreProductForm extends AbstractType
                 if($offer)
                 {
                     $this->formVariationModifier($event->getForm()->getParent(), $product, $offer);
-
                 }
 
                 if($variation)
@@ -216,16 +215,27 @@ final class PreProductForm extends AbstractType
                 'choice_value' => function(?ProductUid $product) {
                     return $product?->getValue();
                 },
-
                 'choice_label' => function(ProductUid $product) {
                     return $product->getAttr();
                 },
                 'choice_attr' => function(?ProductUid $product) {
-                    return $product ? [
-                        'data-filter' => ' ['.$product->getOption().']',
-                        'data-max' => $product->getOption(),
-                        'data-name' => $product->getAttr(),
-                    ] : [];
+
+                    if(!$product)
+                    {
+                        return [];
+                    }
+
+                    if($product)
+                    {
+                        $attr['data-name'] = $product->getAttr();
+                    }
+
+                    if($product?->getOption())
+                    {
+                        $attr['data-filter'] = '('.$product->getOption().')';
+                    }
+
+                    return $attr;
                 },
                 'label' => false,
             ],
@@ -238,10 +248,10 @@ final class PreProductForm extends AbstractType
     private function formOfferModifier(FormInterface $form, ProductUid $product): void
     {
         /** Список торговых предложений продукции */
-        $offer = $this->productOfferChoiceWarehouseRepository
+        $offer = $this->productOfferChoiceRepository
             ->forProfile($this->UserProfileTokenStorage->getProfile())
             ->forProduct($product)
-            ->getProductsOfferExistWarehouse();
+            ->findAll();
 
         /** Если список пустой - возвращаем hidden поле */
         if(false === $offer->valid())
@@ -290,10 +300,9 @@ final class PreProductForm extends AbstractType
                             $attr['data-name'] = $offer->getAttr();
                         }
 
-                        if($offer->getProperty())
+                        if($offer?->getCharacteristic())
                         {
-                            $attr['data-filter'] = trim($offer->getCharacteristic().' ('.$offer->getProperty().')');
-                            $attr['data-max'] = $offer->getProperty();
+                            $attr['data-filter'] = '('.$offer->getCharacteristic().')';
                         }
 
                         return $attr;
@@ -314,11 +323,11 @@ final class PreProductForm extends AbstractType
     private function formVariationModifier(FormInterface $form, ProductUid $product, ProductOfferConst $offer): void
     {
         /** Только текущего профиля */
-        $variations = $this->productVariationChoiceWarehouseRepository
+        $variations = $this->productVariationChoiceRepository
             ->forProfile($this->UserProfileTokenStorage->getProfile())
             ->product($product)
             ->offerConst($offer)
-            ->getProductsVariationExistWarehouse();
+            ->findAll();
 
         /** Если список пустой - возвращаем hidden поле */
         if(false === $variations->valid())
@@ -366,10 +375,9 @@ final class PreProductForm extends AbstractType
                             $attr['data-name'] = $variation->getAttr();
                         }
 
-                        if($variation->getProperty())
+                        if($variation?->getCharacteristic())
                         {
-                            $attr['data-filter'] = trim($variation->getCharacteristic().' ('.$variation->getProperty().')');
-                            $attr['data-max'] = $variation->getProperty();
+                            $attr['data-filter'] = '('.$variation->getCharacteristic().')';
                         }
 
                         return $attr;
@@ -389,13 +397,13 @@ final class PreProductForm extends AbstractType
         ProductVariationConst $variation,
     ): void
     {
-        /** Список Modification только по текущему профилю */
-        $modifications = $this->productModificationChoiceWarehouseRepository
+        /** Список Modification по профилю */
+        $modifications = $this->productModificationChoiceRepository
             ->forProfile($this->UserProfileTokenStorage->getProfile())
             ->product($product)
             ->offerConst($offer)
             ->variationConst($variation)
-            ->getProductsModificationExistWarehouse();
+            ->findAll();
 
         /** Если список пустой - возвращаем hidden поле */
         if(false === $modifications->valid())
@@ -444,10 +452,9 @@ final class PreProductForm extends AbstractType
                             $attr['data-name'] = $modification->getAttr();
                         }
 
-                        if($modification->getProperty())
+                        if($modification?->getCharacteristic())
                         {
-                            $attr['data-filter'] = trim($modification->getCharacteristic().' ('.$modification->getProperty().')');
-                            $attr['data-max'] = $modification->getProperty();
+                            $attr['data-filter'] = '('.$modification?->getCharacteristic().')';
                         }
 
                         return $attr;

@@ -24,7 +24,6 @@
 
 declare(strict_types=1);
 
-use BaksDev\Products\Product\Type\Barcode\ProductBarcode;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
@@ -98,7 +97,6 @@ class NewProductSupplyHandlerTest extends KernelTestCase
          * Номер контейнера
          */
         $NewProductSupplyInvariableDTO = new NewProductSupplyInvariableDTO();
-        $NewProductSupplyInvariableDTO->setNumber('xd1qXZ6g_test');
         $NewProductSupplyDTO->setInvariable($NewProductSupplyInvariableDTO);
 
         /**
@@ -113,9 +111,7 @@ class NewProductSupplyHandlerTest extends KernelTestCase
          * Продукт
          */
         $NewProductSupplyProductDTO = new NewProductSupplyProductDTO();
-
-        $NewProductSupplyProductDTO->setBarcode(new ProductBarcode('0000'));
-        $NewProductSupplyProductDTO->setTotal(3);
+        $NewProductSupplyProductDTO->setTotal(1); // на один Честный знак один продукт !!!
 
         $NewProductSupplyProductDTO
             ->setProduct(new ProductUid)

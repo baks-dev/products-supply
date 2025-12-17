@@ -27,7 +27,6 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\Type\Status\Tests;
 
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
-use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusDelivery;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusCollection;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusInterface;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatusType;
@@ -56,14 +55,6 @@ final class ProductSupplyStatusTest extends KernelTestCase
         $ProductSupplyStatusCollection = self::getContainer()->get(ProductSupplyStatusCollection::class);
 
         $statuses = $ProductSupplyStatusCollection->cases();
-
-        dump($statuses);
-
-        $prev = $ProductSupplyStatusCollection->previous(ProductSupplyStatusDelivery::class);
-
-        dump($prev);
-
-        dd();
 
         /** @var ProductSupplyStatusInterface $status */
         foreach($statuses as $status)

@@ -103,7 +103,6 @@ async function changeCategory(forms)
 
                 let preProduct = result.getElementById("preProduct");
                 document.getElementById("preProduct").replaceWith(preProduct);
-                console.log('preProduct ->', preProduct)
 
                 preProduct ?
                     document?.getElementById("product")?.replaceWith(preProduct) :
@@ -159,8 +158,6 @@ async function changePreProduct(forms)
 {
     disabledElementsForm(forms);
 
-    console.log('forms ->', forms)
-
     document.getElementById("preOfferConst")?.classList.add("d-none");
     document.getElementById("preVariationConst")?.classList.add("d-none");
     document.getElementById("preModificationConst")?.classList.add("d-none");
@@ -200,7 +197,6 @@ async function changePreProduct(forms)
 
                 let preOfferConst = result.getElementById("preOfferConst");
                 preOfferConst ? document.getElementById("preOfferConst").replaceWith(preOfferConst) : preOfferConst.innerHTML = "";
-                console.log('preOfferConst ->', preOfferConst)
 
                 if(preOfferConst)
                 {
@@ -228,7 +224,6 @@ async function changePreProduct(forms)
                 preModification ? preModification.innerHTML = "" : null;
 
                 let offerChange = document.getElementById(forms.name + "_preProduct_preOfferConst");
-                console.log(' offerChange->', offerChange)
 
                 /** Событие на изменение ТП */
                 if(offerChange)
@@ -293,7 +288,6 @@ async function changePreOffer(forms)
                 let result = parser.parseFromString(data, "text/html");
 
                 let preVariation = result.getElementById("preVariationConst");
-                console.log('preVariation ->', preVariation)
 
                 if(preVariation)
                 {
@@ -384,7 +378,6 @@ async function changePreVariation(forms)
                 let result = parser.parseFromString(data, "text/html");
 
                 let preModification = result.getElementById("preModificationConst");
-                console.log('preModification ->', preModification)
 
                 if(preModification)
                 {
@@ -461,38 +454,33 @@ function addProductOrder()
     let header = "Добавить продукцию в поставку";
 
     let preTotal = document.getElementById("new_product_supply_form_preProduct_preTotal");
+
     let $TOTAL = preTotal.value * 1;
 
-    let $totalMax = preTotal.getAttribute("max");
+    let $totalMin = preTotal.getAttribute("min");
 
     /**
-     * Сообщения об ошибках с колличеством
+     * Сообщения об ошибках с количеством
      */
 
-    if($TOTAL === undefined || $TOTAL < 1 || $TOTAL > $totalMax)
+    if($TOTAL === undefined)
     {
-        if($TOTAL === undefined)
-        {
-            $errorFormHandler = "{ \"type\":\"danger\" , " +
-                "\"header\":\"" + header + "\"  , " +
-                "\"message\" : \"Ошибка при заполнение количество\" }";
-        }
+        $errorFormHandler = "{ \"type\":\"danger\" , " +
+            "\"header\":\"" + header + "\"  , " +
+            "\"message\" : \"Ошибка при заполнение количества\" }";
 
-        if($TOTAL > $totalMax)
-        {
-            $warninfFormHandler = "{ \"type\":\"danger\" , " +
-                "\"header\":\"" + header + "\"  , " +
-                "\"message\" : \"На складе отстутсвует необходимое количество продукции\" }";
+        createToast(JSON.parse($errorFormHandler));
+        return;
+    }
 
-            createToast(JSON.parse($warninfFormHandler));
-        }
+    if($TOTAL < $totalMin)
+    {
+        $errorFormHandler = "{ \"type\":\"danger\" , " +
+            "\"header\":\"" + header + "\"  , " +
+            "\"message\" : \"Не указано количество продукции\" }";
 
-        if($TOTAL < 1)
-        {
-            $errorFormHandler = "{ \"type\":\"danger\" , " +
-                "\"header\":\"" + header + "\"  , " +
-                "\"message\" : \"Не указано количество продукции\" }";
-        }
+        createToast(JSON.parse($errorFormHandler));
+        return;
     }
 
     let $preProduct = document.getElementById("new_product_supply_form_preProduct_preProduct");
@@ -606,7 +594,6 @@ function addProductOrder()
     /** Удаляем при клике колекцию СЕКЦИЙ */
     elementCollectionBlock.querySelector(".del-item-product").addEventListener("click", function()
     {
-        console.log(' del-item-product->',)
         this.closest(".item-collection-product").remove();
         index = addProductButton.dataset.index * 1;
         addProductButton.dataset.index = (index - 1).toString();
