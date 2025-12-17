@@ -22,10 +22,12 @@
  *
  */
 
-namespace BaksDev\Products\Supply\Repository\ProductsProduct\ProductChoice\Tests;
+namespace BaksDev\Products\Supply\Repository\ProductsProduct\ProductModificationChoice\Tests;
 
-use BaksDev\Products\Category\Type\Id\CategoryProductUid;
-use BaksDev\Products\Supply\Repository\ProductsProduct\ProductChoice\ProductChoiceInterface;
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Supply\Repository\ProductsProduct\ProductModificationChoice\ProductModificationChoiceInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -33,18 +35,20 @@ use Symfony\Component\DependencyInjection\Attribute\When;
 
 #[Group('products-supply')]
 #[When(env: 'test')]
-class ProductChoiceRepositoryTest extends KernelTestCase
+class ProductModificationChoiceRepositoryTest extends KernelTestCase
 {
     public function testRepository(): void
     {
         self::assertTrue(true);
 
-        /** @var ProductChoiceInterface $ProductChoiceInterface */
-        $ProductChoiceInterface = self::getContainer()->get(ProductChoiceInterface::class);
+        /** @var ProductModificationChoiceInterface $ProductModificationChoiceInterface */
+        $ProductModificationChoiceInterface = self::getContainer()->get(ProductModificationChoiceInterface::class);
 
-        $result = $ProductChoiceInterface
+        $result = $ProductModificationChoiceInterface
             ->forProfile(new UserProfileUid)
-            ->forCategory(new CategoryProductUid())
+            ->product(new ProductUid)
+            ->offerConst(new ProductOfferConst())
+            ->variationConst(new ProductVariationConst())
             ->findAll();
     }
 }

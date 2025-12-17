@@ -24,28 +24,27 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Supply\Repository\ProductsProduct\ProductChoice;
+namespace BaksDev\Products\Supply\Repository\ProductsProduct\ProductOfferChoice;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
-use BaksDev\Products\Category\Entity\CategoryProduct;
-use BaksDev\Products\Category\Type\Id\CategoryProductUid;
-use BaksDev\Products\Product\Entity\Active\ProductActive;
-use BaksDev\Products\Product\Entity\Category\ProductCategory;
+use BaksDev\Products\Category\Entity\Offers\CategoryProductOffers;
+use BaksDev\Products\Category\Entity\Offers\Trans\CategoryProductOffersTrans;
 use BaksDev\Products\Product\Entity\Info\ProductInfo;
+use BaksDev\Products\Product\Entity\Offers\ProductOffer;
 use BaksDev\Products\Product\Entity\Product;
-use BaksDev\Products\Product\Entity\Trans\ProductTrans;
 use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Generator;
 use InvalidArgumentException;
 
-final  class ProductChoiceRepository implements ProductChoiceInterface
+final class ProductOfferChoiceRepository implements ProductOfferChoiceInterface
 {
-    private UserProfileUid|false $profile = false;
+    private ProductUid|false $product = false;
 
-    private CategoryProductUid|false $category = false;
+    private UserProfileUid|false $profile = false;
 
     public function __construct(
         private readonly DBALQueryBuilder $DBALQueryBuilder,
@@ -70,33 +69,41 @@ final  class ProductChoiceRepository implements ProductChoiceInterface
         return $this;
     }
 
-    public function forCategory(CategoryProduct|CategoryProductUid $category): self
+    public function forProduct(Product|ProductUid $product): self
     {
-        if($category instanceof CategoryProduct)
+        if($product instanceof Product)
         {
-            $category = $category->getId();
+            $product = $product->getId();
         }
 
-        $this->category = $category;
+        $this->product = $product;
+
         return $this;
     }
 
     public function findAll(): Generator
     {
+        if(false === ($this->product instanceof ProductUid))
+        {
+            throw new InvalidArgumentException('Не передан обязательный параметр запроса product');
+        }
+
         $dbal = $this->DBALQueryBuilder
             ->createQueryBuilder(self::class)
             ->bindLocal();
-
-        if(false === ($this->category instanceof CategoryProductUid))
-        {
-            throw new InvalidArgumentException('Не передан обязательный параметр запроса category');
-        }
 
         /**
          * Product
          */
 
-        $dbal->from(Product::class, 'product');
+        $dbal
+            ->from(Product::class, 'product')
+            ->where('product.id = :product')
+            ->setParameter(
+                key: 'product',
+                value: $this->product,
+                type: ProductUid::TYPE,
+            );
 
         $dbal
             ->join(
@@ -113,55 +120,55 @@ final  class ProductChoiceRepository implements ProductChoiceInterface
                 type: UserProfileUid::TYPE,
             );
 
-        $dbal->join(
-            'product',
-            ProductActive::class,
-            'active',
-            '
-                active.event = product.event AND
-                active.active = true AND
-                active.active_from < NOW() AND
-                ( active.active_to IS NULL OR active.active_to > NOW() )
-		',
-        );
-
-        $dbal->join(
-            'product',
-            ProductTrans::class,
-            'trans',
-            '
-                trans.event = product.event AND
-                trans.local = :local',
-        );
-
         /**
-         * Category
+         * Offer
          */
 
-        $dbal
-            ->join(
-                'product',
-                ProductCategory::class,
-                'category',
-                '
-                    category.event = product.event AND 
-                    category.category = :category',
-            )
-            ->setParameter(
-                'category',
-                $this->category,
-                CategoryProductUid::TYPE,
-            );
+        $dbal->join(
+            'product',
+            ProductOffer::class,
+            'offer',
+            'offer.event = product.event'
+        );
+
+        $dbal->join(
+            'offer',
+            CategoryProductOffers::class,
+            'category_offer',
+            'category_offer.id = offer.category_offer',
+        );
+
+        $dbal->leftJoin(
+            'category_offer',
+            CategoryProductOffersTrans::class,
+            'category_offer_trans',
+            '
+                category_offer_trans.offer = category_offer.id AND 
+                category_offer_trans.local = :local',
+        );
 
         $dbal
-            ->select('product.id AS value')
-            ->addSelect('trans.name AS attr')
-            ->addSelect('info.article AS option');
+            ->select('offer.const AS value')
+            ->groupBy('offer.const');
 
-        $dbal->orderBy('trans.name');
+        $dbal
+            ->addSelect('offer.value AS attr')
+            ->addGroupBy('offer.value');
+
+        $dbal
+            ->addSelect('category_offer_trans.name AS option')
+            ->addGroupBy('category_offer_trans.name');
+
+        $dbal
+            ->addSelect('offer.postfix AS characteristic')
+            ->addGroupBy('offer.postfix');
+
+        $dbal
+            ->addSelect('category_offer.reference AS reference')
+            ->addGroupBy('category_offer.reference');
 
         return $dbal
             ->enableCache('products-product', '1 day')
-            ->fetchAllHydrate(ProductUid::class);
+            ->fetchAllHydrate(ProductOfferConst::class);
     }
 }

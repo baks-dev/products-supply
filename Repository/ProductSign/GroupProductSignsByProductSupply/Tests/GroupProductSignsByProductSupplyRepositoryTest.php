@@ -26,6 +26,7 @@ namespace BaksDev\Products\Supply\Repository\ProductSign\GroupProductSignsByProd
 
 use BaksDev\Products\Supply\Repository\ProductSign\GroupProductSignsByProductSupply\GroupProductSignsByProductSupplyInterface;
 use BaksDev\Products\Supply\Repository\ProductSign\GroupProductSignsByProductSupply\GroupProductSignsByProductSupplyResult;
+use BaksDev\Products\Supply\Type\ProductSign\Status\ProductSignStatusSupply;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -44,6 +45,7 @@ class GroupProductSignsByProductSupplyRepositoryTest extends KernelTestCase
 
         $result = $GroupProductSignsByProductSupplyRepository
             ->forSupply(new ProductSupplyUid)
+            ->forStatus(ProductSignStatusSupply::STATUS)
             ->findAll();
 
         if(false !== $result)

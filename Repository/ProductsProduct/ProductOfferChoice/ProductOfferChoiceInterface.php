@@ -24,24 +24,19 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Supply\Repository\ProductsProduct\ProductChoice;
+namespace BaksDev\Products\Supply\Repository\ProductsProduct\ProductOfferChoice;
 
-use BaksDev\Products\Category\Entity\CategoryProduct;
-use BaksDev\Products\Category\Type\Id\CategoryProductUid;
+use BaksDev\Products\Product\Entity\Product;
+use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use BaksDev\Users\User\Entity\User;
-use BaksDev\Users\User\Type\Id\UserUid;
 use Generator;
 
-interface ProductChoiceInterface
+interface ProductOfferChoiceInterface
 {
     public function forProfile(UserProfile|UserProfileUid|null|false $profile): self;
 
-    public function forCategory(CategoryProduct|CategoryProductUid $category): self;
+    public function forProduct(Product|ProductUid $product): self;
 
-    /**
-     * Метод возвращает все идентификаторы продуктов с названием, имеющиеся в наличии на данном складе
-     */
     public function findAll(): Generator;
 }
