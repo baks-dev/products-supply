@@ -210,6 +210,9 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
 
         $dbal->allGroupByExclude();
 
+        /** Сортировка по uuid - дата */
+        $dbal->addOrderBy('product_supply.id', 'ASC');
+
         $result = $dbal->fetchAllHydrate(AllProductSupplyResult::class);
 
         return true === $result->valid() ? $result : false;

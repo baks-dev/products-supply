@@ -163,6 +163,7 @@ final class ProductSignCountForSupplyRepository implements ProductSignCountForSu
 
         /** Только для конкретной поставки */
         $dbal
+            ->select('COUNT(*)')
             ->join(
                 'event',
                 ProductSignSupply::class,
@@ -245,6 +246,6 @@ final class ProductSignCountForSupplyRepository implements ProductSignCountForSu
                 $invariableCondition
             );
 
-        return $dbal->count();
+        return (int) $dbal->fetchOne();
     }
 }
