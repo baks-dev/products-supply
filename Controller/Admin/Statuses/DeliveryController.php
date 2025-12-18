@@ -59,6 +59,9 @@ final class DeliveryController extends AbstractController
 
     private const string STATUS = ProductSupplyStatusDelivery::STATUS;
 
+    /** Коллекция удачных попыток обновления статуса поставок */
+    private array|null $successful = null;
+
     /** Коллекция неудачных попыток обновления статуса поставок */
     private array|null $unsuccessful = null;
 
@@ -105,9 +108,12 @@ final class DeliveryController extends AbstractController
                 $ProductSupplyEvent = $currentProductSupplyEventRepository
                     ->find($ProductSupplyIdDTO->getId());
 
+                /** Номер поставки */
+                $number = $ProductSupplyEvent->getInvariable()->getNumber();
+
                 if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
                 {
-                    $this->unsuccessful[] = $ProductSupplyIdDTO->getId();
+                    $this->unsuccessful[] = $number;
 
                     $logger->critical(
                         message: sprintf('Не найдено событие ProductSupplyEvent по ID: %s',
@@ -125,7 +131,7 @@ final class DeliveryController extends AbstractController
 
                 if(false === $ProductSupplyEvent->getStatus()->equals($previousStatus))
                 {
-                    $this->unsuccessful[] = $ProductSupplyIdDTO->getId();
+                    $this->unsuccessful[] = $number;
 
                     $logger->info(
                         message: sprintf('Попытка присвоить ГТД для поставки %s (%s) не из статуса: %s',
@@ -144,6 +150,8 @@ final class DeliveryController extends AbstractController
 
                 if(true === $ProductSupply instanceof ProductSupply)
                 {
+                    $this->successful[] = $number;
+
                     $logger->info(
                         message: sprintf('Статус поставки %s изменен на %s',
                             $ProductSupply->getId(),
@@ -166,7 +174,7 @@ final class DeliveryController extends AbstractController
 
                 if(false === $ProductSupply instanceof ProductSupply)
                 {
-                    $this->unsuccessful[] = $ProductSupplyIdDTO->getId();
+                    $this->unsuccessful[] = $number;
                 }
             }
 
@@ -187,7 +195,9 @@ final class DeliveryController extends AbstractController
                 [
                     'type' => 'success',
                     'header' => 'Изменение статуса поставок',
-                    'message' => 'Статусы поставок успешно обновлены',
+                    'message' => sprintf(
+                        'Статусы успешно обновлены для поставок с номерами: %s',
+                        implode(', ', $this->successful)),
                     'status' => 200,
                 ],
                 200,

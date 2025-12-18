@@ -36,6 +36,7 @@ use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -169,8 +170,16 @@ class ProductSupplyEvent extends EntityEvent
         return $this->status;
     }
 
+    /**
+     * @return ArrayCollection<int, ProductSupplyProduct>
+     */
     public function getProduct(): Collection
     {
         return $this->product;
+    }
+
+    public function getPersonal(): ProductSupplyPersonal
+    {
+        return $this->personal;
     }
 }

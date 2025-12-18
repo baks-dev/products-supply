@@ -89,7 +89,7 @@ final readonly class NewStatusProductSupplyDispatcher
             {
                 $this->logger->info(
                     message: sprintf(
-                        'Резервируем Честный знак: `%s` продукт из `%s` в поставке %s',
+                        'Попытка зарезервировать Честный знак: `%s` продукт из `%s` в поставке %s',
                         $i + 1, $total, $ProductSupplyEvent->getMain()
                     ),
                     context: [

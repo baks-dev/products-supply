@@ -88,7 +88,9 @@ final readonly class ProcessReservationProductSignDispatcher
         if(false === ($ProductSignEvent instanceof ProductSignEvent))
         {
             $this->logger->info(
-                message: 'products-sign: Пробуем повторить попытку зарезервировать Честный знак на продукт в поставке позже'.$ProductSupplyEvent->getMain(),
+                message: sprintf(
+                    'products-sign: Повторная попытка зарезервировать Честный знак в поставке %s',
+                    $ProductSupplyEvent->getMain()),
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),

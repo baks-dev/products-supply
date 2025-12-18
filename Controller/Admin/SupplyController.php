@@ -38,6 +38,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * Создает поставку и ОПЦИОНАЛЬНО загружает Честные знаки
+ */
 #[AsController]
 #[RoleSecurity('ROLE_PRODUCT_SUPPLY_NEW')]
 final class SupplyController extends AbstractController

@@ -58,6 +58,9 @@ final class ClearedController extends AbstractController
 
     private const string STATUS = ProductSupplyStatusCleared::STATUS;
 
+    /** Коллекция удачных попыток обновления статуса поставок */
+    private array|null $successful = null;
+
     /** Коллекция неудачных попыток обновления статуса поставок */
     private array|null $unsuccessful = null;
 
@@ -97,12 +100,16 @@ final class ClearedController extends AbstractController
              */
             foreach($ClearanceProductSuppliesDTO->getSupplys() as $ProductSupplyIdDTO)
             {
+                /** Активное событие поставки */
                 $ProductSupplyEvent = $currentProductSupplyEventRepository
                     ->find($ProductSupplyIdDTO->getId());
 
+                /** Номер поставки */
+                $number = $ProductSupplyEvent->getInvariable()->getNumber();
+
                 if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
                 {
-                    $this->unsuccessful[] = $ProductSupplyIdDTO->getId();
+                    $this->unsuccessful[] = $number;
 
                     $logger->warning(
                         message: sprintf('Не найдено событие ProductSupplyEvent по ID: %s',
@@ -121,7 +128,7 @@ final class ClearedController extends AbstractController
 
                 if(false === $ProductSupplyEvent->getStatus()->equals($previousStatus))
                 {
-                    $this->unsuccessful[] = $ProductSupplyIdDTO->getId();
+                    $this->unsuccessful[] = $number;
 
                     $logger->warning(
                         message: sprintf('Попытка присвоить ГТД для поставки %s (%s) не из статуса: %s',
@@ -144,7 +151,7 @@ final class ClearedController extends AbstractController
 
                 if(true === $existUndefinedProduct)
                 {
-                    $this->unsuccessful[] = $ProductSupplyIdDTO->getId();
+                    $this->unsuccessful[] = $number;
 
                     $logger->warning(
                         message: sprintf('Невозможно изменить статус поставки %s с неопределенными продуктами',
@@ -162,6 +169,8 @@ final class ClearedController extends AbstractController
 
                 if(true === $handle instanceof ProductSupply)
                 {
+                    $this->successful[] = $number;
+
                     $logger->info(
                         message: sprintf('Статус поставки %s изменен на %s',
                             $handle->getId(), $ProductSupplyStatusClearanceDTO->getStatus()),
@@ -171,7 +180,7 @@ final class ClearedController extends AbstractController
 
                 if(false === $handle instanceof ProductSupply)
                 {
-                    $this->unsuccessful[] = $ProductSupplyIdDTO->getId();
+                    $this->unsuccessful[] = $number;
                 }
             }
 
@@ -192,7 +201,9 @@ final class ClearedController extends AbstractController
                 [
                     'type' => 'success',
                     'header' => 'Изменение статуса поставок',
-                    'message' => 'Статусы поставок успешно обновлены',
+                    'message' => sprintf(
+                        'Статусы успешно обновлены для поставок с номерами: %s',
+                        implode(', ', $this->successful)),
                     'status' => 200,
                 ],
                 200,
