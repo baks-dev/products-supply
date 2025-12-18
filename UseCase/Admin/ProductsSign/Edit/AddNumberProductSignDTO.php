@@ -29,6 +29,7 @@ namespace BaksDev\Products\Supply\UseCase\Admin\ProductsSign\Edit;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
+use BaksDev\Products\Supply\UseCase\Admin\ProductsSign\Edit\Invariable\ProductSignInvariableDTO;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -36,7 +37,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @see ProductSignEvent
  */
-final class AddCommentProductSignDTO implements ProductSignEventInterface
+final class AddNumberProductSignDTO implements ProductSignEventInterface
 {
     /**
      * Идентификатор события
@@ -51,10 +52,13 @@ final class AddCommentProductSignDTO implements ProductSignEventInterface
     #[Assert\NotBlank]
     private readonly ProductSignStatus $status;
 
-    #[Assert\NotBlank]
-    private string $comment;
+    /**
+     * Код честного знака
+     */
+    #[Assert\Valid]
+    private ProductSignInvariableDTO $invariable;
 
-    public function setId(ProductSignEventUid $id): AddCommentProductSignDTO
+    public function setId(ProductSignEventUid $id): AddNumberProductSignDTO
     {
         $this->id = $id;
         return $this;
@@ -68,17 +72,23 @@ final class AddCommentProductSignDTO implements ProductSignEventInterface
         return $this->id;
     }
 
-    public function setComment(string $comment): AddCommentProductSignDTO
+    /**
+     * Invariable
+     */
+    public function getInvariable(): ProductSignInvariableDTO
     {
-        $this->comment = $comment;
+        return $this->invariable;
+    }
+
+    public function setInvariable(ProductSignInvariableDTO $invariable): self
+    {
+        $this->invariable = $invariable;
         return $this;
     }
 
-    public function getComment(): string
-    {
-        return $this->comment;
-    }
-
+    /**
+     * Status
+     */
     public function getStatus(): ProductSignStatus
     {
         return $this->status;

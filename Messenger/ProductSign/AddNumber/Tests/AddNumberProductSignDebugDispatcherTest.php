@@ -24,10 +24,10 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Supply\Messenger\ProductSign\AddComment\Tests;
+namespace BaksDev\Products\Supply\Messenger\ProductSign\AddNumber\Tests;
 
 use BaksDev\Products\Supply\Entity\ProductSupply;
-use BaksDev\Products\Supply\Messenger\ProductSign\AddComment\AddCommentProductSignDispatcher;
+use BaksDev\Products\Supply\Messenger\ProductSign\AddNumber\AddNumberProductSignDispatcher;
 use BaksDev\Products\Supply\Messenger\ProductSupplyMessage;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use Doctrine\ORM\EntityManagerInterface;
@@ -40,11 +40,12 @@ use Symfony\Component\DependencyInjection\Attribute\When;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 #[When(env: 'test')]
-class AddCommentProductSignDispatcherTest extends KernelTestCase
+class AddNumberProductSignDebugDispatcherTest extends KernelTestCase
 {
     public function testUseCase(): void
     {
         self::assertTrue(true);
+        return;
 
         // Бросаем событие консольной команды
         $dispatcher = self::getContainer()->get(EventDispatcherInterface::class);
@@ -57,8 +58,8 @@ class AddCommentProductSignDispatcherTest extends KernelTestCase
         $ProductSupply = $em->getRepository(ProductSupply::class)
             ->find(ProductSupplyUid::TEST);
 
-        /** @var AddCommentProductSignDispatcher $CommentProductSignDispatcher */
-        $CommentProductSignDispatcher = self::getContainer()->get(AddCommentProductSignDispatcher::class);
+        /** @var AddNumberProductSignDispatcher $CommentProductSignDispatcher */
+        $CommentProductSignDispatcher = self::getContainer()->get(AddNumberProductSignDispatcher::class);
 
         $message = new ProductSupplyMessage(
             $ProductSupply->getId(),

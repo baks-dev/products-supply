@@ -29,6 +29,9 @@
 
                     <span class="text-muted ">{{ supply.id|uuid_format_date }}</span>
 
+                    {% set total = supply.supplyProducts|reduce((carry, product) => carry + (product.total ?? 0), 0) %}
+
+
                     <div class="d-flex gap-1 align-items-center">
                         Продуктов в поставке
                         <span class="badge small p-1"
@@ -37,6 +40,9 @@
                        </span>
                     </div>
 
+                    <span class="text-muted">
+                       в общем количестве: {{ total }}
+                    </span>
                 </div>
 
                 {# Не даем перемещать поставку в статусе completed "Выполнен" #}

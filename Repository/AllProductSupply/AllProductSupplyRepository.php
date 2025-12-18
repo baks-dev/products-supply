@@ -189,7 +189,8 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
 						'product', product_supply_product.product,
 						'offer_const', product_supply_product.offer_const,
 						'variation_const', product_supply_product.variation_const,
-						'modification_const', product_supply_product.modification_const
+						'modification_const', product_supply_product.modification_const,
+						'total', product_supply_product.total
 					)
 			)
 			AS supply_products",

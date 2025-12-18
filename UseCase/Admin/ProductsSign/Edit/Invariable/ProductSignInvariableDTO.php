@@ -58,6 +58,9 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
     #[Assert\Uuid]
     private ?ProductModificationConst $modification;
 
+    /** Грузовая таможенная декларация (номер) */
+    private ?string $number = null;
+
     /**
      * Product
      */
@@ -111,6 +114,20 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
     public function setModification(?ProductModificationConst $modification): self
     {
         $this->modification = $modification;
+        return $this;
+    }
+
+    /**
+     * Number
+     */
+    public function getNumber(): ?string
+    {
+        return $this->number;
+    }
+
+    public function setNumber(?string $number): self
+    {
+        $this->number = $number;
         return $this;
     }
 }
