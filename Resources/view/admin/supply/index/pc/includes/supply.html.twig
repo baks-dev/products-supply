@@ -1,16 +1,22 @@
 {# @var supply \BaksDev\Products\Supply\Repository\AllProductSupply\AllProductSupplyResult #}
 
-<div class="draggable" id="{{ supply.id }}" tabindex="0">
+<div class="draggable rounded-4 z-0" id="{{ supply.id }}" tabindex="0">
 
     <div class="border-bottom border-4 rounded-4"
-            {#         style="background-color: {{ supply.orderDanger ? 'red' : color }}; border-color: {{ supply.orderDanger ? 'red' : color }} !important;" #}
-    >
+         style="background-color: {{ color }} !important; border-color: {{ color }} !important;">
 
-        <div class="card bg-light-primary rounded-4"
-                {#                {{ supply.orderDanger ? 'style="border-color: red;"' }} #}
-        >
+        <div class="card bg-light-primary rounded-4">
 
             <div class="card-body d-flex justify-content-between small p-2 px-1">
+
+                <label for="{{ supply.supplyNumber }}">
+                    <input class="form-check-input m-0"
+                           type="checkbox"
+                           data-status="{{ supply.supplyStatus }}"
+                           value="{{ supply.id }}"
+                           id="{{ supply.supplyNumber }}"
+                           style="width: 18px; height: 18px;">
+                </label>
 
                 <div class="d-flex flex-column justify-content-between gap-1 offcanvas-link small"
                      data-href='{{ path('products-supply:admin.supply.detail', { id : supply.id }) }}'
@@ -23,13 +29,20 @@
 
                     <span class="text-muted ">{{ supply.id|uuid_format_date }}</span>
 
+                    {% set total = supply.supplyProducts|reduce((carry, product) => carry + (product.total ?? 0), 0) %}
+
+
                     <div class="d-flex gap-1 align-items-center">
                         Продуктов в поставке
-                        <span class="badge text-bg-primary small p-1" style="min-width: 1.7em;">
+                        <span class="badge small p-1"
+                              style="min-width: 1.7em; background-color: {{ color }} !important;">
                                 {{ supply.supplyProducts|length }}
                        </span>
                     </div>
 
+                    <span class="text-muted">
+                       в общем количестве: {{ total }}
+                    </span>
                 </div>
 
                 {# Не даем перемещать поставку в статусе completed "Выполнен" #}

@@ -37,7 +37,6 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * Загружает файлы на сервер
- * @see
  */
 final readonly class ProductSupplyFilesHandler
 {

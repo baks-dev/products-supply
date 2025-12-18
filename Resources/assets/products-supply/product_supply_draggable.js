@@ -43,35 +43,8 @@ let status = null;
 //    }, 300);
 //});
 
-function getToken(url, ctx)
+executeFunc(function lW9JEBic()
 {
-    return new Promise((resolve, reject) =>
-    {
-        fetch(url, {
-            method: "POST",
-            headers: new Headers({"Content-Type": "application/json"}),
-            body: JSON.stringify(ctx),
-        }).then(res =>
-        {
-            if(!res.ok)
-            {
-                throw new Error(`Unexpected status code ${res.status}`);
-            }
-            return res.json();
-        }).then(data =>
-        {
-            resolve(data.token);
-
-        }).catch(err =>
-        {
-            reject(err);
-        });
-    });
-}
-
-executeFunc(function P8X1I2diQ4()
-{
-
     if(typeof Droppable !== "object" || typeof bootstrap !== "object")
     {
         return false;
@@ -173,7 +146,6 @@ executeFunc(function P8X1I2diQ4()
             }
 
         });
-
 
         // Handle drag over event -- more info: https://shopify.github.io/draggable/docs/class/src/Draggable/DragEvent/DragEvent.js~DragOverEvent.html
         droppable.on("drag:over", (e) =>
@@ -280,7 +252,8 @@ executeFunc(function P8X1I2diQ4()
 
                         /** Очищаем список выбранных поставок и закрываем модалку */
                         selectedProductSupplys.clear();
-                        updateSelectedOrdersVisuals();
+                        //updateSelectedOrdersVisuals();
+                        updateMultiSelectedVisualForProductsSupply();
                         modal_bootstrap.hide();
 
                         if(status_response.status === 400)
@@ -308,7 +281,8 @@ executeFunc(function P8X1I2diQ4()
                     {
                         /** Очищаем список выбранных поставок и закрываем модалку */
                         selectedProductSupplys.clear();
-                        updateSelectedOrdersVisuals();
+                        //updateSelectedOrdersVisuals();
+                        updateMultiSelectedVisualForProductsSupply();
                         modal_bootstrap.hide();
 
                         let $dangerOrderToast = "{ \"type\":\"danger\" , " +
@@ -326,7 +300,8 @@ executeFunc(function P8X1I2diQ4()
 
                         // Очищаем список выбранных поставок
                         selectedProductSupplys.clear();
-                        updateSelectedOrdersVisuals();
+                        //updateSelectedOrdersVisuals();
+                        updateMultiSelectedVisualForProductsSupply();
 
                         // Только один заказ требует форму - показываем её
                         modal.innerHTML = result;
@@ -345,7 +320,8 @@ executeFunc(function P8X1I2diQ4()
                 {
                     modal_bootstrap.hide();
                     selectedProductSupplys.clear();
-                    updateSelectedOrdersVisuals();
+                    //updateSelectedOrdersVisuals();
+                    updateMultiSelectedVisualForProductsSupply();
                     console.error("Ошибка обновления:", error);
 
                     let $dangerOrderToast = "{ \"type\":\"danger\" , " +
@@ -376,176 +352,314 @@ executeFunc(function P8X1I2diQ4()
         });
     }
 
+    ///** Добавляем обработчики для чекбоксов */
+    //function initCheckboxHandlers()
+    //{
+    //    const all = document.getElementById("check-all");
+    //
+    //    /** Все чекбоксы */
+    //    const checkboxes = document.querySelectorAll(".draggable input[type=\"checkbox\"]");
+    //
+    //    checkboxes.forEach(checkbox =>
+    //    {
+    //        /** снимаем чеки при обновлении */
+    //        checkbox.checked = false;
+    //
+    //        checkbox.addEventListener("change", function()
+    //        {
+    //            const supplyId = this.closest(".draggable").id;
+    //
+    //            const draggableElement = this.closest(".draggable");
+    //
+    //            /** Ограничиваем выделяемые заказы по статусу */
+    //            status = checkbox.dataset.status;
+    //
+    //            if(this.checked)
+    //            {
+    //                selectedProductSupplys.add(supplyId);
+    //                draggableElement.classList.add("selected-order");
+    //
+    //            } else
+    //            {
+    //                selectedProductSupplys.delete(supplyId);
+    //                draggableElement.classList.remove("selected-order");
+    //            }
+    //
+    //            // Визуальное выделение выбранных карточек
+    //            updateSelectedOrdersVisuals();
+    //        });
+    //    });
+    //
+    //    if(all)
+    //    {
+    //        /** снимаем чек при обновлении */
+    //        all.checked = false;
+    //
+    //        all.addEventListener("change", function(all)
+    //        {
+    //            checkboxes.forEach(checkbox =>
+    //            {
+    //                if(checkbox.dataset.status === "new")
+    //                {
+    //                    const supplyId = checkbox.closest(".draggable").id;
+    //                    const draggableElement = checkbox.closest(".draggable");
+    //
+    //                    checkbox.checked = this.checked;
+    //
+    //                    if(this.checked)
+    //                    {
+    //                        selectedProductSupplys.add(supplyId);
+    //                        draggableElement.classList.add("selected-order");
+    //
+    //                    } else
+    //                    {
+    //                        selectedProductSupplys.delete(supplyId);
+    //                        draggableElement.classList.remove("selected-order");
+    //                    }
+    //                }
+    //            });
+    //
+    //            updateSelectedOrdersVisuals();
+    //        });
+    //    }
+    //}
+    //
+    //
+    ///** Функция для обновления визуального состояния выбранных карточек */
+    //function updateSelectedOrdersVisuals()
+    //{
+    //    const allDraggables = document.querySelectorAll(".draggable");
+    //
+    //    allDraggables.forEach(draggable =>
+    //    {
+    //        const supplyId = draggable.id;
+    //        const draggableHandle = draggable.querySelector(".draggable-handle");
+    //        const draggableCheckbox = draggable.querySelector("input[type=\"checkbox\"]");
+    //
+    //        if(selectedProductSupplys.has(supplyId))
+    //        {
+    //            /** Показать полностью весь заказ */
+    //            draggable.classList.remove("opacity-50");
+    //            draggable.classList.replace("z-0", "z-2");
+    //
+    //            /** Выделяем заказ рамкой */
+    //            draggable.style.transform = "scale(0.98)";
+    //            draggable.style.boxShadow = "0 0 0 2px #007bff";
+    //
+    //            // Если есть выделенные карточки, включаем перетаскивание только для них
+    //            if(draggableHandle)
+    //            {
+    //                draggableHandle.style.pointerEvents = "auto";
+    //            }
+    //        } else
+    //        {
+    //            draggable.removeAttribute("style");
+    //
+    //            // Если есть выделенные карточки, отключаем перетаскивание для невыделенных
+    //            if(draggableHandle)
+    //            {
+    //                if(selectedProductSupplys.size > 0)
+    //                {
+    //                    draggable.classList.add("opacity-50"); // полупрозрачный заказ
+    //
+    //                    draggableHandle.style.pointerEvents = "none";
+    //
+    //                    /** получаем элемент chekbox */
+    //                    if(draggableCheckbox && draggableCheckbox.dataset.status !== status)
+    //                    {
+    //                        draggableCheckbox.disabled = true;
+    //                    }
+    //                }
+    //
+    //                if(selectedProductSupplys.size === 0)
+    //                {
+    //                    // Если нет выделенных карточек, включаем перетаскивание для всех
+    //                    draggable.classList.remove("opacity-50");
+    //
+    //                    draggableHandle.style.pointerEvents = "auto";
+    //                    draggableCheckbox ? draggableCheckbox.disabled = false : false;
+    //
+    //                    status = null;
+    //                }
+    //            }
+    //        }
+    //    });
+    //}
+    //
+    ///** Функция для создания визуального индикатора множественного перетаскивания */
+    //function createMultipleDragIndicator(count)
+    //{
+    //    const indicator = document.createElement("div");
+    //    indicator.className = "multiple-drag-indicator";
+    //    indicator.style.cssText = `
+    //        position: absolute;
+    //        top: -10px;
+    //        right: -10px;
+    //        background: #007bff;
+    //        color: white;
+    //        border-radius: 50%;
+    //        width: 24px;
+    //        height: 24px;
+    //        display: flex;
+    //        align-items: center;
+    //        justify-content: center;
+    //        font-size: 12px;
+    //        font-weight: bold;
+    //        z-index: 1000;
+    //    `;
+    //
+    //    indicator.textContent = count;
+    //    return indicator;
+    //}
 
-    // Добавляем обработчики для чекбоксов
-    function initCheckboxHandlers()
+    initMultiSelectForProductsSupply()
+    updateMultiSelectedVisualForProductsSupply()
+
+    // Initial call to set up Droppable
+    initializeDroppable();
+
+    return true;
+});
+
+// Добавляем обработчики для чекбоксов
+function initMultiSelectForProductsSupply()
+{
+    const all = document.getElementById("check-all");
+
+    /** Все чекбоксы */
+    const checkboxes = document.querySelectorAll(".draggable input[type=\"checkbox\"]");
+
+    checkboxes.forEach(checkbox =>
     {
-        const all = document.getElementById("check-all");
+        /** снимаем чеки при обновлении */
+        checkbox.checked = false;
 
-        const checkboxes = document.querySelectorAll(".draggable input[type=\"checkbox\"]");
-
-        checkboxes.forEach(checkbox =>
+        checkbox.addEventListener("change", function()
         {
+            const selectedId = this.closest(".draggable").id;
 
-            /** снимаем чеки при обновлении */
-            checkbox.checked = false;
+            const draggableElement = this.closest(".draggable");
 
-            checkbox.addEventListener("change", function()
+            /** Ограничиваем выделяемые заказы по статусу */
+            status = checkbox.dataset.status;
+
+            if(this.checked)
             {
-                const supplyId = this.closest(".draggable").id;
-                const draggableElement = this.closest(".draggable");
+                selectedProductSupplys.add(selectedId);
+                draggableElement.classList.add("muilti-selected");
 
-                /** Ограничиваем выделяемые заказы по статусу */
-                status = checkbox.dataset.status;
-
-                if(this.checked)
-                {
-                    //selectCheckboxesByPrefix(checkbox.id);
-
-                    selectedProductSupplys.add(supplyId);
-                    draggableElement.classList.add("selected-order");
-
-                    /** Выделяем аналогичные заказы */
-
-                    //// Извлекаем префикс (убираем последнюю часть после последнего дефиса)
-                    //let checkboxId = checkbox.id;
-                    //const idParts = checkboxId.split("-");
-                    //idParts.pop(); // Удаляем последнюю часть
-                    //const prefix = idParts.join("-");
-                    //
-                    //// Находим и выделяем все соответствующие checkbox
-                    //const checkboxes = document.querySelectorAll(`input[type="checkbox"][id^="${prefix}"]`);
-                    //
-                    //checkboxes.forEach(check =>
-                    //{
-                    //    if(!check.checked)
-                    //    {
-                    //        check.checked = true;
-                    //        selectedProductSupplys.add(check.value);
-                    //    }
-                    //});
-
-                } else
-                {
-                    selectedProductSupplys.delete(supplyId);
-                    draggableElement.classList.remove("selected-order");
-                }
-
-                // Визуальное выделение выбранных карточек
-                updateSelectedOrdersVisuals();
-            });
-        });
-
-        if(all)
-        {
-            /** снимаем чек при обновлении */
-            all.checked = false;
-
-            all.addEventListener("change", function(all)
-            {
-                checkboxes.forEach(checkbox =>
-                {
-
-                    if(checkbox.dataset.status === "new")
-                    {
-                        const supplyId = checkbox.closest(".draggable").id;
-                        const draggableElement = checkbox.closest(".draggable");
-
-                        checkbox.checked = this.checked;
-
-                        if(this.checked)
-                        {
-                            selectedProductSupplys.add(supplyId);
-                            draggableElement.classList.add("selected-order");
-
-                        } else
-                        {
-                            selectedProductSupplys.delete(supplyId);
-                            draggableElement.classList.remove("selected-order");
-                        }
-                    }
-
-                });
-
-                updateSelectedOrdersVisuals();
-            });
-        }
-
-    }
-
-    // Функция для обновления визуального состояния выбранных карточек
-    function updateSelectedOrdersVisuals()
-    {
-        const allDraggables = document.querySelectorAll(".draggable");
-
-        allDraggables.forEach(draggable =>
-        {
-            const supplyId = draggable.id;
-            const draggableHandle = draggable.querySelector(".draggable-handle");
-            const draggableCheckbox = draggable.querySelector("input[type=\"checkbox\"]");
-
-
-            if(selectedProductSupplys.has(supplyId))
-            {
-                /** Показать полностью весь заказ */
-                draggable.classList.remove("opacity-50");
-                draggable.classList.replace("z-0", "z-2");
-
-                //draggable.classList.add("opacity-100");
-
-                /** Выделяем заказ рамкой */
-                draggable.style.transform = "scale(0.98)";
-                draggable.style.boxShadow = "0 0 0 2px #007bff";
-
-                // Если есть выделенные карточки, включаем перетаскивание только для них
-                if(draggableHandle)
-                {
-                    draggableHandle.style.pointerEvents = "auto";
-                }
             } else
             {
-
-                draggable.removeAttribute("style");
-
-                // Если есть выделенные карточки, отключаем перетаскивание для невыделенных
-                if(draggableHandle)
-                {
-                    if(selectedProductSupplys.size > 0)
-                    {
-                        draggable.classList.add("opacity-50"); // полупрозрачный заказ
-
-                        draggableHandle.style.pointerEvents = "none";
-
-                        /** получаем элемент chekbox */
-                        if(draggableCheckbox && draggableCheckbox.dataset.status !== status)
-                        {
-                            draggableCheckbox.disabled = true;
-                        }
-                    }
-
-                    if(selectedProductSupplys.size === 0)
-                    {
-                        // Если нет выделенных карточек, включаем перетаскивание для всех
-                        draggable.classList.remove("opacity-50");
-
-                        draggableHandle.style.pointerEvents = "auto";
-                        draggableCheckbox ? draggableCheckbox.disabled = false : false;
-
-                        status = null;
-                    }
-
-                }
-
+                selectedProductSupplys.delete(selectedId);
+                draggableElement.classList.remove("muilti-selected");
             }
+
+            // Визуальное выделение выбранных карточек
+            updateMultiSelectedVisualForProductsSupply();
+        });
+    });
+
+    if(all)
+    {
+        /** снимаем чек при обновлении */
+        all.checked = false;
+
+        all.addEventListener("change", function(all)
+        {
+            checkboxes.forEach(checkbox =>
+            {
+                if(checkbox.dataset.status === "new")
+                {
+                    const selectedId = checkbox.closest(".draggable").id;
+                    const draggableElement = checkbox.closest(".draggable");
+
+                    checkbox.checked = this.checked;
+
+                    if(this.checked)
+                    {
+                        selectedProductSupplys.add(selectedId);
+                        draggableElement.classList.add("muilti-selected");
+
+                    } else
+                    {
+                        selectedProductSupplys.delete(selectedId);
+                        draggableElement.classList.remove("muilti-selected");
+                    }
+                }
+            });
+
+            updateMultiSelectedVisualForProductsSupply();
         });
     }
+}
 
-    // Функция для создания визуального индикатора множественного перетаскивания
-    function createMultipleDragIndicator(count)
+// Функция для обновления визуального состояния выбранных карточек
+function updateMultiSelectedVisualForProductsSupply()
+{
+    const allDraggables = document.querySelectorAll(".draggable");
+
+    allDraggables.forEach(draggable =>
     {
-        const indicator = document.createElement("div");
-        indicator.className = "multiple-drag-indicator";
-        indicator.style.cssText = `
+        const selectedId = draggable.id;
+        const draggableHandle = draggable.querySelector(".draggable-handle");
+        const draggableCheckbox = draggable.querySelector("input[type=\"checkbox\"]");
+
+        if(selectedProductSupplys.has(selectedId))
+        {
+            /** Показать полностью весь заказ */
+            draggable.classList.remove("opacity-50");
+            draggable.classList.replace("z-0", "z-2");
+
+            /** Выделяем заказ рамкой */
+            draggable.style.transform = "scale(0.98)";
+            draggable.style.boxShadow = "0 0 0 2px #007bff";
+
+            // Если есть выделенные карточки, включаем перетаскивание только для них
+            if(draggableHandle)
+            {
+                draggableHandle.style.pointerEvents = "auto";
+            }
+        } else
+        {
+            draggable.removeAttribute("style");
+
+            // Если есть выделенные карточки, отключаем перетаскивание для невыделенных
+            if(draggableHandle)
+            {
+                if(selectedProductSupplys.size > 0)
+                {
+                    draggable.classList.add("opacity-50"); // полупрозрачный заказ
+
+                    draggableHandle.style.pointerEvents = "none";
+
+                    /** получаем элемент chekbox */
+                    if(draggableCheckbox && draggableCheckbox.dataset.status !== status)
+                    {
+                        draggableCheckbox.disabled = true;
+                    }
+                }
+
+                if(selectedProductSupplys.size === 0)
+                {
+                    // Если нет выделенных карточек, включаем перетаскивание для всех
+                    draggable.classList.remove("opacity-50");
+
+                    draggableHandle.style.pointerEvents = "auto";
+                    draggableCheckbox ? draggableCheckbox.disabled = false : false;
+
+                    status = null;
+                }
+            }
+        }
+    });
+}
+
+// Функция для создания визуального индикатора множественного перетаскивания
+function createMultipleDragIndicator(count)
+{
+    const indicator = document.createElement("div");
+    indicator.className = "multiple-drag-indicator";
+    indicator.style.cssText = `
             position: absolute;
             top: -10px;
             right: -10px;
@@ -561,15 +675,7 @@ executeFunc(function P8X1I2diQ4()
             font-weight: bold;
             z-index: 1000;
         `;
-        indicator.textContent = count;
-        return indicator;
-    }
 
-    // Инициализируем обработчики чекбоксов
-    initCheckboxHandlers();
-
-    // Initial call to set up Droppable
-    initializeDroppable();
-
-    return true;
-});
+    indicator.textContent = count;
+    return indicator;
+}

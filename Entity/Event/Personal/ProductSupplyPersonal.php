@@ -90,4 +90,14 @@ class ProductSupplyPersonal extends EntityEvent
 
         throw new InvalidArgumentException(sprintf('Class %s interface error', $dto::class));
     }
+
+    public function getUsr(): UserUid
+    {
+        return $this->usr;
+    }
+
+    public function getProfile(): UserProfileUid
+    {
+        return $this->profile;
+    }
 }

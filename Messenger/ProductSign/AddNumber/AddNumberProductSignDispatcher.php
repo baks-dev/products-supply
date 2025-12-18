@@ -24,9 +24,8 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Supply\Messenger\ProductSign\AddComment;
+namespace BaksDev\Products\Supply\Messenger\ProductSign\AddNumber;
 
-use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
@@ -34,7 +33,7 @@ use BaksDev\Products\Supply\Messenger\ProductSupplyMessage;
 use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductSupplyEventInterface;
 use BaksDev\Products\Supply\Repository\ProductSign\AllProductSignEventsRelatedProductSupply\AllProductSignEventsRelatedProductSupplyInterface;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusCleared;
-use BaksDev\Products\Supply\UseCase\Admin\ProductsSign\Edit\AddCommentProductSignDTO;
+use BaksDev\Products\Supply\UseCase\Admin\ProductsSign\Edit\AddNumberProductSignDTO;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -44,7 +43,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * присваивает ГТД для связанных Честных знаков в виде комментария
  */
 #[AsMessageHandler(priority: 0)]
-final readonly class AddCommentProductSignDispatcher
+final readonly class AddNumberProductSignDispatcher
 {
     public function __construct(
         #[Target('productsSupplyLogger')] private LoggerInterface $logger,
@@ -101,11 +100,12 @@ final readonly class AddCommentProductSignDispatcher
 
         foreach($productSignForComment as $ProductSignEvent)
         {
-            $CommentProductSignDTO = new AddCommentProductSignDTO();
+            $CommentProductSignDTO = new AddNumberProductSignDTO();
             $ProductSignEvent->getDto($CommentProductSignDTO);
 
-            /** Присваиваем номер ГТД из поставки Честному знаку в виде комментария */
-            $CommentProductSignDTO->setComment($ProductSupplyEvent->getInvariable()->getDeclaration());
+            /** Присваиваем номер ГТД из поставки как номер Честному знаку */
+            $CommentProductSignDTO->getInvariable()
+                ->setNumber($ProductSupplyEvent->getInvariable()->getDeclaration());
 
             $handle = $this->ProductSignStatusHandler->handle($CommentProductSignDTO);
 
