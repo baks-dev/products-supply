@@ -37,6 +37,7 @@ use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignHandler;
 use BaksDev\Products\Supply\UseCase\Admin\ProductsSign\New\ProductSignNewDTO;
 use DateTimeImmutable;
+use Exception;
 use Imagick;
 use Psr\Log\LoggerInterface;
 use SplFileInfo;
@@ -103,7 +104,23 @@ final readonly class ScannerProductSupplyDispatcher
         Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, 3600);
         $Imagick = new Imagick();
         $Imagick->setResolution(500, 500);
-        $Imagick->readImage($cropFilePath);
+
+        try
+        {
+            $Imagick->readImage($cropFilePath);
+        }
+        catch(Exception)
+        {
+            $this->messageDispatch->dispatch(
+                $message,
+                transport: 'products-supply-low',
+            );
+
+            return;
+        }
+
+
+
         $pages = $Imagick->getNumberImages(); // количество страниц в файле
 
         /** Переименовываем в начале сканирования Честного знака */
