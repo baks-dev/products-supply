@@ -100,6 +100,7 @@ final class DeliveryController extends AbstractController
 
             /**
              * @var ProductSupplyIdDTO $ProductSupplyIdDTO
+             * TODO: Переделать на асинхронную очередь, комментарий не обязательный
              */
             foreach($DeliveryProductSupplyDTO->getSupplys() as $ProductSupplyIdDTO)
             {

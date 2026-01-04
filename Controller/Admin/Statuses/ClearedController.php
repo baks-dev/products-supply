@@ -97,6 +97,7 @@ final class ClearedController extends AbstractController
 
             /**
              * @var ProductSupplyIdDTO $ProductSupplyIdDTO
+             * TODO: Переделать на асинхронную очередь
              */
             foreach($ClearanceProductSuppliesDTO->getSupplys() as $ProductSupplyIdDTO)
             {
@@ -163,7 +164,8 @@ final class ClearedController extends AbstractController
                 }
 
                 /** Присваиваем номер ГТД - единый для всех выбранных поставок */
-                $ProductSupplyStatusClearanceDTO->getInvariable()->setDeclaration($ClearanceProductSuppliesDTO->getNumber());
+                $ProductSupplyStatusClearanceDTO->getInvariable()
+                    ->setDeclaration($ClearanceProductSuppliesDTO->getNumber());
 
                 $handle = $editProductSupplyHandler->handle($ProductSupplyStatusClearanceDTO);
 

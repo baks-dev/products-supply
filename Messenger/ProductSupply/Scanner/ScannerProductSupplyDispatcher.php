@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\Messenger\ProductSupply\Scanner;
 
 use BaksDev\Barcode\Reader\BarcodeRead;
+use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Products\Product\Repository\Ids\ProductIdsByBarcodesRepository\ProductIdsByBarcodesInterface;
@@ -84,13 +85,13 @@ final readonly class ScannerProductSupplyDispatcher
             false === $file->isFile() ||
             false === $file->getRealPath() ||
             false === file_exists($file->getRealPath()) ||
-            false === ($file->getExtension() === 'pdf') ||
+            false === ('pdf' === $file->getExtension()) ||
             false === str_starts_with($file->getFilename(), 'crop')
         )
         {
             $this->logger->critical(
-                message: 'Ошибка при сканировании файла Честного знака.',
-                context: [self::class.':'.__LINE__]
+                message: 'products-supply: Ошибка при сканировании файла Честного знака. Недопустимый формат файла либо путь к файлу.',
+                context: [self::class.':'.__LINE__],
             );
 
             return;
@@ -102,6 +103,8 @@ final readonly class ScannerProductSupplyDispatcher
         $cropFilePath = $file->getRealPath();
 
         Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, 3600);
+        Imagick::setResourceLimit(Imagick::RESOURCETYPE_MEMORY, (256 * 1024 * 1024));
+
         $Imagick = new Imagick();
         $Imagick->setResolution(500, 500);
 
@@ -111,15 +114,19 @@ final readonly class ScannerProductSupplyDispatcher
         }
         catch(Exception)
         {
+            $this->logger->critical(
+                message: 'products-supply: Ошибка при сканировании файла Честного знака. Пробуем просканировать позже.',
+                context: [self::class.':'.__LINE__],
+            );
+
             $this->messageDispatch->dispatch(
-                $message,
+                message: $message,
+                stamps: [new MessageDelay('1 minute')],
                 transport: 'products-supply-low',
             );
 
             return;
         }
-
-
 
         $pages = $Imagick->getNumberImages(); // количество страниц в файле
 
@@ -217,11 +224,8 @@ final readonly class ScannerProductSupplyDispatcher
                     $scanFileName = str_replace('scan_success', 'scan_error', $scanFileName);
 
                     $this->logger->critical(
-                        message: ' Не удалось извлечь штрихкод после сканирования Честного знака. Code: '.$code,
-                        context: [
-                            $parseCode,
-                            self::class.':'.__LINE__,
-                        ]
+                        message: 'products-supply: Не удалось извлечь штрихкод после сканирования Честного знака. Code: '.$code,
+                        context: [$parseCode, self::class.':'.__LINE__],
                     );
                 }
 
@@ -256,14 +260,14 @@ final readonly class ScannerProductSupplyDispatcher
                     /** Если продукт не найден */
                     if(false === $product instanceof ProductIdsByBarcodesResult)
                     {
-                        $this->logger->warning(message: sprintf(
-                            'Не удалось найти продукт по штрихкоду %s из Честного знака. Честный знак НЕ БУДЕТ СОЗДАН',
-                            $partCode
-                        ),
+                        $this->logger->warning(
+                            message: sprintf(
+                                'Не удалось найти продукт по штрихкоду %s из Честного знака. Честный знак НЕ БУДЕТ СОЗДАН', $partCode,
+                            ),
                             context: [
                                 'штрихкоды' => $barcodes,
                                 self::class.':'.__LINE__,
-                            ]
+                            ],
                         );
 
                         /** Удаляем после обработки файл PDF */
@@ -322,7 +326,9 @@ final readonly class ScannerProductSupplyDispatcher
             {
                 if(false === $handle)
                 {
-                    $this->logger->warning(message: sprintf('products-sign: Дубликат честного знака %s: ', $code));
+                    $this->logger->warning(
+                        message: sprintf('Дубликат честного знака %s: ', $code),
+                    );
 
                     /** Удаляем после обработки файл PDF */
                     $this->filesystem->remove($scanFileName);
@@ -338,7 +344,7 @@ final readonly class ScannerProductSupplyDispatcher
             else
             {
                 $this->logger->info(
-                    sprintf('products-sign: Честный знак создан: %s: %s', $handle->getId(), $code),
+                    sprintf('Честный знак создан: %s: %s', $handle->getId(), $code),
                     [self::class.':'.__LINE__],
                 );
 

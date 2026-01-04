@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\UseCase\Admin\Cancel\Tests;
 
+use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusCollection;
@@ -33,12 +34,17 @@ use BaksDev\Products\Supply\UseCase\Admin\Cleared\Invariable\ProductSupplyInvari
 use BaksDev\Products\Supply\UseCase\Admin\Cleared\ProductSupplyStatusClearedDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
 use Doctrine\ORM\EntityManagerInterface;
+use NewProductSupplyHandlerTest;
+use PHPUnit\Framework\Attributes\DependsOnClass;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
 #[When(env: 'test')]
+#[Group('products-supply')]
 class ProductSupplyStatusClearanceTest extends KernelTestCase
 {
+    #[DependsOnClass(NewProductSupplyHandlerTest::class)]
     public function testUseCase(): void
     {
         /**
@@ -54,8 +60,17 @@ class ProductSupplyStatusClearanceTest extends KernelTestCase
 
         $ProductSupply = $em->getRepository(ProductSupply::class)
             ->find(ProductSupplyUid::TEST);
+        self::assertInstanceOf(ProductSupply::class, $ProductSupply);
+
+
+        $ProductSupplyEvent = $em->getRepository(ProductSupplyEvent::class)
+            ->find($ProductSupply->getEvent());
+        self::assertInstanceOf(ProductSupplyEvent::class, $ProductSupplyEvent);
+
 
         $ClearanceProductSupplyDTO = new ProductSupplyStatusClearedDTO($ProductSupply->getEvent());
+        $ProductSupplyEvent->getDto($ClearanceProductSupplyDTO);
+
 
         $ClearanceProductSupplyInvariableDTO = new ProductSupplyInvariableDTO();
         $ClearanceProductSupplyInvariableDTO->setDeclaration('Wb0r4OS1Fx_test');

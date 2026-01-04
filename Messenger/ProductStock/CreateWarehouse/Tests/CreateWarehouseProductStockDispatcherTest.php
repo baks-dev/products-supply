@@ -67,7 +67,7 @@ class CreateWarehouseProductStockDispatcherTest extends KernelTestCase
             ->get(CreateWarehouseProductStockDispatcher::class);
 
         $message = new CreateWarehouseProductStockMessage(
-            $ProductSupply->getEvent(),
+            $ProductSupply->getId(),
             new UserProfileUid($profile),
             'comment'
         );

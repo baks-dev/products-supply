@@ -78,7 +78,7 @@ final readonly class PdfCropProductSupplyDispatcher
                 $this->filesystem->rename($info->getRealPath(), $info->getRealPath().'.error.txt');
 
                 $this->logger->critical(
-                    message: 'Ошибка при удалении неразмеченной пустой области в файле PDF',
+                    message: 'products-supply: Ошибка при удалении неразмеченной пустой области в файле PDF',
                     context: [$info->getRealPath(), self::class.':'.__LINE__],
                 );
 

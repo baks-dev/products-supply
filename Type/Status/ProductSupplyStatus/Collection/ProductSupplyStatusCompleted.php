@@ -26,7 +26,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection;
 
-use BaksDev\Products\Supply\Security\RoleProductSupplyStatus;
+use BaksDev\Products\Supply\Security\Role;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusInterface;
 use BaksDev\Users\Profile\Group\Security\RoleInterface;
 use BaksDev\Users\Profile\Group\Security\VoterInterface;
@@ -67,11 +67,11 @@ class ProductSupplyStatusCompleted implements ProductSupplyStatusInterface, Vote
     /** Правило доступа */
     public static function getVoter(): string
     {
-        return RoleProductSupplyStatus::ROLE.'_'.mb_strtoupper(self::STATUS);
+        return Role::ROLE.'_'.mb_strtoupper(self::STATUS);
     }
 
     public function equals(RoleInterface $role): bool
     {
-        return RoleProductSupplyStatus::ROLE === $role->getRole();
+        return Role::ROLE === $role->getRole();
     }
 }

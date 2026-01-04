@@ -26,11 +26,14 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\UseCase\Admin\Completed\Tests;
 
+use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Messenger\ProductSupply\CompletedStatusProductSupply\CompletedStatusProductSupplyDispatcher;
 use BaksDev\Products\Supply\Messenger\ProductSupply\CompletedStatusProductSupply\CompletedStatusProductSupplyMessage;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use Doctrine\ORM\EntityManagerInterface;
+use NewProductSupplyHandlerTest;
+use PHPUnit\Framework\Attributes\DependsOnClass;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
@@ -42,18 +45,30 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 #[When(env: 'test')]
 class ProductSupplyStatusCompletedTest extends KernelTestCase
 {
+    #[DependsOnClass(NewProductSupplyHandlerTest::class)]
     public function testUseCase(): void
     {
+        // Бросаем событие консольной команды
+        $dispatcher = self::getContainer()->get(EventDispatcherInterface::class);
+        $event = new ConsoleCommandEvent(new Command(), new StringInput(''), new NullOutput());
+        $dispatcher->dispatch($event, 'console.command');
+
         /** @var EntityManagerInterface $em */
         $em = self::getContainer()->get(EntityManagerInterface::class);
 
         $ProductSupply = $em->getRepository(ProductSupply::class)
             ->find(ProductSupplyUid::TEST);
 
-        // Бросаем событие консольной команды
-        $dispatcher = self::getContainer()->get(EventDispatcherInterface::class);
-        $event = new ConsoleCommandEvent(new Command(), new StringInput(''), new NullOutput());
-        $dispatcher->dispatch($event, 'console.command');
+        self::assertInstanceOf(ProductSupply::class, $ProductSupply);
+
+
+        $ProductSupplyEvent = $em->getRepository(ProductSupplyEvent::class)
+            ->find($ProductSupply->getEvent());
+
+        self::assertInstanceOf(ProductSupplyEvent::class, $ProductSupplyEvent);
+
+
+
 
         /** @var CompletedStatusProductSupplyDispatcher $CompletedProductSupplyDispatcher */
         $CompletedProductSupplyDispatcher = self::getContainer()->get(CompletedStatusProductSupplyDispatcher::class);

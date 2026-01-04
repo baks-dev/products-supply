@@ -55,7 +55,7 @@ use Symfony\Component\Routing\Attribute\Route;
  * @see assets/products-supply/supply_draggable.js
  */
 #[AsController]
-#[RoleSecurity('ROLE_PRODUCTS_SUPPLY_STATUS')]
+#[RoleSecurity('ROLE_PRODUCT_SUPPLY_STATUS')]
 final class StatusController extends AbstractController
 {
     public const string NAME = 'admin.supply.status';

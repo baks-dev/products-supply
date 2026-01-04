@@ -131,11 +131,11 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
                 '
                     event.id = main.event AND
                     event.status = :status 
-                '
+                ',
             )->setParameter(
                 key: 'status',
                 value: $this->status,
-                type: ProductSignStatus::TYPE
+                type: ProductSignStatus::TYPE,
             );
 
         /** Только для конкретной поставки */
@@ -147,12 +147,12 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
                 'sign_supply',
                 '
                     sign_supply.event = main.event AND
-                    sign_supply.supply = :supply'
+                    sign_supply.supply = :supply',
             )
             ->setParameter(
                 'supply',
                 $this->supply,
-                ProductSupplyUid::TYPE
+                ProductSupplyUid::TYPE,
             );
 
         $dbal
@@ -162,7 +162,7 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
                 'event',
                 ProductSignInvariable::class,
                 'invariable',
-                'invariable.main = main.id'
+                'invariable.main = main.id',
             );
 
         $dbal
@@ -170,7 +170,7 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
                 'invariable',
                 ProductSignCode::class,
                 'code',
-                'code.main = main.id'
+                'code.main = main.id',
             );
 
         /** Product */
@@ -180,14 +180,14 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
                 'invariable',
                 Product::class,
                 'product',
-                'product.id = invariable.product'
+                'product.id = invariable.product',
             );
 
         $dbal->join(
             'product',
             ProductEvent::class,
             'product_event',
-            'product_event.id = product.event'
+            'product_event.id = product.event',
         );
 
         /**
@@ -199,7 +199,7 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
                 'product',
                 ProductInfo::class,
                 'product_info',
-                'product_info.product = product.id'
+                'product_info.product = product.id',
             );
 
         $dbal
@@ -208,7 +208,7 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
                 'product',
                 ProductTrans::class,
                 'product_trans',
-                'product_trans.event = product.event AND product_trans.local = :local'
+                'product_trans.event = product.event AND product_trans.local = :local',
             );
 
         /**
@@ -222,7 +222,7 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
                 'product',
                 ProductOffer::class,
                 'product_offer',
-                'product_offer.event = product.event AND product_offer.const = invariable.offer'
+                'product_offer.event = product.event AND product_offer.const = invariable.offer',
             );
 
         /** Получаем тип торгового предложения */
@@ -232,7 +232,7 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
                 'product_offer',
                 CategoryProductOffers::class,
                 'category_offer',
-                'category_offer.id = product_offer.category_offer'
+                'category_offer.id = product_offer.category_offer',
             );
 
         /** Множественные варианты торгового предложения */
@@ -244,7 +244,7 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
                 'product_offer',
                 ProductVariation::class,
                 'product_variation',
-                'product_variation.offer = product_offer.id AND product_variation.const = invariable.variation'
+                'product_variation.offer = product_offer.id AND product_variation.const = invariable.variation',
             );
 
         /** Получаем тип множественного варианта */
@@ -254,7 +254,7 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
                 'product_variation',
                 CategoryProductVariation::class,
                 'category_variation',
-                'category_variation.id = product_variation.category_variation'
+                'category_variation.id = product_variation.category_variation',
             );
 
         /** Модификация множественного варианта торгового предложения */
@@ -266,7 +266,7 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
                 'product_variation',
                 ProductModification::class,
                 'product_modification',
-                'product_modification.variation = product_variation.id AND product_modification.const = invariable.modification'
+                'product_modification.variation = product_variation.id AND product_modification.const = invariable.modification',
             );
 
         /** Получаем тип модификации множественного варианта */
@@ -276,7 +276,7 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
                 'product_modification',
                 CategoryProductModification::class,
                 'category_offer_modification',
-                'category_offer_modification.id = product_modification.category_modification'
+                'category_offer_modification.id = product_modification.category_modification',
             );
 
         /** Артикул продукта */
@@ -287,8 +287,14 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
                 product_variation.article,
                 product_offer.article,
                 product_info.article
-            ) AS product_article'
+            ) AS product_article',
         );
+
+        $dbal
+            ->addOrderBy('product_modification.value')
+            ->addOrderBy('product_variation.value')
+            ->addOrderBy('product_offer.value')
+            ->addOrderBy('product.id');
 
         $dbal->allGroupByExclude();
 
