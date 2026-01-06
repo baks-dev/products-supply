@@ -38,9 +38,12 @@ use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignHandler;
 use BaksDev\Products\Supply\UseCase\Admin\ProductsSign\New\ProductSignNewDTO;
 use DateTimeImmutable;
+use Doctrine\ORM\Mapping\Table;
 use Exception;
 use Imagick;
 use Psr\Log\LoggerInterface;
+use ReflectionAttribute;
+use ReflectionClass;
 use SplFileInfo;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
@@ -71,21 +74,50 @@ final readonly class ScannerProductSupplyDispatcher
             return;
         }
 
-        $file = new SplFileInfo($message->getRealPath());
 
-        /** Директория загрузки изображения с кодом после сканирования */
-        $productSupplyScanDir = implode(DIRECTORY_SEPARATOR, [
-            $this->projectDir, 'public', 'upload', 'product_supply_code', '',
-        ]);
+        /** Директория загрузки изображения с кодом по названию таблицы ProductSignCode */
 
-        /** Если директория загрузки не найдена - создаем с правами 0700 */
+        $ref = new ReflectionClass(ProductSignCode::class);
+        /** @var ReflectionAttribute $current */
+        $current = current($ref->getAttributes(Table::class));
+
+        if(!isset($current->getArguments()['name']))
+        {
+            $this->logger->critical(
+                sprintf(
+                    'Невозможно определить название таблицы из класса сущности %s ',
+                    ProductSignCode::class,
+                ),
+                [self::class.':'.__LINE__],
+            );
+        }
+
+        /**
+         * Создаем полный путь для сохранения изображения с кодом по таблице сущности
+         */
+        $pathCode = null;
+        $pathCode[] = $this->projectDir;
+        $pathCode[] = 'public';
+        $pathCode[] = 'upload';
+        $pathCode[] = $current->getArguments()['name'];
+        $pathCode[] = '';
+
+        /**
+         * Директория загрузки изображения с кодом после сканирования
+         * Если директория загрузки не найдена - создаем с правами 0700
+         */
+        $productSupplyScanDir = implode(DIRECTORY_SEPARATOR, $pathCode);
         $this->filesystem->exists($productSupplyScanDir) ?: $this->filesystem->mkdir($productSupplyScanDir);
+
+
+        /** Директория с файлом PDF для сканирования */
+        $file = new SplFileInfo($message->getRealPath());
 
         if(
             false === $file->isFile() ||
             false === $file->getRealPath() ||
-            false === file_exists($file->getRealPath()) ||
             false === ('pdf' === $file->getExtension()) ||
+            false === file_exists($file->getRealPath()) ||
             false === str_starts_with($file->getFilename(), 'crop')
         )
         {
@@ -139,25 +171,6 @@ final readonly class ScannerProductSupplyDispatcher
             /** Преобразуем PDF страницу в PNG и сохраняем временный файл для расчета его хеша */
             $Imagick->setIteratorIndex($number);
             $Imagick->setImageFormat('png');
-
-            //            /**
-            //             * В некоторых случаях может вызывать ошибку.
-            //             * В таком случае сохраняем без рамки и пробуем отсканировать как есть
-            //             */
-            //            try
-            //            {
-            //                $Imagick->borderImage('white', 5, 5);
-            //            }
-            //            catch(Exception $e)
-            //            {
-            //                $this->logger->critical(
-            //                    message: ' Ошибка при добавлении рамки к изображению. Пробуем отсканировать как есть.',
-            //                    context: [
-            //                        $e->getMessage(),
-            //                        self::class.':'.__LINE__
-            //                    ]
-            //                );
-            //            }
 
             /**
              * Записываем изображение в указанное имя файла
