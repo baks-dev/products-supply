@@ -138,7 +138,7 @@ final readonly class ScannerProductSupplyDispatcher
         Imagick::setResourceLimit(Imagick::RESOURCETYPE_MEMORY, (256 * 1024 * 1024));
 
         $Imagick = new Imagick();
-        $Imagick->setResolution(500, 500);
+        $Imagick->setResolution(400, 400);
 
         try
         {
