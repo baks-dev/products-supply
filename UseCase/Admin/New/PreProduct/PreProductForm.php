@@ -48,6 +48,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class PreProductForm extends AbstractType
 {
@@ -59,6 +60,7 @@ final class PreProductForm extends AbstractType
         private readonly ProductOfferChoiceInterface $productOfferChoiceRepository,
         private readonly ProductVariationChoiceInterface $productVariationChoiceRepository,
         private readonly ProductModificationChoiceInterface $productModificationChoiceRepository,
+        private readonly TranslatorInterface $translator
     ) {}
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -297,7 +299,10 @@ final class PreProductForm extends AbstractType
 
                         if($offer->getAttr())
                         {
-                            $attr['data-name'] = $offer->getAttr();
+                            $attr['data-name'] = $this->translator->trans(
+                                id: $offer->getAttr(),
+                                domain: $offer->getReference(),
+                            );
                         }
 
                         if($offer?->getCharacteristic())
@@ -372,7 +377,10 @@ final class PreProductForm extends AbstractType
 
                         if($variation->getAttr())
                         {
-                            $attr['data-name'] = $variation->getAttr();
+                            $attr['data-name'] = $this->translator->trans(
+                                id: $variation->getAttr(),
+                                domain: $variation->getReference(),
+                            );
                         }
 
                         if($variation?->getCharacteristic())
@@ -449,7 +457,10 @@ final class PreProductForm extends AbstractType
 
                         if($modification->getAttr())
                         {
-                            $attr['data-name'] = $modification->getAttr();
+                            $attr['data-name'] = $this->translator->trans(
+                                id: $modification->getAttr(),
+                                domain: $modification->getReference(),
+                            );
                         }
 
                         if($modification?->getCharacteristic())

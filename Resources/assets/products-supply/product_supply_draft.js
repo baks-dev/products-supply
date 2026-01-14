@@ -568,10 +568,10 @@ function addProductOrder()
      * Строка со значениями полей формы продукта (название, параметры, количество и т.д.)
      */
 
-    let $productName = "<b>" + $preProduct.options[$preProduct.selectedIndex].dataset.name + "</b>";
-    let $variationName = $preVariation?.tagName === "SELECT" ? "<small class=\"text-muted\">" + document.querySelector("label[for=\"" + $preVariation.id + "\"]").textContent + "</small> <b>" + $preVariation.options[$preVariation.selectedIndex].dataset.name + "</b>" : "";
-    let $modificationName = $preModification?.tagName === "SELECT" ? "<small class=\"text-muted\">" + document.querySelector("label[for=\"" + $preModification.id + "\"]").textContent + "</small> <b>" + $preModification.options[$preModification.selectedIndex].dataset.name + "</b>" : "";
-    let $offerName = $preOffer?.tagName === "SELECT" ? "<small class=\"text-muted\">" + document.querySelector("label[for=\"" + $preOffer.id + "\"]").textContent + "</small> <b>" + $preOffer.options[$preOffer.selectedIndex].dataset.name + "</b>" : "";
+    let $productName = "<b>" + $preProduct.options[$preProduct.selectedIndex].dataset.name + "</b>&nbsp;";
+    let $variationName = $preVariation?.tagName === "SELECT" ? "&nbsp;<small class=\"text-muted\">" + document.querySelector("label[for=\"" + $preVariation.id + "\"]").textContent + ":&nbsp;</small> <b>" + $preVariation.options[$preVariation.selectedIndex].dataset.name + "</b>" : "";
+    let $modificationName = $preModification?.tagName === "SELECT" ? "&nbsp;<small class=\"text-muted\">" + document.querySelector("label[for=\"" + $preModification.id + "\"]").textContent + ":&nbsp;</small> <b>" + $preModification.options[$preModification.selectedIndex].dataset.name + "</b>" : "";
+    let $offerName = $preOffer?.tagName === "SELECT" ? "&nbsp;<small class=\"text-muted\">" + document.querySelector("label[for=\"" + $preOffer.id + "\"]").textContent + ":&nbsp;</small> <b>" + $preOffer.options[$preOffer.selectedIndex].dataset.name + "</b>" : "";
     let $productTextBlock = elementCollectionBlock.querySelector("#product-text-" + index);
     $productTextBlock.innerHTML = $productName + " " + $offerName + " " + $variationName + " " + $modificationName + "&nbsp; : &nbsp;<b>" + $TOTAL + " шт.</b>";
 
