@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * При присвоении поставке статуса New «Новая» -
- * бронирует ОДИН Честный знак на ОДНУ единицу продукции в поставке
+ * запускает процесс резервирования ОДИНОГО Честный знака на ОДНУ единицу продукции в поставке
  * @see ProcessReservationProductSignDispatcher
  */
 #[AsMessageHandler(priority: 0)]
