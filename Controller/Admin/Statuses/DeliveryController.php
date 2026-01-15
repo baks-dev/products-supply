@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +38,7 @@ use BaksDev\Products\Supply\Forms\Statuses\ProductSupplyIdDTO;
 use BaksDev\Products\Supply\Messenger\ProductStock\CreateWarehouse\CreateWarehouseProductStockMessage;
 use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductSupplyEventInterface;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusDelivery;
+use BaksDev\Products\Supply\UseCase\Admin\Delivery\Arrival\ProductSupplyArrivalDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Delivery\ProductSupplyStatusDeliveryDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
 use Psr\Log\LoggerInterface;
@@ -147,6 +148,12 @@ final class DeliveryController extends AbstractController
                 }
 
                 $ProductSupplyStatusDeliveryDTO = new ProductSupplyStatusDeliveryDTO($ProductSupplyEvent->getId());
+
+                /** Ожидаемая дата прибытия */
+                $ProductSupplyArrivalDTO = new ProductSupplyArrivalDTO();
+                $ProductSupplyArrivalDTO->setValue($DeliveryProductSupplyDTO->getArrival());
+                $ProductSupplyStatusDeliveryDTO->setArrival($ProductSupplyArrivalDTO);
+
                 $ProductSupply = $editProductSupplyHandler->handle($ProductSupplyStatusDeliveryDTO);
 
                 if(true === $ProductSupply instanceof ProductSupply)

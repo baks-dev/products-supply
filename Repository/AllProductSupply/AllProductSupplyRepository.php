@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,10 @@ namespace BaksDev\Products\Supply\Repository\AllProductSupply;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Core\Form\Search\SearchDTO;
+use BaksDev\Products\Supply\Entity\Event\Arrival\ProductSupplyArrival;
+use BaksDev\Products\Supply\Entity\Event\Created\ProductSupplyCreated;
 use BaksDev\Products\Supply\Entity\Event\Invariable\ProductSupplyInvariable;
+use BaksDev\Products\Supply\Entity\Event\Modify\ProductSupplyModify;
 use BaksDev\Products\Supply\Entity\Event\Personal\ProductSupplyPersonal;
 use BaksDev\Products\Supply\Entity\Event\Product\ProductSupplyProduct;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
@@ -134,6 +137,36 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 ProductSupplyInvariable::class,
                 'product_supply_invariable',
                 'product_supply_invariable.event = product_supply_event.id'
+            );
+
+        /** Created */
+        $dbal
+            ->addSelect('product_supply_created.value AS supply_created')
+            ->leftJoin(
+                'product_supply_event',
+                ProductSupplyCreated::class,
+                'product_supply_created',
+                'product_supply_created.event = product_supply_event.id'
+            );
+
+        /** Created */
+        $dbal
+            ->addSelect('product_supply_modify.mod_date AS supply_mod_date')
+            ->leftJoin(
+                'product_supply_event',
+                ProductSupplyModify::class,
+                'product_supply_modify',
+                'product_supply_modify.event = product_supply_event.id'
+            );
+
+        /** Arrival */
+        $dbal
+            ->addSelect('product_supply_arrival.value AS supply_arrival')
+            ->leftJoin(
+                'product_supply_event',
+                ProductSupplyArrival::class,
+                'product_supply_arrival',
+                'product_supply_arrival.event = product_supply_event.id'
             );
 
         /**
