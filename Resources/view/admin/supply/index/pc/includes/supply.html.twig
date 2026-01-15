@@ -29,12 +29,81 @@
 
             <div class="card-body d-flex justify-content-between small p-2">
 
-            <div class="d-flex flex-column justify-content-between gap-1 offcanvas-link small"
+                <div class="d-flex flex-column gap-1 offcanvas-link small"
                      data-href='{{ path('products-supply:admin.supply.detail', { id : supply.id }) }}'
                      data-id='{{ supply.id }}'
                      style="cursor: help">
 
-                    <span class="text-muted ">{{ supply.id|uuid_format_date }}</span>
+                    {# Дата создания и последнего изменения #}
+
+                    {% set dedline = date(supply.dateModify) %}
+                    {% set difference = dedline.diff(date("now")) %}
+                    {% set day = difference.days ?: null %}
+                    {% set hour = difference.h ?: null %}
+
+                    <div class="small">
+
+                        {% if supply.supplyCreated is not null %}
+                            <span class="text-muted ">{{ supply.supplyCreated|format_datetime(pattern="d MMMM") }} | </span>
+                        {% else %}
+                            <span class="text-muted ">{{ supply.id|uuid_format_date|format_datetime(pattern="d MMMM") }} | </span>
+                        {% endif %}
+
+                        <strong role="tooltip"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="bottom"
+                                data-bs-delay='{"show":600,"hide":100}'
+                                title="Последнее движение по заказу"
+                                class="small {{ day ? 'text-danger' : 'text-success' }}">
+
+                            {% if day %}
+                                {{ day }}<span class="small">д.</span>
+                            {% endif %}
+
+                            {% if hour %}
+                                {{ hour }}<span class="small">ч.</span>
+                            {% endif %}
+
+                            {% if day is null %}
+                                {% if hour is empty and difference.i is empty %}
+                                    Новая
+                                {% else %}
+                                    {{ difference.i }}<span class="small">м.</span>
+                                {% endif %}
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+                    {# Дата планируемого поступления #}
+                    {% if supply.supplyArrival is not null %}
+
+                        {% set arrivalDedline = date(supply.supplyArrival) %}
+                        {% set arrivalDifference = arrivalDedline.diff(date("now")) %}
+                        {% set arrivalDay = arrivalDifference.days ?: null %}
+
+                        <div class="small">
+
+                            <span class="text-muted ">Поступление - </span>
+                            <span class="text-muted ">{{ supply.supplyArrival|format_datetime(pattern="d MMMM") }} | </span>
+
+                            <strong role="tooltip"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="bottom"
+                                    data-bs-delay='{"show":600,"hide":100}'
+                                    title="Последнее движение по заказу"
+                                    class="small {{ arrivalDifference.invert == 0 and arrivalDay > 0 ? 'text-danger' : 'text-success' }}">
+
+                                {% if arrivalDay %}
+                                    {{ arrivalDay }}<span class="small">д.</span>
+                                {% else %}
+                                    <span>сегодня</span>
+                                {% endif %}
+
+                            </strong>
+                        </div>
+                    {% endif %}
 
                     {% set total = supply.supplyProducts|reduce((carry, product) => carry + (product.total ?? 0), 0) %}
 

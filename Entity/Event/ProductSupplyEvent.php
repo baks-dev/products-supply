@@ -1,7 +1,7 @@
 <?php
 
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,8 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\Entity\Event;
 
 use BaksDev\Core\Entity\EntityEvent;
+use BaksDev\Products\Supply\Entity\Event\Arrival\ProductSupplyArrival;
+use BaksDev\Products\Supply\Entity\Event\Created\ProductSupplyCreated;
 use BaksDev\Products\Supply\Entity\Event\Invariable\ProductSupplyInvariable;
 use BaksDev\Products\Supply\Entity\Event\Modify\ProductSupplyModify;
 use BaksDev\Products\Supply\Entity\Event\Personal\ProductSupplyPersonal;
@@ -78,6 +80,12 @@ class ProductSupplyEvent extends EntityEvent
     private ?string $comment = null;
 
     /**
+     * Дата создания поставки
+     */
+    #[ORM\OneToOne(targetEntity: ProductSupplyCreated::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
+    private ProductSupplyCreated $created;
+
+    /**
      * Постоянная величина
      */
     #[ORM\OneToOne(targetEntity: ProductSupplyInvariable::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
@@ -96,6 +104,12 @@ class ProductSupplyEvent extends EntityEvent
     private ProductSupplyModify $modify;
 
     /**
+     * Планируемая дата поступления
+     */
+    #[ORM\OneToOne(targetEntity: ProductSupplyArrival::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
+    private ProductSupplyArrival $arrival;
+
+    /**
      * Коллекция продуктов в поставке
      */
     #[Assert\Valid]
@@ -106,6 +120,7 @@ class ProductSupplyEvent extends EntityEvent
     public function __construct()
     {
         $this->id = new ProductSupplyEventUid();
+        $this->created = new ProductSupplyCreated($this);
         $this->modify = new ProductSupplyModify($this);
     }
 

@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@ use BaksDev\Products\Supply\Entity\Event\ProductSupplyEventInterface;
 use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusDelivery;
+use BaksDev\Products\Supply\UseCase\Admin\Delivery\Arrival\ProductSupplyArrivalDTO;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -50,6 +51,10 @@ final class ProductSupplyStatusDeliveryDTO implements ProductSupplyEventInterfac
     #[Assert\NotBlank]
     private ProductSupplyStatus $status;
 
+    /** Планируемая дата поступления */
+    #[Assert\Valid]
+    private ProductSupplyArrivalDTO $arrival;
+
     public function __construct(ProductSupplyEventUid $id)
     {
         $this->id = $id;
@@ -64,8 +69,25 @@ final class ProductSupplyStatusDeliveryDTO implements ProductSupplyEventInterfac
         return $this->id;
     }
 
+    /**
+     * Статус
+     */
     public function getStatus(): ProductSupplyStatus
     {
         return $this->status;
+    }
+
+    /**
+     * Планируемая дата прибытия
+     */
+    public function setArrival(ProductSupplyArrivalDTO $arrival): ProductSupplyStatusDeliveryDTO
+    {
+        $this->arrival = $arrival;
+        return $this;
+    }
+
+    public function getArrival(): ProductSupplyArrivalDTO
+    {
+        return $this->arrival;
     }
 }

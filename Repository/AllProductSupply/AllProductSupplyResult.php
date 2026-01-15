@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ namespace BaksDev\Products\Supply\Repository\AllProductSupply;
 use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
+use DateTimeImmutable;
 
 final readonly class AllProductSupplyResult
 {
@@ -36,6 +37,9 @@ final readonly class AllProductSupplyResult
         private string $supply_status,
         private string $supply_number,
         private string $supply_products,
+        private string $supply_mod_date,
+        private ?string $supply_created,
+        private ?string $supply_arrival,
     ) {}
 
     public function getId(): ProductSupplyUid
@@ -78,5 +82,20 @@ final readonly class AllProductSupplyResult
         }
 
         return $products;
+    }
+
+    public function getDateModify(): DateTimeImmutable
+    {
+        return new DateTimeImmutable($this->supply_mod_date);
+    }
+
+    public function getSupplyCreated(): ?DateTimeImmutable
+    {
+        return $this->supply_created ? new DateTimeImmutable($this->supply_created) : null;
+    }
+
+    public function getSupplyArrival(): ?DateTimeImmutable
+    {
+        return $this->supply_arrival ? new DateTimeImmutable($this->supply_arrival) : null;
     }
 }
