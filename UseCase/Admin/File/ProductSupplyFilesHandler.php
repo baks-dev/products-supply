@@ -27,7 +27,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\UseCase\Admin\File;
 
 use BaksDev\Core\Messenger\MessageDispatchInterface;
-use BaksDev\Products\Supply\Messenger\ProductSupply\Files\FileScannerProductSupplyMessage;
+use BaksDev\Products\Supply\Messenger\ProductSupply\LoadFilesSigns\LoadFilesSignsMessage;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
@@ -55,7 +55,7 @@ final readonly class ProductSupplyFilesHandler
 
         $uploadDir = implode(DIRECTORY_SEPARATOR, [
             $this->project_dir,
-            'public', 'upload', 'barcode', 'products-supply', $command->getUsr(), $command->getProfile()
+            'public', 'upload', 'barcode', 'products-supply', $command->getUsr(), $command->getProfile(),
         ]);
 
         /**
@@ -115,15 +115,27 @@ final readonly class ProductSupplyFilesHandler
             }
         }
 
+        //        /** Обрабатываем все загруженные файлы */
+        //        $this->messageDispatch->dispatch(
+        //            message: new FileScannerProductSupplyMessage(
+        //                dir: $uploadDir,
+        //                usr: $command->getUsr(),
+        //                profile: $command->getProfile(),
+        //            ),
+        //            transport: 'products-supply',
+        //        );
+
+
         /** Обрабатываем все загруженные файлы */
         $this->messageDispatch->dispatch(
-            message: new FileScannerProductSupplyMessage(
+            message: new LoadFilesSignsMessage(
                 dir: $uploadDir,
                 usr: $command->getUsr(),
                 profile: $command->getProfile(),
             ),
             transport: 'products-supply',
         );
+
 
         return true;
     }
