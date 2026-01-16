@@ -74,22 +74,44 @@ final readonly class LoadFilesSignsDispatcher
 
             if($isCrop)
             {
-                $ScannerImageProductSupplyMessage = new ScannerImageProductSupplyMessage(
-                    $info->getPath(),
-                    $message->getUsr(),
-                    $message->getProfile(),
-                    $part,
-                );
 
-                $this->MessageDispatch
-                    ->dispatch(
-                        message: $ScannerImageProductSupplyMessage,
-                        transport: 'barcode',
+                /** Создаем сообщения на сканер стикеров честного знака */
+
+                $imgDirPath = $info->getPath().DIRECTORY_SEPARATOR.$part;
+                $imgDirectory = new RecursiveDirectoryIterator($imgDirPath);
+                $imgIterator = new RecursiveIteratorIterator($imgDirectory);
+
+                foreach($imgIterator as $image)
+                {
+                    if(
+                        false === $image->isFile() ||
+                        false === $image->getRealPath() ||
+                        false === ($image->getExtension() === 'png') ||
+                        false === file_exists($image->getRealPath())
+                    )
+                    {
+                        continue;
+                    }
+
+                    $ScannerImageProductSupplyMessage = new ScannerImageProductSupplyMessage(
+                        $image->getRealPath(),
+                        $message->getUsr(),
+                        $message->getProfile(),
+                        $part,
                     );
 
-                ///** Удаляем после обработки основной файл PDF и doc_data.txt */
+                    $this->MessageDispatch
+                        ->dispatch(
+                            message: $ScannerImageProductSupplyMessage,
+                            transport: 'barcode',
+                        );
+                }
+
+                ///** Удаляем после обработки основной файл PDF */
                 $this->filesystem->remove($info->getRealPath());
             }
+
         }
+
     }
 }

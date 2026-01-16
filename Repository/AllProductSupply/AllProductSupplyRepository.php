@@ -233,7 +233,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
         {
             $dbal
                 ->createSearchQueryBuilder($this->search)
-                ->addSearchLike('product_supply_product.barcode')
+                //->addSearchLike('product_supply_product.barcode')
                 ->addSearchLike('product_supply_invariable.number');
         }
 

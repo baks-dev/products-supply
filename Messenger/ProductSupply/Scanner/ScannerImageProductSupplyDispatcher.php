@@ -39,8 +39,6 @@ use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignHandler;
 use BaksDev\Products\Supply\UseCase\Admin\ProductsSign\New\ProductSignNewDTO;
 use Doctrine\ORM\Mapping\Table;
 use Psr\Log\LoggerInterface;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use ReflectionAttribute;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -66,10 +64,7 @@ final readonly class ScannerImageProductSupplyDispatcher
 
     public function __invoke(ScannerImageProductSupplyMessage $message): void
     {
-        $pathDirScanner = $message->getRealPath().DIRECTORY_SEPARATOR.$message->getPart();
-
-        /** Директории больше не существует */
-        if(false === $this->filesystem->exists($pathDirScanner))
+        if(false === $this->filesystem->exists($message->getRealPath()))
         {
             return;
         }
@@ -80,20 +75,102 @@ final readonly class ScannerImageProductSupplyDispatcher
         /** @var ReflectionAttribute $current */
         $current = current($ref->getAttributes(Table::class));
 
-        if(!isset($current->getArguments()['name']))
+        if(false === isset($current->getArguments()['name']))
         {
             $this->logger->critical(
                 sprintf(
-                    'Невозможно определить название таблицы из класса сущности %s ',
+                    'products-supply: Невозможно определить название таблицы из класса сущности %s',
                     ProductSignCode::class,
                 ),
                 [self::class.':'.__LINE__],
             );
         }
 
+
         /**
-         * Создаем полный путь для сохранения изображения с кодом по таблице сущности
+         * Сканируем Честный знак
          */
+
+        $decode = $this->barcodeRead->decode($message->getRealPath());
+
+        if(true === $decode->isError())
+        {
+            $this->logger->critical(
+                'products-supply: Ошибка при сканировании файла ',
+                [self::class.':'.__LINE__, $message->getRealPath()],
+            );
+
+            return;
+        }
+
+        /** Код из изображения */
+        $code = $decode->getText();
+
+        /** Получаем Штрихкод (GTIN) из Честного знака */
+        $parseCode = preg_match('/^\(\d+\)(.*?)\(\d+\)/', $code, $matches);
+
+        if(0 === $parseCode || false === $parseCode)
+        {
+            $this->logger->critical(
+                message: 'products-supply: Не удалось извлечь штрихкод после сканирования Честного знака. Code: '.$code,
+                context: [self::class.':'.__LINE__, $code],
+            );
+
+            $this->filesystem->remove($message->getRealPath());
+
+            return;
+        }
+
+
+        $ProductSignNewDTO = new ProductSignNewDTO();
+
+
+        /** Находим продукт по штрихкоду */
+        if(1 === $parseCode)
+        {
+            /** Код партии */
+            $partCode = $matches[1];
+            $barcodes = [$matches[1]];
+
+            /** Если штрихкод начинается с 0 - добавляем вариант без 0 */
+            if(str_starts_with($matches[1], '0'))
+            {
+                $barcodes[] = ltrim($matches[1], '0');
+            }
+
+            /** Продукт по штрихкоду */
+            $product = $this->productIdentifiersByBarcodeRepository
+                ->byBarcodes($barcodes)
+                ->find();
+
+            /** Присваиваем продукт */
+            if(true === $product instanceof ProductIdsByBarcodesResult)
+            {
+                $ProductSignNewDTO->getInvariable()
+                    ->setProduct($product->getProduct())
+                    ->setOffer($product->getOfferConst())
+                    ->setVariation($product->getVariationConst())
+                    ->setModification($product->getModificationConst());
+            }
+
+            /** Если продукт не найден */
+            if(false === $product instanceof ProductIdsByBarcodesResult)
+            {
+                $this->logger->warning(
+                    message: sprintf(
+                        'Не удалось найти продукт по штрихкоду %s из Честного знака. Честный знак НЕ БУДЕТ создан', $partCode,
+                    ),
+                    context: [
+                        'штрихкоды' => $barcodes,
+                        self::class.':'.__LINE__,
+                    ],
+                );
+
+                return;
+            }
+        }
+
+        /** Создаем полный путь для сохранения изображения с кодом по таблице сущности*/
         $pathCode = null;
         $pathCode[] = $this->projectDir;
         $pathCode[] = 'public';
@@ -101,173 +178,70 @@ final readonly class ScannerImageProductSupplyDispatcher
         $pathCode[] = $current->getArguments()['name'];
         $pathCode[] = '';
 
-
-        /** Итерируемся по директории и сканируем файлы изображений */
-
-        $directory = new RecursiveDirectoryIterator($pathDirScanner);
-        $iterator = new RecursiveIteratorIterator($directory);
+        $scanDirName = md5($code);
+        $productSignDir = implode(DIRECTORY_SEPARATOR, $pathCode);
 
 
-        foreach($iterator as $info)
+        $renameDir = $productSignDir.$scanDirName.DIRECTORY_SEPARATOR.'image.png';
+
+        if(true === $this->filesystem->exists($renameDir))
         {
-            // This condition execution costs less than the previous one
-            if(
-                false === $info->isFile() ||
-                false === $info->getRealPath() ||
-                false === ($info->getExtension() === 'png') ||
-                false === file_exists($info->getRealPath())
-            )
-            {
-                continue;
-            }
-
-
-            /**
-             * Сканируем Честный знак
-             */
-
-            $decode = $this->barcodeRead->decode($info->getRealPath());
-
-            if(true === $decode->isError())
-            {
-                $this->logger->critical(
-                    'products-supply: Ошибка при сканировании файла ',
-                    [self::class.':'.__LINE__, $info->getRealPath()],
-                );
-
-                continue;
-            }
-
-
-            $ProductSignNewDTO = new ProductSignNewDTO();
-
-            /** Код из изображения */
-            $code = $decode->getText();
-
-            /** Получаем Штрихкод (GTIN) из Честного знака */
-            $parseCode = preg_match('/^\(\d+\)(.*?)\(\d+\)/', $code, $matches);
-
-            if(0 === $parseCode || false === $parseCode)
-            {
-                $this->logger->critical(
-                    message: 'products-supply: Не удалось извлечь штрихкод после сканирования Честного знака. Code: '.$code,
-                    context: [self::class.':'.__LINE__, $parseCode],
-                );
-
-                continue;
-            }
-
-            /** Находим продукт по штрихкоду */
-            if(1 === $parseCode)
-            {
-                /** Код партии */
-                $partCode = $matches[1];
-                $barcodes = [$matches[1]];
-
-                /** Если штрихкод начинается с 0 - добавляем вариант без 0 */
-                if(str_starts_with($matches[1], '0'))
-                {
-                    $barcodes[] = ltrim($matches[1], '0');
-                }
-
-                /** Продукт по штрихкоду */
-                $product = $this->productIdentifiersByBarcodeRepository
-                    ->byBarcodes($barcodes)
-                    ->find();
-
-                /** Присваиваем продукт */
-                if(true === $product instanceof ProductIdsByBarcodesResult)
-                {
-                    $ProductSignNewDTO->getInvariable()
-                        ->setProduct($product->getProduct())
-                        ->setOffer($product->getOfferConst())
-                        ->setVariation($product->getVariationConst())
-                        ->setModification($product->getModificationConst());
-                }
-
-                /** Если продукт не найден */
-                if(false === $product instanceof ProductIdsByBarcodesResult)
-                {
-                    $this->logger->warning(
-                        message: sprintf(
-                            'Не удалось найти продукт по штрихкоду %s из Честного знака. Честный знак НЕ БУДЕТ СОЗДАН', $partCode,
-                        ),
-                        context: [
-                            'штрихкоды' => $barcodes,
-                            self::class.':'.__LINE__,
-                        ],
-                    );
-
-                    continue;
-                }
-            }
-
-
-            /**
-             * Переименовываем директорию по коду честного знака (для уникальности)
-             */
-
-            $scanDirName = md5($code);
-            $productSignDir = implode(DIRECTORY_SEPARATOR, $pathCode);
-            $renameDir = $productSignDir.$scanDirName.DIRECTORY_SEPARATOR.'image.png';
-
-            if(true === $this->filesystem->exists($renameDir))
-            {
-                // Удаляем файл если уже имеется
-                $this->filesystem->remove($info->getRealPath());
-                continue;
-            }
-
-            // переименовываем файл если не существует
-            $this->filesystem->rename($info->getRealPath(), $renameDir);
-
-            /**
-             * Присваиваем результат сканера
-             */
-
-            $ProductSignNewDTO->getCode()
-                ->setCode($code)
-                ->setName($scanDirName)
-                ->setPngExt();
-
-            $ProductSignNewDTO->getInvariable()
-                ->setPart($message->getPart())
-                ->setUsr($message->getUsr())
-                ->setProfile($message->getProfile());
-
-            $handle = $this->productSignHandler->handle($ProductSignNewDTO);
-
-            if(false === ($handle instanceof ProductSign))
-            {
-                if(false === $handle)
-                {
-                    $this->logger->warning(
-                        message: sprintf('Дубликат честного знака %s: ', $code),
-                    );
-
-                    continue;
-                }
-
-                $this->logger->critical(
-                    message: sprintf('products-sign: Ошибка %s при сохранении информации о Честном знаке: ', $handle),
-                    context: [self::class.':'.__LINE__],
-                );
-            }
-            else
-            {
-                $this->logger->info(
-                    sprintf('Честный знак создан: %s: %s', $handle->getId(), $code),
-                    [self::class.':'.__LINE__],
-                );
-
-                /** Создаем команду для отправки файла CDN */
-                $this->messageDispatch->dispatch(
-                    new CDNUploadImageMessage($handle->getId(), ProductSignCode::class, $scanDirName),
-                    transport: 'files-res-low',
-                );
-            }
+            // Удаляем файл если уже имеется
+            $this->filesystem->remove($message->getRealPath());
+            return;
         }
 
+        /** Создаем директорию для перемещения если отсутствует  */
+        $productImageSignDir = $productSignDir.$scanDirName;
 
+        if(false === $this->filesystem->exists($productImageSignDir))
+        {
+            $this->filesystem->mkdir($productImageSignDir);
+        }
+
+        /**
+         * Перемещаем файл с изображением в директорию честного знака и присваиваем результат сканера
+         */
+
+        $this->filesystem->rename($message->getRealPath(), $renameDir, true);
+
+        $ProductSignNewDTO->getCode()
+            ->setCode($code)
+            ->setName($scanDirName)
+            ->setPngExt();
+
+        $ProductSignNewDTO->getInvariable()
+            ->setPart($message->getPart())
+            ->setUsr($message->getUsr())
+            ->setProfile($message->getProfile());
+
+        $handle = $this->productSignHandler->handle($ProductSignNewDTO);
+
+        if(false === ($handle instanceof ProductSign))
+        {
+            if(false === $handle)
+            {
+                $this->logger->warning(message: sprintf('Дубликат честного знака %s: ', $code));
+                return;
+            }
+
+            $this->logger->critical(
+                message: sprintf('products-sign: Ошибка %s при сохранении информации о Честном знаке: ', $handle),
+                context: [self::class.':'.__LINE__],
+            );
+        }
+        else
+        {
+            $this->logger->info(
+                sprintf('Добавили честный знак: %s: %s', $handle->getId(), $code),
+                [self::class.':'.__LINE__],
+            );
+
+            /** Создаем команду для отправки файла CDN */
+            $this->messageDispatch->dispatch(
+                new CDNUploadImageMessage($handle->getId(), ProductSignCode::class, $scanDirName),
+                transport: 'files-res-low',
+            );
+        }
     }
 }
