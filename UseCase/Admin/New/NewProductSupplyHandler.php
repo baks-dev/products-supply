@@ -67,7 +67,7 @@ final class NewProductSupplyHandler extends AbstractHandler
 
         if(true === $isExistsSupply)
         {
-            $error = uniqid();
+            $error = uniqid('', true);
 
             $this->logger->warning(
                 message: sprintf('%s: Поставка с данным номером уже существует: %s',

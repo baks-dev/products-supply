@@ -27,7 +27,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\Messenger\ProductSign\ProcessNew\Tests;
 
 use BaksDev\Products\Supply\Entity\ProductSupply;
-use BaksDev\Products\Supply\Messenger\ProductSign\ProcessNew\ProcessNewProductSignDispatcher;
+use BaksDev\Products\Supply\Messenger\ProductSign\ProcessNew\UpdateProductSignStatusNewBySupplyCompleteHandler;
 use BaksDev\Products\Supply\Messenger\ProductSupplyMessage;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use Doctrine\ORM\EntityManagerInterface;
@@ -57,8 +57,8 @@ class ProcessNewProductSignDispatcherTest extends KernelTestCase
         $event = new ConsoleCommandEvent(new Command(), new StringInput(''), new NullOutput());
         $dispatcher->dispatch($event, 'console.command');
 
-        /** @var ProcessNewProductSignDispatcher $ProcessNewProductSignDispatcher */
-        $ProcessNewProductSignDispatcher = self::getContainer()->get(ProcessNewProductSignDispatcher::class);
+        /** @var UpdateProductSignStatusNewBySupplyCompleteHandler $ProcessNewProductSignDispatcher */
+        $ProcessNewProductSignDispatcher = self::getContainer()->get(UpdateProductSignStatusNewBySupplyCompleteHandler::class);
 
         $message = new ProductSupplyMessage(
             $ProductSupply->getId(),

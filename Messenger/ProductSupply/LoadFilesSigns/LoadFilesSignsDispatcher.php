@@ -34,7 +34,6 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\Process\Process;
 
 /** Парсит pdf документ, разбивает его на отдельные файлы с одной страницей и сохраняет как изображение */
 #[AsMessageHandler(priority: 0)]
@@ -53,7 +52,6 @@ final readonly class LoadFilesSignsDispatcher
 
         foreach($iterator as $info)
         {
-            // This condition execution costs less than the previous one
             if(
                 false === $info->isFile() ||
                 false === $info->getRealPath() ||
@@ -74,7 +72,6 @@ final readonly class LoadFilesSignsDispatcher
 
             if($isCrop)
             {
-
                 /** Создаем сообщения на сканер стикеров честного знака */
 
                 $imgDirPath = $info->getPath().DIRECTORY_SEPARATOR.$part;
@@ -107,11 +104,9 @@ final readonly class LoadFilesSignsDispatcher
                         );
                 }
 
-                ///** Удаляем после обработки основной файл PDF */
+                // Удаляем после обработки файл PDF
                 $this->filesystem->remove($info->getRealPath());
             }
-
         }
-
     }
 }

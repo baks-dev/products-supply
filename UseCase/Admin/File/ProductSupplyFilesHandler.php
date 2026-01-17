@@ -115,17 +115,6 @@ final readonly class ProductSupplyFilesHandler
             }
         }
 
-        //        /** Обрабатываем все загруженные файлы */
-        //        $this->messageDispatch->dispatch(
-        //            message: new FileScannerProductSupplyMessage(
-        //                dir: $uploadDir,
-        //                usr: $command->getUsr(),
-        //                profile: $command->getProfile(),
-        //            ),
-        //            transport: 'products-supply',
-        //        );
-
-
         /** Обрабатываем все загруженные файлы */
         $this->messageDispatch->dispatch(
             message: new LoadFilesSignsMessage(

@@ -71,11 +71,13 @@ final readonly class CompletedStatusProductSupplyDispatcher
 
         /**
          * Проверяем, что все продукты из поставки поступили на склад
+         *
          * @var EditProductSupplyProductDTO $product
          */
-        $existNotReceived = $ProductSupplyStatusCompletedDTO->getProduct()->exists(function($key, $product) {
-            return false === $product->getReceived();
-        });
+        $existNotReceived = $ProductSupplyStatusCompletedDTO->getProduct()
+            ->exists(function($key, $product) {
+                return false === $product->getReceived();
+            });
 
         /** Если не все продукты поступили на склад - прерываем  */
         if(true === $existNotReceived)
@@ -93,7 +95,7 @@ final readonly class CompletedStatusProductSupplyDispatcher
                     $handle,
                     $currentSupply->getStatus(),
                     $ProductSupplyStatusCompletedDTO->getStatus(),
-                    $currentSupply->getMain()
+                    $currentSupply->getMain(),
                 ),
                 context: [
                     self::class.':'.__LINE__,
@@ -107,10 +109,10 @@ final readonly class CompletedStatusProductSupplyDispatcher
             $this->logger->info(
                 message: sprintf(
                     'Успешно переместили поставку %s со статуса %s в статус %s',
-                    $handle->getId(), $currentSupply->getStatus(), $ProductSupplyStatusCompletedDTO->getStatus()
+                    $handle->getId(), $currentSupply->getStatus(), $ProductSupplyStatusCompletedDTO->getStatus(),
                 ),
                 context: [
-                    self::class.':'.__LINE__
+                    self::class.':'.__LINE__,
                 ],
             );
         }
