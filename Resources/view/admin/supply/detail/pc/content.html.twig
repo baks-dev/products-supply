@@ -51,20 +51,20 @@
             </button>
         </li>
 
-        {# @TODO не реализованно #}
-        {#        <li class="nav-item" role="presentation"> #}
-        {#            <button class="btn nav-link fw-bolder rounded-3 border" #}
-        {#                    id="history" #}
-        {#                    data-bs-toggle="pill" #}
-        {#                    data-bs-target="#pills-history" #}
-        {#                    aria-controls="pills-history" #}
-        {#                    type="button" #}
-        {#                    role="tab" #}
-        {#                    aria-selected="false" tabindex="-1"> #}
 
-        {#                <span class="text-uppercase px-3">История</span> #}
-        {#            </button> #}
-        {#        </li> #}
+        <li class="nav-item" role="presentation">
+            <button class="btn nav-link fw-bolder rounded-3 border"
+                    id="history"
+                    data-bs-toggle="pill"
+                    data-bs-target="#pills-history"
+                    aria-controls="pills-history"
+                    type="button"
+                    role="tab"
+                    aria-selected="false" tabindex="-1">
+
+                <span class="text-uppercase px-3">История</span>
+            </button>
+        </li>
 
         {# ДОКУМЕНТЫ #}
         {{ include(_self|replace({ "content.html.twig": "includes/docs.html.twig" })) }}
@@ -74,19 +74,22 @@
     {# ТАБЫ - КОНТЕНТ #}
     <div class="tab-content w-100 h-100 pt-3" id="pills-tabContent">
 
+        {# ТАБ - ПРОДУКЦИЯ #}
         <div class="tab-pane fade active show" role="tabpanel"
-             id="pills-order"
+             id="pills-products"
              tabindex="0">
 
-            {# ТАБ - ПРОДУКЦИЯ #}
             {{ include(_self|replace({ "content.html.twig": "includes/products.html.twig" })) }}
-
-            {# @TODO не реализованно #}
-            {# ИСТОРИЯ #}
-            {#    {{ include(_self|replace({ "content.html.twig": "includes/history.html.twig" })) }} #}
-
         </div>
 
+        {# ИСТОРИЯ #}
+        <div class="tab-pane fade" role="tabpanel"
+             id="pills-history"
+             tabindex="0">
+
+            {{ include(_self|replace({ "content.html.twig": "includes/history.html.twig" })) }}
+
+        </div>
     </div>
 
     {# Кнопки управления канвасом #}
@@ -102,16 +105,16 @@
 
             <div class="w-50 d-flex gap-3 align-items-end justify-content-start">
 
-            <button type="button"
-                    class="btn btn-light border text-secondary"
-                    data-bs-dismiss="offcanvas"
-                    title="Close">
-                <span class="text-nowrap">Закрыть без изменений</span>
-            </button>
+                <button type="button"
+                        class="btn btn-light border text-secondary"
+                        data-bs-dismiss="offcanvas"
+                        title="Close">
+                    <span class="text-nowrap">Закрыть без изменений</span>
+                </button>
 
+            </div>
         </div>
+
     </div>
 
-</div>
-
-{{ form_end(form) }}
+    {{ form_end(form) }}

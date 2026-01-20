@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -37,9 +37,11 @@ use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductSupplyEventInterface;
 use BaksDev\Products\Supply\Repository\ProductSign\GroupProductSignsByProductSupply\GroupProductSignsByProductSupplyInterface;
+use BaksDev\Products\Supply\Repository\ProductSupplyHistory\ProductSupplyHistoryInterface;
 use BaksDev\Products\Supply\Type\ProductSign\Status\ProductSignStatusSupply;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusCompleted;
+use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusCollection;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyForm;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
@@ -60,6 +62,8 @@ final class DetailController extends AbstractController
         CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
         ProductDetailByConstInterface $productDetailByConstRepository,
         GroupProductSignsByProductSupplyInterface $groupProductSignsByProductSupplyRepository,
+        ProductSupplyHistoryInterface $productSupplyHistoryRepository,
+        ProductSupplyStatusCollection $statuses,
         EditProductSupplyHandler $handler,
         #[ParamConverter(ProductSupplyUid::class)] ProductSupplyUid $id,
     ): Response
@@ -155,11 +159,18 @@ final class DetailController extends AbstractController
             ->forStatus($productSignStatus)
             ->findAll();
 
+        /** История изменений */
+        $histories = $productSupplyHistoryRepository
+            ->supply($ProductSupplyEvent->getMain())
+            ->findAll();
+
         return $this->render(
             [
                 'id' => $id,
                 'form' => $form->createView(),
                 'product_signs' => $ProductSigns,
+                'statuses' => $statuses,
+                'histories' => $histories,
             ]
         );
     }
