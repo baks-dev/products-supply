@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,7 @@ use BaksDev\Products\Supply\Forms\Statuses\Canceled\CanceledProductSupplyDTO;
 use BaksDev\Products\Supply\Forms\Statuses\Canceled\CanceledProductSupplyForm;
 use BaksDev\Products\Supply\Forms\Statuses\ProductSupplyIdDTO;
 use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductSupplyEventInterface;
+use BaksDev\Products\Supply\Repository\ExistProductSupplyByStatus\ExistProductSupplyByStatusInterface;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusCompleted;
 use BaksDev\Products\Supply\UseCase\Admin\Cancel\ProductSupplyStatusCanceledDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
@@ -72,6 +73,7 @@ final class CanceledController extends AbstractController
         Request $request,
         CentrifugoPublishInterface $publish,
         CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
+        ExistProductSupplyByStatusInterface $existProductSupplyByStatusRepository,
         EditProductSupplyHandler $editProductSupplyHandler,
     ): Response
     {
@@ -99,12 +101,9 @@ final class CanceledController extends AbstractController
                 $ProductSupplyEvent = $currentProductSupplyEventRepository
                     ->find($ProductSupplyIdDTO->getId());
 
-                /** Номер поставки */
-                $number = $ProductSupplyEvent->getInvariable()->getNumber();
-
                 if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
                 {
-                    $this->unsuccessful[] = $number;
+                    $this->unsuccessful[] = $ProductSupplyIdDTO->getId();
 
                     $logger->critical(
                         message: sprintf('Не найдено событие ProductSupplyEvent по ID: %s',
@@ -115,13 +114,45 @@ final class CanceledController extends AbstractController
                     continue;
                 }
 
-                /** Не отменяем поставки в статусе completed "Выполнен" */
+                /** Номер поставки */
+                $number = $ProductSupplyEvent->getInvariable()->getNumber();
+
+                /**
+                 * Не отменяем поставки в статусе completed "Выполнен"
+                 */
                 if(true === $ProductSupplyEvent->getStatus()->equals(ProductSupplyStatusCompleted::class))
                 {
                     continue;
                 }
 
                 $ProductSupplyStatusCanceledDTO = new ProductSupplyStatusCanceledDTO($ProductSupplyEvent->getId());
+
+                /**
+                 * Проверка существования поставки с переданным статусом
+                 */
+                $isExistsStatus = $existProductSupplyByStatusRepository
+                    ->forSupply($ProductSupplyEvent->getMain())
+                    ->forStatus($ProductSupplyStatusCanceledDTO->getStatus())
+                    ->isExists();
+
+                if($isExistsStatus)
+                {
+                    $this->successful[] = $number;
+
+                    $logger->warning(
+                        message: sprintf('%s: Невозможно применить статус %s повторно для поставки',
+                            $number,
+                            $ProductSupplyStatusCanceledDTO->getStatus(),
+                        ),
+                        context: [self::class.':'.__LINE__,],
+                    );
+
+                    continue;
+                }
+
+                /**
+                 * Устанавливаем комментарий с причиной отмены из формы
+                 */
                 $ProductSupplyStatusCanceledDTO->setComment($CancelProductSupplyDTO->getComment());
 
                 $ProductSupply = $editProductSupplyHandler->handle($ProductSupplyStatusCanceledDTO);
@@ -132,7 +163,7 @@ final class CanceledController extends AbstractController
 
                     $logger->info(
                         message: sprintf('Статус поставки %s изменен на %s',
-                            $ProductSupply->getId(),
+                            $ProductSupplyEvent->getInvariable()->getNumber(),
                             $ProductSupplyStatusCanceledDTO->getStatus()
                         ),
                         context: [self::class.':'.__LINE__],

@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -28,8 +28,13 @@ use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
+use BaksDev\Products\Supply\Entity\Event\Product\ProductSupplyProduct;
+use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Repository\ProductSign\ProductSignCountForSupply\ProductSignCountForSupplyInterface;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
+use Doctrine\ORM\EntityManagerInterface;
+use NewProductSupplyHandlerTest;
+use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
@@ -38,19 +43,32 @@ use Symfony\Component\DependencyInjection\Attribute\When;
 #[When(env: 'test')]
 class ProductSignCountForSupplyRepositoryTest extends KernelTestCase
 {
+    /** Для переопределения корня */
+    private const string MAIN = '';
+
+    #[DependsOnClass(NewProductSupplyHandlerTest::class)]
     public function testRepository(): void
     {
         self::assertTrue(true);
+
+        /** @var EntityManagerInterface $em */
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+
+        $ProductSupply = $em->getRepository(ProductSupply::class)
+            ->find(empty(self::MAIN) ? ProductSupplyUid::TEST : self::MAIN);
+
+        $ProductSupplyProducts = $em->getRepository(ProductSupplyProduct::class)
+            ->findOneBy(['event' => $ProductSupply->getEvent()]);
 
         /** @var ProductSignCountForSupplyInterface $ProductSignCountForSupplyInterface */
         $ProductSignCountForSupplyInterface = self::getContainer()->get(ProductSignCountForSupplyInterface::class);
 
         $result = $ProductSignCountForSupplyInterface
-            ->forSupply(new ProductSupplyUid)
-            ->forProduct(new ProductUid)
-            ->forOffer(new ProductOfferConst)
-            ->forVariation(new ProductVariationConst)
-            ->forModification(new ProductModificationConst)
+            ->forSupply($ProductSupply->getId())
+            ->forProduct($ProductSupplyProducts->getProduct())
+            ->forOffer($ProductSupplyProducts->getOfferConst())
+            ->forVariation($ProductSupplyProducts->getVariationConst())
+            ->forModification($ProductSupplyProducts->getModificationConst())
             ->count();
     }
 }

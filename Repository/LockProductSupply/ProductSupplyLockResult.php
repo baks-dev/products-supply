@@ -22,31 +22,22 @@
  *
  */
 
-namespace BaksDev\Products\Supply\Repository\AllProductSupply;
+namespace BaksDev\Products\Supply\Repository\LockProductSupply;
 
-use BaksDev\Core\Form\Search\SearchDTO;
-use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
-use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusInterface;
-use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use BaksDev\Users\User\Entity\User;
-use BaksDev\Users\User\Type\Id\UserUid;
-use Generator;
-
-interface AllProductSupplyInterface
+final readonly class ProductSupplyLockResult
 {
-    public function search(SearchDTO $search): self;
+    public function __construct(
+        private bool $lock,
+        private ?string $context,
+    ) {}
 
-    public function setLimit(int $limit): self;
+    public function isLock(): bool
+    {
+        return $this->lock === true;
+    }
 
-    public function status(ProductSupplyStatus|ProductSupplyStatusInterface|string $status): self;
-
-    public function forUser(User|UserUid $user): self;
-
-    public function forProfile(UserProfile|UserProfileUid $profile): self;
-
-    /**
-     * @return Generator<int, AllProductSupplyResult>|false
-     */
-    public function findAll(): Generator|false;
+    public function getContext(): ?string
+    {
+        return $this->context;
+    }
 }

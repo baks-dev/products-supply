@@ -22,31 +22,31 @@
  *
  */
 
-namespace BaksDev\Products\Supply\Repository\AllProductSupply;
 
-use BaksDev\Core\Form\Search\SearchDTO;
-use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
-use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusInterface;
-use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use BaksDev\Users\User\Entity\User;
-use BaksDev\Users\User\Type\Id\UserUid;
-use Generator;
+namespace BaksDev\Products\Supply\UseCase\Admin\Lock;
 
-interface AllProductSupplyInterface
+use BaksDev\Core\Entity\AbstractHandler;
+use BaksDev\Products\Supply\Entity\Event\Lock\ProductSupplyLock;
+
+final class ProductSupplyLockHandler extends AbstractHandler
 {
-    public function search(SearchDTO $search): self;
+    public function handle(ProductSupplyLockDTO $command): ProductSupplyLock|string
+    {
+        $this->setCommand($command);
 
-    public function setLimit(int $limit): self;
+        /** @var ProductSupplyLock $entity */
+        $entity = $this->prePersistOrUpdate(ProductSupplyLock::class, [
+            'event' => $command->getEvent(),
+        ]);
 
-    public function status(ProductSupplyStatus|ProductSupplyStatusInterface|string $status): self;
+        /** Валидация всех объектов */
+        if($this->validatorCollection->isInvalid())
+        {
+            return $this->validatorCollection->getErrorUniqid();
+        }
 
-    public function forUser(User|UserUid $user): self;
+        $this->flush();
 
-    public function forProfile(UserProfile|UserProfileUid $profile): self;
-
-    /**
-     * @return Generator<int, AllProductSupplyResult>|false
-     */
-    public function findAll(): Generator|false;
+        return $entity;
+    }
 }

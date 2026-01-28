@@ -1,5 +1,5 @@
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -32,16 +32,99 @@ let selectedProductSupplys = new Set();
 
 let status = null;
 
-// @TODO фильтр
-//const form = document.forms.order_delivery_filter_form;
+let init_counter_T1dfEVi = 100;
 
-//form.addEventListener("change", () =>
-//{
-//    setTimeout(() =>
-//    {
-//        form.submit();
-//    }, 300);
-//});
+/** Сокеты */
+setTimeout(function Hk91aSnRFfF()
+{
+    if(typeof centrifuge !== 'object')
+    {
+        if(init_counter_T1dfEVi > 1000)
+        { return; }
+
+        init_counter_T1dfEVi = init_counter_T1dfEVi * 2;
+        return setTimeout(Hk91aSnRFfF, init_counter_T1dfEVi);
+    }
+
+    const publish = centrifuge.newSubscription('supplys');
+
+    publish.on('publication', function(ctx)
+    {
+        const supply = document.getElementById(ctx.data.supply);
+
+        if(supply !== null)
+        {
+            const number = supply.querySelector('.number-supply')
+            const label = supply.querySelector(`label[for="${number.dataset.copy}"]`);
+
+            /** Реакция если переданн профиль */
+            if(ctx.data.profile && window.current_profile && ctx.data.profile !== window.current_profile)
+            {
+                /** Удаляем поставку у остальных менеджеров */
+                supply.remove()
+            }
+
+            let draggable = supply.querySelector('[class*="draggable"]')
+
+            if(draggable !== null)
+            {
+                /** Блокируем draggable */
+                if(ctx.data.lock === true)
+                {
+                    let draggableMove = draggable.querySelector('.bi-arrows-move')
+                    draggableMove.classList.add('d-none');
+
+                    let draggableLock = draggable.querySelector('.bi-ban')
+                    draggableLock.classList.remove("d-none");
+
+                    /** Скрываем чекбокс выбора карточки */
+                    label?.classList.add('fade')
+
+                    draggable.classList.remove('draggable-handle')
+                    draggable.classList.add('draggable-lock');
+
+                    let lockMessage = `{
+                      "type": "danger",
+                      "header": "Поставка ${number.dataset.copy} в процессе обработки и не может быть изменена",
+                      "message": "${ctx.data.context}."
+                    }`;
+
+                    createToast(JSON.parse(lockMessage));
+                }
+
+                /** Разлокируем draggable */
+                if(ctx.data.lock === false)
+                {
+                    let draggableLock = draggable.querySelector('.bi-ban')
+                    draggableLock.classList.add('d-none');
+
+                    let draggableMove = draggable.querySelector('.bi-arrows-move')
+                    draggableMove.classList.remove("d-none");
+
+                    /** Показываем чекбокс выбора карточки */
+                    label?.classList.remove('fade')
+
+                    draggable.classList.remove('draggable-lock')
+                    draggable.classList.add('draggable-handle');
+
+                    let unlockMessage = `{
+                      "type": "success",
+                      "header": "Поставка ${number.dataset.copy} готова к изменению",
+                      "message": "${ctx.data.context}."
+                    }`;
+
+                    createToast(JSON.parse(unlockMessage));
+
+                    return;
+                }
+            }
+
+        }
+
+    }).subscribe();
+
+}, 100);
+
 
 executeFunc(function lW9JEBic()
 {
@@ -351,166 +434,6 @@ executeFunc(function lW9JEBic()
             }
         });
     }
-
-    ///** Добавляем обработчики для чекбоксов */
-    //function initCheckboxHandlers()
-    //{
-    //    const all = document.getElementById("check-all");
-    //
-    //    /** Все чекбоксы */
-    //    const checkboxes = document.querySelectorAll(".draggable input[type=\"checkbox\"]");
-    //
-    //    checkboxes.forEach(checkbox =>
-    //    {
-    //        /** снимаем чеки при обновлении */
-    //        checkbox.checked = false;
-    //
-    //        checkbox.addEventListener("change", function()
-    //        {
-    //            const supplyId = this.closest(".draggable").id;
-    //
-    //            const draggableElement = this.closest(".draggable");
-    //
-    //            /** Ограничиваем выделяемые заказы по статусу */
-    //            status = checkbox.dataset.status;
-    //
-    //            if(this.checked)
-    //            {
-    //                selectedProductSupplys.add(supplyId);
-    //                draggableElement.classList.add("selected-order");
-    //
-    //            } else
-    //            {
-    //                selectedProductSupplys.delete(supplyId);
-    //                draggableElement.classList.remove("selected-order");
-    //            }
-    //
-    //            // Визуальное выделение выбранных карточек
-    //            updateSelectedOrdersVisuals();
-    //        });
-    //    });
-    //
-    //    if(all)
-    //    {
-    //        /** снимаем чек при обновлении */
-    //        all.checked = false;
-    //
-    //        all.addEventListener("change", function(all)
-    //        {
-    //            checkboxes.forEach(checkbox =>
-    //            {
-    //                if(checkbox.dataset.status === "new")
-    //                {
-    //                    const supplyId = checkbox.closest(".draggable").id;
-    //                    const draggableElement = checkbox.closest(".draggable");
-    //
-    //                    checkbox.checked = this.checked;
-    //
-    //                    if(this.checked)
-    //                    {
-    //                        selectedProductSupplys.add(supplyId);
-    //                        draggableElement.classList.add("selected-order");
-    //
-    //                    } else
-    //                    {
-    //                        selectedProductSupplys.delete(supplyId);
-    //                        draggableElement.classList.remove("selected-order");
-    //                    }
-    //                }
-    //            });
-    //
-    //            updateSelectedOrdersVisuals();
-    //        });
-    //    }
-    //}
-    //
-    //
-    ///** Функция для обновления визуального состояния выбранных карточек */
-    //function updateSelectedOrdersVisuals()
-    //{
-    //    const allDraggables = document.querySelectorAll(".draggable");
-    //
-    //    allDraggables.forEach(draggable =>
-    //    {
-    //        const supplyId = draggable.id;
-    //        const draggableHandle = draggable.querySelector(".draggable-handle");
-    //        const draggableCheckbox = draggable.querySelector("input[type=\"checkbox\"]");
-    //
-    //        if(selectedProductSupplys.has(supplyId))
-    //        {
-    //            /** Показать полностью весь заказ */
-    //            draggable.classList.remove("opacity-50");
-    //            draggable.classList.replace("z-0", "z-2");
-    //
-    //            /** Выделяем заказ рамкой */
-    //            draggable.style.transform = "scale(0.98)";
-    //            draggable.style.boxShadow = "0 0 0 2px #007bff";
-    //
-    //            // Если есть выделенные карточки, включаем перетаскивание только для них
-    //            if(draggableHandle)
-    //            {
-    //                draggableHandle.style.pointerEvents = "auto";
-    //            }
-    //        } else
-    //        {
-    //            draggable.removeAttribute("style");
-    //
-    //            // Если есть выделенные карточки, отключаем перетаскивание для невыделенных
-    //            if(draggableHandle)
-    //            {
-    //                if(selectedProductSupplys.size > 0)
-    //                {
-    //                    draggable.classList.add("opacity-50"); // полупрозрачный заказ
-    //
-    //                    draggableHandle.style.pointerEvents = "none";
-    //
-    //                    /** получаем элемент chekbox */
-    //                    if(draggableCheckbox && draggableCheckbox.dataset.status !== status)
-    //                    {
-    //                        draggableCheckbox.disabled = true;
-    //                    }
-    //                }
-    //
-    //                if(selectedProductSupplys.size === 0)
-    //                {
-    //                    // Если нет выделенных карточек, включаем перетаскивание для всех
-    //                    draggable.classList.remove("opacity-50");
-    //
-    //                    draggableHandle.style.pointerEvents = "auto";
-    //                    draggableCheckbox ? draggableCheckbox.disabled = false : false;
-    //
-    //                    status = null;
-    //                }
-    //            }
-    //        }
-    //    });
-    //}
-    //
-    ///** Функция для создания визуального индикатора множественного перетаскивания */
-    //function createMultipleDragIndicator(count)
-    //{
-    //    const indicator = document.createElement("div");
-    //    indicator.className = "multiple-drag-indicator";
-    //    indicator.style.cssText = `
-    //        position: absolute;
-    //        top: -10px;
-    //        right: -10px;
-    //        background: #007bff;
-    //        color: white;
-    //        border-radius: 50%;
-    //        width: 24px;
-    //        height: 24px;
-    //        display: flex;
-    //        align-items: center;
-    //        justify-content: center;
-    //        font-size: 12px;
-    //        font-weight: bold;
-    //        z-index: 1000;
-    //    `;
-    //
-    //    indicator.textContent = count;
-    //    return indicator;
-    //}
 
     initMultiSelectForProductsSupply()
     updateMultiSelectedVisualForProductsSupply()

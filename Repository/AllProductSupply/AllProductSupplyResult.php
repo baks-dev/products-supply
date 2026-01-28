@@ -38,6 +38,8 @@ final readonly class AllProductSupplyResult
         private string $supply_number,
         private string $supply_products,
         private string $supply_mod_date,
+        private ?bool $supply_lock,
+        private ?string $supply_context,
         private ?string $supply_created,
         private ?string $supply_arrival,
     ) {}
@@ -97,5 +99,15 @@ final readonly class AllProductSupplyResult
     public function getSupplyArrival(): ?DateTimeImmutable
     {
         return $this->supply_arrival ? new DateTimeImmutable($this->supply_arrival) : null;
+    }
+
+    public function getSupplyLock(): ?bool
+    {
+        return $this->supply_lock === true;
+    }
+
+    public function getSupplyContext(): ?string
+    {
+        return $this->supply_context;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,6 @@ namespace BaksDev\Products\Supply\Controller\Admin\Statuses;
 use BaksDev\Centrifugo\Server\Publish\CentrifugoPublishInterface;
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
-use BaksDev\Products\Supply\Entity\Event\Product\ProductSupplyProduct;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Forms\Statuses\ProductSupplyIdDTO;
@@ -37,10 +36,8 @@ use BaksDev\Products\Supply\Forms\Supplys\ProductSupplysDTO;
 use BaksDev\Products\Supply\Forms\Supplys\ProductSupplysForm;
 use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductSupplyEventInterface;
 use BaksDev\Products\Supply\Repository\ExistProductSupplyByStatus\ExistProductSupplyByStatusInterface;
-use BaksDev\Products\Supply\Repository\ProductSign\ProductSignCountForSupply\ProductSignCountForSupplyInterface;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusCollection;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
-use BaksDev\Products\Supply\UseCase\Admin\Edit\Product\EditProductSupplyProductDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Statuses\ProductSupplyStatusesDTO;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
@@ -79,7 +76,6 @@ final class StatusController extends AbstractController
         ProductSupplyStatusCollection $productSupplyStatusCollection,
         CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
         ExistProductSupplyByStatusInterface $existProductSupplyByStatusRepository,
-        ProductSignCountForSupplyInterface $productSignCountBySupplyRepository,
         EditProductSupplyHandler $editProductSupplyHandler,
 
         string $status,
@@ -100,21 +96,23 @@ final class StatusController extends AbstractController
             foreach($ProductSupplysDTO->getSupplys() as $ProductSupplyIdDTO)
             {
                 /** Скрываем поставку у всех пользователей */
-                $publish
+                $socket = $publish
                     ->addData(['supply' => (string) $ProductSupplyIdDTO->getId()])
                     ->addData(['profile' => (string) $this->getCurrentProfileUid()])
                     ->send('supplys');
+
+                if($socket && $socket->isError())
+                {
+                    return new JsonResponse($socket->getMessage());
+                }
 
                 /** Активное событие поставки */
                 $ProductSupplyEvent = $currentProductSupplyEventRepository
                     ->find($ProductSupplyIdDTO->getId());
 
-                /** Номер поставки */
-                $number = $ProductSupplyEvent->getInvariable()->getNumber();
-
                 if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
                 {
-                    $this->unsuccessful[] = $number;
+                    $this->unsuccessful[] = $ProductSupplyIdDTO->getId();
 
                     $logger->critical(
                         message: sprintf(
@@ -126,45 +124,12 @@ final class StatusController extends AbstractController
                     continue;
                 }
 
+                /** Номер поставки */
+                $number = $ProductSupplyEvent->getInvariable()->getNumber();
+
                 /**
-                 * Проверка, что на каждую единицу продукции в поставке есть Честный знак
-                 *
-                 * @var ProductSupplyProduct $ProductSupplyProduct
+                 * Проверка перемещения поставки из корректного статуса
                  */
-                foreach($ProductSupplyEvent->getProduct() as $ProductSupplyProduct)
-                {
-                    $EditProductSupplyProductDTO = new EditProductSupplyProductDTO();
-                    $ProductSupplyProduct->getDto($EditProductSupplyProductDTO);
-
-                    $totalProduct = $ProductSupplyProduct->getTotal();
-
-                    $productSignReserve = $productSignCountBySupplyRepository
-                        ->forSupply($ProductSupplyIdDTO->getId())
-                        ->forProduct($EditProductSupplyProductDTO->getProduct())
-                        ->forOffer($EditProductSupplyProductDTO->getOfferConst())
-                        ->forVariation($EditProductSupplyProductDTO->getVariationConst())
-                        ->forModification($EditProductSupplyProductDTO->getModificationConst())
-                        ->count();
-
-                    /** Количество продукции в поставке и количество зарезервированных Честных знаков должно совпадать */
-                    if($totalProduct !== $productSignReserve)
-                    {
-                        $this->unsuccessful[] = $number;
-
-                        $logger->critical(
-                            message: sprintf(
-                                'Не для всех продуктов зарезервирован Честный знак в поставке: %s',
-                                $ProductSupplyIdDTO->getId()),
-                            context: [self::class.':'.__LINE__]
-                        );
-
-                        /**
-                         * Пропускаем всю поставку -
-                         * ждем завершения резервирования Честных знаков для всех продуктов в поставку
-                         */
-                        continue(2);
-                    }
-                }
 
                 /** Инициализируем объект по переданному статусу */
                 $newProductSupplyStatus = $productSupplyStatusCollection->from($status);
@@ -175,9 +140,6 @@ final class StatusController extends AbstractController
                 /** Предыдущий статус относительно текущего */
                 $previousStatus = $currentProductSupplyStatus->previous($newProductSupplyStatus->getStatus());
 
-                /**
-                 * Статус поставки можно изменить только из предыдущего
-                 */
                 if(false === ($currentProductSupplyStatus->equals($previousStatus)))
                 {
                     $this->unsuccessful[] = $number;
@@ -196,34 +158,31 @@ final class StatusController extends AbstractController
                     continue;
                 }
 
+                $ProductSupplyStatusesDTO = new ProductSupplyStatusesDTO($ProductSupplyEvent->getId());
+                $ProductSupplyStatusesDTO->setStatus($newProductSupplyStatus);
+
                 /**
-                 * Невозможно применить статус повторно
+                 * Проверка существования поставки с переданным статусом
                  */
                 $isExistsStatus = $existProductSupplyByStatusRepository
-                    ->forProductSupply($ProductSupplyIdDTO->getId())
-                    ->forStatus($newProductSupplyStatus)
+                    ->forSupply($ProductSupplyEvent->getMain())
+                    ->forStatus($ProductSupplyStatusesDTO->getStatus())
                     ->isExists();
 
-                if(true === $isExistsStatus)
+                if($isExistsStatus)
                 {
-                    $this->unsuccessful[] = $number;
+                    $this->successful[] = $number;
 
-                    $logger->info(
-                        message: sprintf(
-                            'Невозможно применить статус повторно для поставки %s (%s): %s -> %s ',
-                            $ProductSupplyEvent->getMain(),
-                            $ProductSupplyEvent->getInvariable()->getNumber(),
-                            $currentProductSupplyStatus->getStatus()->getValue(),
-                            $newProductSupplyStatus->getStatus()->getValue()
+                    $logger->warning(
+                        message: sprintf('%s: Невозможно применить статус %s повторно для поставки',
+                            $number,
+                            $currentProductSupplyStatus->getStatus(),
                         ),
-                        context: [self::class.':'.__LINE__]
+                        context: [self::class.':'.__LINE__,],
                     );
 
                     continue;
                 }
-
-                $ProductSupplyStatusesDTO = new ProductSupplyStatusesDTO($ProductSupplyEvent->getId());
-                $ProductSupplyStatusesDTO->setStatus($newProductSupplyStatus);
 
                 $ProductSupply = $editProductSupplyHandler->handle($ProductSupplyStatusesDTO);
 
@@ -246,8 +205,8 @@ final class StatusController extends AbstractController
                     $logger->critical(
                         message: sprintf(
                             'Ошибка применения статуса %s для поставки %s',
-                            $ProductSupply->getId(),
-                            $ProductSupplyStatusesDTO->getStatus()
+                            $ProductSupplyStatusesDTO->getStatus(),
+                            $ProductSupplyEvent->getInvariable()->getNumber(),
                         ),
                         context: [self::class.':'.__LINE__]
                     );

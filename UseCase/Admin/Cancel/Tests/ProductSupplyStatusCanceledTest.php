@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -30,14 +30,24 @@ use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusCollection;
 use BaksDev\Products\Supply\UseCase\Admin\Cancel\ProductSupplyStatusCanceledDTO;
+use BaksDev\Products\Supply\UseCase\Admin\Completed\Tests\ProductSupplyStatusCompletedTest;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
 use Doctrine\ORM\EntityManagerInterface;
+use NewProductSupplyHandlerTest;
+use PHPUnit\Framework\Attributes\DependsOnClass;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
+#[Group('products-supply')]
+#[Group('products-supply-usecase')]
 #[When(env: 'test')]
 class ProductSupplyStatusCanceledTest extends KernelTestCase
 {
+    /** Для переопределения корня */
+    private const string MAIN = '';
+
+    #[DependsOnClass(ProductSupplyStatusCompletedTest::class)]
     public function testUseCase(): void
     {
         /**
@@ -54,14 +64,21 @@ class ProductSupplyStatusCanceledTest extends KernelTestCase
         $em = $container->get(EntityManagerInterface::class);
 
         $ProductSupply = $em->getRepository(ProductSupply::class)
-            ->find(ProductSupplyUid::TEST);
+            ->find(empty(self::MAIN) ? ProductSupplyUid::TEST : self::MAIN);
 
-        $supplyCanceledDTO = new ProductSupplyStatusCanceledDTO($ProductSupply->getEvent());
+        $ProductSupplyStatusCanceledDTO = new ProductSupplyStatusCanceledDTO($ProductSupply->getEvent());
+        $ProductSupplyStatusCanceledDTO->setComment('Отмена поставки');
 
         /** @var EditProductSupplyHandler $EditProductSupplyHandler */
         $EditProductSupplyHandler = self::getContainer()->get(EditProductSupplyHandler::class);
-        $handle = $EditProductSupplyHandler->handle($supplyCanceledDTO);
+
+        $handle = $EditProductSupplyHandler->handle($ProductSupplyStatusCanceledDTO);
 
         self::assertTrue(($handle instanceof ProductSupply), $handle.': Ошибка ProductSupply');
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        NewProductSupplyHandlerTest::setUpBeforeClass();
     }
 }

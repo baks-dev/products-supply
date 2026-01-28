@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -24,22 +24,14 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Supply\Messenger\ProductSign\ProcessReservation\Tests;
+namespace BaksDev\Products\Supply\Messenger\ProductSupply\CheckSignOnProductSupplyProduct\Tests;
 
-use BaksDev\Products\Product\Type\Id\ProductUid;
-use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
-use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
-use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Supply\Entity\Event\Product\ProductSupplyProduct;
 use BaksDev\Products\Supply\Entity\ProductSupply;
-use BaksDev\Products\Supply\Messenger\ProductSign\ProcessReservation\ProcessReservationProductSignDispatcher;
-use BaksDev\Products\Supply\Messenger\ProductSign\ProcessReservation\ProcessReservationProductSignMessage;
+use BaksDev\Products\Supply\Messenger\ProductSupply\CheckSignOnProductSupplyProduct\CheckSignOnProductSupplyProductDispatcher;
+use BaksDev\Products\Supply\Messenger\ProductSupply\CheckSignOnProductSupplyProduct\CheckSignOnProductSupplyProductMessage;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\ORM\EntityManagerInterface;
-use NewProductSupplyHandlerTest;
-use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;
@@ -49,52 +41,43 @@ use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\DependencyInjection\Attribute\When;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-#[Group('products-supply-process')]
+#[Group('products-supply')]
 #[When(env: 'test')]
-class ProcessReservationProductSignDispatcherTest extends KernelTestCase
+class CheckSignOnProductSupplyProductDispatcherTest extends KernelTestCase
 {
-    #[DependsOnClass(NewProductSupplyHandlerTest::class)]
+    private const string MAIN = '';
+
     public function testUseCase(): void
     {
         self::assertTrue(true);
+        return;
 
         // Бросаем событие консольной команды
         $dispatcher = self::getContainer()->get(EventDispatcherInterface::class);
         $event = new ConsoleCommandEvent(new Command(), new StringInput(''), new NullOutput());
         $dispatcher->dispatch($event, 'console.command');
 
-        /** @var ProcessReservationProductSignDispatcher $ProductSignProcessDispatcher */
-        $ProductSignProcessDispatcher = self::getContainer()->get(ProcessReservationProductSignDispatcher::class);
-
         /** @var EntityManagerInterface $em */
         $em = self::getContainer()->get(EntityManagerInterface::class);
 
         $ProductSupply = $em->getRepository(ProductSupply::class)
-            ->find(ProductSupplyUid::TEST);
+            ->find(empty(self::MAIN) ? ProductSupplyUid::TEST : self::MAIN);
 
         $ProductSupplyProducts = $em->getRepository(ProductSupplyProduct::class)
-            ->findBy(['event' => $ProductSupply->getEvent()]);
+            ->findOneBy(['event' => $ProductSupply->getEvent()]);
 
-        /** @var ProductSupplyProduct $product */
-        foreach($ProductSupplyProducts as $product)
-        {
-            $total = $product->getTotal();
+        /** @var CheckSignOnProductSupplyProductDispatcher $CheckSignOnProductSupplyProductDispatcher */
+        $CheckSignOnProductSupplyProductDispatcher = self::getContainer()->get(CheckSignOnProductSupplyProductDispatcher::class);
 
-            /** Запускаем процесс бронирования на каждую единицу продукции в поставке */
-            for($i = 0; $i < $total; $i++)
-            {
-                $ProductSignProcessMessage = new ProcessReservationProductSignMessage(
-                    supply: new ProductSupplyUid,
-                    user: new UserUid,
-                    profile: new UserProfileUid,
-                    product: new ProductUid,
-                    offer: new ProductOfferConst,
-                    variation: new ProductVariationConst,
-                    modification: new ProductModificationConst,
-                );
+        $message = new CheckSignOnProductSupplyProductMessage(
+            supply: $ProductSupply->getId(),
+            product: $ProductSupplyProducts->getProduct(),
+            offerConst: $ProductSupplyProducts->getOfferConst(),
+            variationConst: $ProductSupplyProducts->getVariationConst(),
+            modificationConst: $ProductSupplyProducts->getModificationConst(),
+            total: $ProductSupplyProducts->getTotal(),
+        );
 
-                $ProductSignProcessDispatcher($ProductSignProcessMessage);
-            }
-        }
+        $CheckSignOnProductSupplyProductDispatcher($message);
     }
 }

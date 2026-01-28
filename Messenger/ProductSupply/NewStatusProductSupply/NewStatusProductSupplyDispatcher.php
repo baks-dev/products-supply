@@ -26,9 +26,16 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\Messenger\ProductSupply\NewStatusProductSupply;
 
+use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
+use BaksDev\Products\Product\Type\Barcode\ProductBarcode;
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Messenger\ProductSign\ProcessReservation\ProcessReservationProductSignMessage;
+use BaksDev\Products\Supply\Messenger\ProductSupply\CheckSignOnProductSupplyProduct\CheckSignOnProductSupplyProductMessage;
 use BaksDev\Products\Supply\Messenger\ProductSupplyMessage;
 use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductSupplyEventInterface;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusNew;
@@ -89,8 +96,8 @@ final readonly class NewStatusProductSupplyDispatcher
             {
                 $this->logger->info(
                     message: sprintf(
-                        'Попытка зарезервировать Честный знак: `%s` продукт из `%s` в поставке %s',
-                        $i + 1, $total, $ProductSupplyEvent->getMain()
+                        'products-sign: Попытка зарезервировать Честный знак: `%s` продукт из `%s` в поставке %s',
+                        $i + 1, $total, $ProductSupplyEvent->getInvariable()->getNumber()
                     ),
                     context: [
                         'номер поставки' => $NewProductSupplyDTO->getInvariable()->getNumber(),
@@ -113,6 +120,27 @@ final readonly class NewStatusProductSupplyDispatcher
                         transport: 'products-supply',
                     );
             }
+
+            /**
+             * Сообщение для проверки резервирования ЧЗ на все количество продукции в поставке
+             */
+
+            $message = new CheckSignOnProductSupplyProductMessage(
+                supply: $ProductSupplyEvent->getMain(),
+                product: $product->getProduct(),
+                offerConst: $product->getOfferConst(),
+                variationConst: $product->getVariationConst(),
+                modificationConst: $product->getModificationConst(),
+                total: $total
+            );
+
+            $this->messageDispatch
+                ->dispatch(
+                    message: $message,
+                    stamps: [new MessageDelay('30 seconds')],
+                    transport: 'products-supply',
+                );
+
         }
     }
 }

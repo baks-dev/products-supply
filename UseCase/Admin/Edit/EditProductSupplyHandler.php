@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,17 +26,92 @@
 namespace BaksDev\Products\Supply\UseCase\Admin\Edit;
 
 use BaksDev\Core\Entity\AbstractHandler;
+use BaksDev\Core\Messenger\MessageDispatchInterface;
+use BaksDev\Core\Validator\ValidatorCollectionInterface;
+use BaksDev\Files\Resources\Upload\File\FileUploadInterface;
+use BaksDev\Files\Resources\Upload\Image\ImageUploadInterface;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEventInterface;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Messenger\ProductSupplyMessage;
+use BaksDev\Products\Supply\Repository\LockProductSupply\ProductSupplyLockInfoInterface;
+use BaksDev\Products\Supply\Repository\LockProductSupply\ProductSupplyLockResult;
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 
 final class EditProductSupplyHandler extends AbstractHandler
 {
+    public function __construct(
+        #[Target('productsSupplyLogger')] private readonly LoggerInterface $logger,
+        private readonly ProductSupplyLockInfoInterface $productSupplyLockRepository,
+
+        EntityManagerInterface $entityManager,
+        MessageDispatchInterface $messageDispatch,
+        ValidatorCollectionInterface $validatorCollection,
+        ImageUploadInterface $imageUpload,
+        FileUploadInterface $fileUpload,
+    )
+    {
+        parent::__construct($entityManager, $messageDispatch, $validatorCollection, $imageUpload, $fileUpload);
+    }
+
     public function handle(ProductSupplyEventInterface $command): ProductSupply|string
     {
-        $this->setCommand($command);
-        $this->preEventPersistOrUpdate(ProductSupply::class, ProductSupplyEvent::class);
+        /** Проверка на блокировку при изменении - блокировка EntityReadonly, поэтому всегда хранит активное событие */
+        $ProductSupplyLockResult = $this->productSupplyLockRepository
+            ->forEvent($command->getEvent())
+            ->find();
+
+        if(
+            true === ($ProductSupplyLockResult instanceof ProductSupplyLockResult) &&
+            true === $ProductSupplyLockResult->isLock()
+        )
+        {
+            $error = uniqid('', true);
+
+            $this->logger->warning(
+                message: sprintf('%s: Поставка заблокирована для изменений',
+                    $error),
+                context: [
+                    'context' => $ProductSupplyLockResult->getContext(),
+                    self::class.':'.__LINE__,
+                    $command,
+                ],
+            );
+
+            return $error;
+        }
+
+        //        /**
+        //         *  Так как изменение поставки возможно только при изменении статуса - применить статус повторно невозможно
+        //         */
+        //        $isExistsStatus = $this->existProductSupplyByStatusRepository
+        //            ->forEvent($command->getEvent())
+        //            ->forStatus($command->getStatus())
+        //            ->isExists();
+        //
+        //        if($isExistsStatus)
+        //        {
+        //            $error = uniqid('', true);
+        //
+        //            $this->logger->warning(
+        //                message: sprintf('%s: Невозможно применить статус %s повторно для поставки',
+        //                    $error,
+        //                    $command->getStatus()
+        //                ),
+        //                context: [
+        //                    self::class.':'.__LINE__,
+        //                    $command,
+        //                ],
+        //            );
+        //
+        //            return $error;
+        //        }
+
+        $this
+            ->setCommand($command)
+            ->preEventPersistOrUpdate(ProductSupply::class, ProductSupplyEvent::class);
 
         /** Валидация всех объектов */
         if($this->validatorCollection->isInvalid())

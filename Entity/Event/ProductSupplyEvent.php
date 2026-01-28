@@ -31,6 +31,7 @@ use BaksDev\Core\Entity\EntityEvent;
 use BaksDev\Products\Supply\Entity\Event\Arrival\ProductSupplyArrival;
 use BaksDev\Products\Supply\Entity\Event\Created\ProductSupplyCreated;
 use BaksDev\Products\Supply\Entity\Event\Invariable\ProductSupplyInvariable;
+use BaksDev\Products\Supply\Entity\Event\Lock\ProductSupplyLock;
 use BaksDev\Products\Supply\Entity\Event\Modify\ProductSupplyModify;
 use BaksDev\Products\Supply\Entity\Event\Personal\ProductSupplyPersonal;
 use BaksDev\Products\Supply\Entity\Event\Product\ProductSupplyProduct;
@@ -117,6 +118,13 @@ class ProductSupplyEvent extends EntityEvent
     #[ORM\OneToMany(targetEntity: ProductSupplyProduct::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
     private Collection $product;
 
+    /**
+     * Блокировка поставки
+     */
+    #[ORM\OneToOne(targetEntity: ProductSupplyLock::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
+    private ProductSupplyLock $lock;
+
+
     public function __construct()
     {
         $this->id = new ProductSupplyEventUid();
@@ -196,5 +204,10 @@ class ProductSupplyEvent extends EntityEvent
     public function getPersonal(): ProductSupplyPersonal
     {
         return $this->personal;
+    }
+
+    public function getLock(): ProductSupplyLock
+    {
+        return $this->lock;
     }
 }

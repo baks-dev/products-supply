@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -82,6 +82,15 @@ final readonly class CompletedStatusProductSupplyDispatcher
         /** Если не все продукты поступили на склад - прерываем  */
         if(true === $existNotReceived)
         {
+            $this->logger->warning(
+                message: sprintf('Поставка %s: Не все продукты из поставки поступили на склад.',
+                    $currentSupply->getInvariable()->getNumber()),
+                context: [
+                    self::class.':'.__LINE__,
+                    var_export($message, true),
+                ],
+            );
+
             return;
         }
 

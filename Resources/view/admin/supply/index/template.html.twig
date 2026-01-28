@@ -31,44 +31,14 @@
 
 {#  Сокеты  #}
 
-<script nonce="{{ csp_nonce() }}">
-    window.centrifugo_dsn = "{{ centrifugo_dsn }}";
-    window.centrifugo_token = "{{ token }}";
-</script>
+{# @TODO зачем и откуда токен#}
+{#<script nonce="{{ csp_nonce() }}">#}
+    {#window.centrifugo_dsn = "{{ centrifugo_dsn }}";#}
+    {#window.centrifugo_token = "{{ token }}";#}
+{#</script>#}
 
 <script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/centrifugo/centrifuge.min.js" class='lazy'></script>
 <script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/centrifugo/socket.min.js" class='lazy'></script>
-
-<script nonce="{{ csp_nonce() }}">
-
-    let hfgsZAPeF = 100;
-
-    setTimeout(function xA1wFjaW7B()
-    {
-        if(typeof centrifuge !== 'object')
-        {
-            if(hfgsZAPeF > 1000) { return; }
-
-            hfgsZAPeF = hfgsZAPeF * 2;
-            return setTimeout(xA1wFjaW7B, hfgsZAPeF);
-        }
-
-
-        const publish = centrifuge.newSubscription('orders');
-
-        publish.on('publication', function(ctx)
-        {
-            if(ctx.data.profile !== '{{ current_profile }}')
-            {
-                /* Удаляем у остальных менеджеров заказ */
-                document.getElementById(ctx.data.order)?.remove();
-            }
-
-        }).subscribe();
-
-    }, 100);
-
-</script>
 
 {% endblock %}
 

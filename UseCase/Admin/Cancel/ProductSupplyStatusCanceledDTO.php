@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@ use BaksDev\Products\Supply\Entity\Event\ProductSupplyEventInterface;
 use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusCancel;
+use BaksDev\Products\Supply\UseCase\Admin\Edit\Lock\EditProductSupplyLockDTO;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -50,12 +51,23 @@ final class ProductSupplyStatusCanceledDTO implements ProductSupplyEventInterfac
     #[Assert\NotBlank]
     private readonly ProductSupplyStatus $status;
 
+    /**
+     * Блокировка поставки
+     */
+    #[Assert\Valid]
+    private EditProductSupplyLockDTO $lock;
+
+    #[Assert\NotBlank]
     private string $comment;
 
     public function __construct(ProductSupplyEventUid $id)
     {
         $this->id = $id;
         $this->status = new ProductSupplyStatus(ProductSupplyStatusCancel::class);
+
+        /** Блокировка */
+        $this->lock = new EditProductSupplyLockDTO();
+        $this->lock->setContext(self::class);
     }
 
     /**
@@ -81,4 +93,14 @@ final class ProductSupplyStatusCanceledDTO implements ProductSupplyEventInterfac
     {
         return $this->comment;
     }
+
+    public function getLock(): EditProductSupplyLockDTO
+    {
+        return $this->lock;
+    }
+
+    //    public function setLock(EditProductSupplyLockDTO $lock): void
+    //    {
+    //        $this->lock = $lock;
+    //    }
 }

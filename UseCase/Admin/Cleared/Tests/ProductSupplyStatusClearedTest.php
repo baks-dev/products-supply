@@ -24,31 +24,32 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Supply\UseCase\Admin\Delivery\Tests;
+namespace BaksDev\Products\Supply\UseCase\Admin\Cancel\Tests;
 
+use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusCollection;
-use BaksDev\Products\Supply\UseCase\Admin\Cancel\Tests\ProductSupplyStatusClearedTest;
-use BaksDev\Products\Supply\UseCase\Admin\Delivery\Arrival\ProductSupplyArrivalDTO;
-use BaksDev\Products\Supply\UseCase\Admin\Delivery\ProductSupplyStatusDeliveryDTO;
+use BaksDev\Products\Supply\UseCase\Admin\Cleared\Invariable\ProductSupplyInvariableDTO;
+use BaksDev\Products\Supply\UseCase\Admin\Cleared\ProductSupplyStatusClearedDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
+use BaksDev\Products\Supply\UseCase\Admin\Tests\Edit\EditProductSupplyTest;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
-/** next @see ProductSupplyStatusCompletedTest */
+/** next @see ProductSupplyStatusDeliveryTest */
 #[Group('products-supply')]
 #[Group('products-supply-usecase')]
 #[When(env: 'test')]
-class ProductSupplyStatusDeliveryTest extends KernelTestCase
+class ProductSupplyStatusClearedTest extends KernelTestCase
 {
     /** Для переопределения корня */
     private const string MAIN = '';
 
-    #[DependsOnClass(ProductSupplyStatusClearedTest::class)]
+    #[DependsOnClass(EditProductSupplyTest::class)]
     public function testUseCase(): void
     {
         /**
@@ -59,24 +60,30 @@ class ProductSupplyStatusDeliveryTest extends KernelTestCase
         $ProductSupplyStatusCollection = self::getContainer()->get(ProductSupplyStatusCollection::class);
         $ProductSupplyStatusCollection->cases();
 
-        $container = self::getContainer();
-
         /** @var EntityManagerInterface $em */
-        $em = $container->get(EntityManagerInterface::class);
+        $em = self::getContainer()->get(EntityManagerInterface::class);
 
         $ProductSupply = $em->getRepository(ProductSupply::class)
             ->find(empty(self::MAIN) ? ProductSupplyUid::TEST : self::MAIN);
 
-        $ProductSupplyStatusDeliveryDTO = new ProductSupplyStatusDeliveryDTO($ProductSupply->getEvent());
+        self::assertInstanceOf(ProductSupply::class, $ProductSupply);
 
-        /** Ожидаемая дата прибытия */
-        $ProductSupplyArrivalDTO = new ProductSupplyArrivalDTO();
-        $ProductSupplyArrivalDTO->setValue(new \DateTimeImmutable('+1 day'));
-        $ProductSupplyStatusDeliveryDTO->setArrival($ProductSupplyArrivalDTO);
+        $ProductSupplyEvent = $em->getRepository(ProductSupplyEvent::class)
+            ->find($ProductSupply->getEvent());
+
+        self::assertInstanceOf(ProductSupplyEvent::class, $ProductSupplyEvent);
+
+        $ClearanceProductSupplyDTO = new ProductSupplyStatusClearedDTO($ProductSupply->getEvent());
+        $ProductSupplyEvent->getDto($ClearanceProductSupplyDTO);
+
+        $ClearanceProductSupplyInvariableDTO = new ProductSupplyInvariableDTO();
+        $ClearanceProductSupplyInvariableDTO->setDeclaration('Wb0r4OS1Fx_test');
+
+        $ClearanceProductSupplyDTO->setInvariable($ClearanceProductSupplyInvariableDTO);
 
         /** @var EditProductSupplyHandler $EditProductSupplyHandler */
         $EditProductSupplyHandler = self::getContainer()->get(EditProductSupplyHandler::class);
-        $handle = $EditProductSupplyHandler->handle($ProductSupplyStatusDeliveryDTO);
+        $handle = $EditProductSupplyHandler->handle($ClearanceProductSupplyDTO);
 
         self::assertTrue(($handle instanceof ProductSupply), $handle.': Ошибка ProductSupply');
     }

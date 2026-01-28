@@ -22,31 +22,33 @@
  *
  */
 
-namespace BaksDev\Products\Supply\Repository\AllProductSupply;
+declare(strict_types=1);
 
-use BaksDev\Core\Form\Search\SearchDTO;
-use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
-use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusInterface;
-use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use BaksDev\Users\User\Entity\User;
-use BaksDev\Users\User\Type\Id\UserUid;
-use Generator;
+namespace BaksDev\Products\Supply\UseCase\Admin\New\Lock;
 
-interface AllProductSupplyInterface
+use BaksDev\Products\Supply\Entity\Event\Lock\ProductSupplyLockInterface;
+
+/** @see ProductSupplyLock */
+final class NewProductSupplyLockDTO implements ProductSupplyLockInterface
 {
-    public function search(SearchDTO $search): self;
+    /** Блокируем при создании */
+    private bool $lock = true;
 
-    public function setLimit(int $limit): self;
+    private ?string $context = null;
 
-    public function status(ProductSupplyStatus|ProductSupplyStatusInterface|string $status): self;
+    public function getLock(): bool
+    {
+        return $this->lock;
+    }
 
-    public function forUser(User|UserUid $user): self;
+    public function setContext(?string $context): NewProductSupplyLockDTO
+    {
+        $this->context = $context;
+        return $this;
+    }
 
-    public function forProfile(UserProfile|UserProfileUid $profile): self;
-
-    /**
-     * @return Generator<int, AllProductSupplyResult>|false
-     */
-    public function findAll(): Generator|false;
+    public function getContext(): ?string
+    {
+        return $this->context;
+    }
 }

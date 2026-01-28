@@ -22,51 +22,51 @@
  *
  */
 
-namespace BaksDev\Products\Supply\Repository\AllProductSupply\Tests;
+namespace BaksDev\Products\Supply\Repository\LockProductSupply\Tests;
 
-use BaksDev\Products\Supply\Repository\AllProductSupply\AllProductSupplyInterface;
-use BaksDev\Products\Supply\Repository\AllProductSupply\AllProductSupplyResult;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use BaksDev\Users\User\Type\Id\UserUid;
+use BaksDev\Products\Supply\Entity\ProductSupply;
+use BaksDev\Products\Supply\Repository\LockProductSupply\ProductSupplyLockInfoInterface;
+use BaksDev\Products\Supply\Repository\LockProductSupply\ProductSupplyLockResult;
+use BaksDev\Products\Supply\Type\ProductSupplyUid;
+use Doctrine\ORM\EntityManagerInterface;
+use NewProductSupplyHandlerTest;
+use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Event\ConsoleCommandEvent;
-use Symfony\Component\Console\Input\StringInput;
-use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\DependencyInjection\Attribute\When;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 #[Group('products-supply')]
 #[When(env: 'test')]
-class AllProductSupplyRepositoryTest extends KernelTestCase
+class ProductSupplyLockInfoRepositoryTest extends KernelTestCase
 {
+    /** Для переопределения корня */
+    private const string MAIN = '';
+
+    #[DependsOnClass(NewProductSupplyHandlerTest::class)]
     public function testRepository(): void
     {
         self::assertTrue(true);
 
-        // Бросаем событие консольной команды
-        $dispatcher = self::getContainer()->get(EventDispatcherInterface::class);
-        $event = new ConsoleCommandEvent(new Command(), new StringInput(''), new NullOutput());
-        $dispatcher->dispatch($event, 'console.command');
+        /** @var EntityManagerInterface $em */
+        $em = self::getContainer()->get(EntityManagerInterface::class);
 
-        /** @var AllProductSupplyInterface $AllProductSupplyInterface */
-        $AllProductSupplyInterface = self::getContainer()->get(AllProductSupplyInterface::class);
+        $ProductSupply = $em->getRepository(ProductSupply::class)
+            ->find(empty(self::MAIN) ? ProductSupplyUid::TEST : self::MAIN);
 
-        $results = $AllProductSupplyInterface
-            ->forUser(new UserUid())
-            ->forProfile(new UserProfileUid())
-            ->findAll();
+        /** @var ProductSupplyLockInfoInterface $ProductSupplyLockInfoInterface */
+        $ProductSupplyLockInfoInterface = self::getContainer()->get(ProductSupplyLockInfoInterface::class);
 
-        if(false === $results)
+        $result = $ProductSupplyLockInfoInterface
+            ->forEvent($ProductSupply->getEvent())
+            ->find();
+
+        if(false === $result)
         {
             return;
         }
 
-        $AllServicesResult = $results->current();
-
         // Вызываем все геттеры
-        $reflectionClass = new \ReflectionClass(AllProductSupplyResult::class);
+        $reflectionClass = new \ReflectionClass(ProductSupplyLockResult::class);
         $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
 
         foreach($methods as $method)
@@ -75,7 +75,7 @@ class AllProductSupplyRepositoryTest extends KernelTestCase
             if($method->getNumberOfParameters() === 0)
             {
                 // Вызываем метод
-                $data = $method->invoke($AllServicesResult);
+                $data = $method->invoke($result);
             }
         }
     }

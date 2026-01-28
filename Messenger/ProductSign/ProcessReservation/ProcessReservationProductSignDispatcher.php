@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\Messenger\ProductSign\ProcessReservation;
 
+use BaksDev\Centrifugo\Server\Publish\CentrifugoPublishInterface;
 use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
@@ -51,9 +52,12 @@ final readonly class ProcessReservationProductSignDispatcher
     public function __construct(
         #[Target('productsSupplyLogger')] private LoggerInterface $logger,
         private MessageDispatchInterface $messageDispatch,
+        private CentrifugoPublishInterface $centrifugo,
+
+        private ProductSignStatusHandler $ProductSignStatusHandler,
+
         private CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
         private OneProductSignEventInterface $productSignSupplyRepository,
-        private ProductSignStatusHandler $ProductSignStatusHandler,
     ) {}
 
     public function __invoke(ProcessReservationProductSignMessage $message): void
@@ -89,8 +93,8 @@ final readonly class ProcessReservationProductSignDispatcher
         {
             $this->logger->info(
                 message: sprintf(
-                    'products-sign: Повторная попытка зарезервировать Честный знак в поставке %s',
-                    $ProductSupplyEvent->getMain()),
+                    'products-sign: Поставка %s - Повторная попытка зарезервировать Честный знак',
+                    $ProductSupplyEvent->getInvariable()->getNumber()),
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),

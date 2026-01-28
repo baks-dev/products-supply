@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -93,6 +93,18 @@ final class NewProductSupplyHandler extends AbstractHandler
         }
 
         $this->flush();
+
+        $this->logger->warning(
+            message: sprintf(
+                'Блокируем изменение поставки %s',
+                $command->getInvariable()->getNumber()
+            ),
+            context: [
+                'main' => $this->main->getId(),
+                'event' => $this->main->getEvent(),
+                self::class.':'.__LINE__,
+            ],
+        );
 
         $this->messageDispatch
             ->addClearCacheOther('products-sign')

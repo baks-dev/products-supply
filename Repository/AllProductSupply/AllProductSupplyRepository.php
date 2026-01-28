@@ -29,6 +29,7 @@ use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Products\Supply\Entity\Event\Arrival\ProductSupplyArrival;
 use BaksDev\Products\Supply\Entity\Event\Created\ProductSupplyCreated;
 use BaksDev\Products\Supply\Entity\Event\Invariable\ProductSupplyInvariable;
+use BaksDev\Products\Supply\Entity\Event\Lock\ProductSupplyLock;
 use BaksDev\Products\Supply\Entity\Event\Modify\ProductSupplyModify;
 use BaksDev\Products\Supply\Entity\Event\Personal\ProductSupplyPersonal;
 use BaksDev\Products\Supply\Entity\Event\Product\ProductSupplyProduct;
@@ -98,6 +99,9 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
         return $this;
     }
 
+    /**
+     * @return Generator<int, AllProductSupplyResult>|false
+     */
     public function findAll(): Generator|false
     {
         $dbal = $this->DBALQueryBuilder
@@ -139,6 +143,16 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 'product_supply_invariable.event = product_supply_event.id'
             );
 
+        $dbal
+            ->addSelect('product_supply_lock.lock AS supply_lock')
+            ->addSelect('product_supply_lock.context AS supply_context')
+            ->leftJoin(
+                'product_supply_event',
+                ProductSupplyLock::class,
+                'product_supply_lock',
+                'product_supply_lock.event = product_supply_event.id'
+            );
+
         /** Created */
         $dbal
             ->addSelect('product_supply_created.value AS supply_created')
@@ -149,16 +163,6 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 'product_supply_created.event = product_supply_event.id'
             );
 
-        /** Created */
-        $dbal
-            ->addSelect('product_supply_modify.mod_date AS supply_mod_date')
-            ->leftJoin(
-                'product_supply_event',
-                ProductSupplyModify::class,
-                'product_supply_modify',
-                'product_supply_modify.event = product_supply_event.id'
-            );
-
         /** Arrival */
         $dbal
             ->addSelect('product_supply_arrival.value AS supply_arrival')
@@ -167,6 +171,16 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 ProductSupplyArrival::class,
                 'product_supply_arrival',
                 'product_supply_arrival.event = product_supply_event.id'
+            );
+
+        /** Modify */
+        $dbal
+            ->addSelect('product_supply_modify.mod_date AS supply_mod_date')
+            ->leftJoin(
+                'product_supply_event',
+                ProductSupplyModify::class,
+                'product_supply_modify',
+                'product_supply_modify.event = product_supply_event.id'
             );
 
         /**
@@ -233,7 +247,6 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
         {
             $dbal
                 ->createSearchQueryBuilder($this->search)
-                //->addSearchLike('product_supply_product.barcode')
                 ->addSearchLike('product_supply_invariable.number');
         }
 

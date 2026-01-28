@@ -22,23 +22,33 @@
  *
  */
 
-namespace BaksDev\Products\Supply\Repository\ExistProductSupplyByStatus\Tests;
+declare(strict_types=1);
 
-use BaksDev\Products\Supply\Repository\ExistProductSupplyByStatus\ExistProductSupplyByStatusInterface;
+namespace BaksDev\Products\Supply\UseCase\Admin\Lock\Tests;
+
+use BaksDev\Products\Supply\Entity\Event\Lock\ProductSupplyLock;
+use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
+use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
-use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusNew;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusCollection;
+use BaksDev\Products\Supply\UseCase\Admin\Lock\ProductSupplyLockDTO;
+use BaksDev\Products\Supply\UseCase\Admin\Lock\ProductSupplyLockHandler;
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
 #[Group('products-supply')]
 #[When(env: 'test')]
-class ExistProductSupplyByStatusRepositoryTest extends KernelTestCase
+class ProductSupplyLockDebugTest extends KernelTestCase
 {
-    public function testRepository(): void
+    /** Для переопределения корня */
+    private const string MAIN = '';
+
+    public function testUseCase(): void
     {
         self::assertTrue(true);
+        return;
 
         /**
          * Инициализируем статусы
@@ -48,12 +58,29 @@ class ExistProductSupplyByStatusRepositoryTest extends KernelTestCase
         $ProductSupplyStatusCollection = self::getContainer()->get(ProductSupplyStatusCollection::class);
         $ProductSupplyStatusCollection->cases();
 
-        /** @var ExistProductSupplyByStatusInterface $ExistProductSupplyByStatusInterface */
-        $ExistProductSupplyByStatusInterface = self::getContainer()->get(ExistProductSupplyByStatusInterface::class);
+        $container = self::getContainer();
 
-        $result = $ExistProductSupplyByStatusInterface
-            ->forSupply(new ProductSupplyUid)
-            ->forStatus(new ProductSupplyStatusNew)
-            ->isExists();
+        /** @var EntityManagerInterface $em */
+        $em = $container->get(EntityManagerInterface::class);
+
+        $ProductSupply = $em->getRepository(ProductSupply::class)
+            ->find(empty(self::MAIN) ? ProductSupplyUid::TEST : self::MAIN);
+
+        $ProductSupplyEvent = $em->getRepository(ProductSupplyEvent::class)
+            ->find($ProductSupply->getEvent());
+
+        $ProductSupplyLockDTO = new ProductSupplyLockDTO($ProductSupplyEvent->getId());
+        $ProductSupplyEvent->getLock()->getDto($ProductSupplyLockDTO);
+
+        $ProductSupplyLockDTO
+            ->unlock() // снимаем блокировку
+            ->setContext(self::class);
+
+        /** @var ProductSupplyLockHandler $ProductSupplyLockHandler */
+        $ProductSupplyLockHandler = self::getContainer()->get(ProductSupplyLockHandler::class);
+
+        $handle = $ProductSupplyLockHandler->handle($ProductSupplyLockDTO);
+
+        self::assertTrue(($handle instanceof ProductSupplyLock), $handle.': Ошибка ProductSupplyLock');
     }
 }

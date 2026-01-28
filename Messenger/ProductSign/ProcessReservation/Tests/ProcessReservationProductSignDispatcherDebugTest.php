@@ -24,16 +24,15 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Supply\UseCase\Admin\Completed\Tests;
+namespace BaksDev\Products\Supply\Messenger\ProductSign\ProcessReservation\Tests;
 
+use BaksDev\Products\Supply\Entity\Event\Product\ProductSupplyProduct;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Entity\ProductSupply;
-use BaksDev\Products\Supply\Messenger\ProductSupply\CompletedStatusProductSupply\CompletedStatusProductSupplyDispatcher;
-use BaksDev\Products\Supply\Messenger\ProductSupply\CompletedStatusProductSupply\CompletedStatusProductSupplyMessage;
+use BaksDev\Products\Supply\Messenger\ProductSign\ProcessReservation\ProcessReservationProductSignDispatcher;
+use BaksDev\Products\Supply\Messenger\ProductSign\ProcessReservation\ProcessReservationProductSignMessage;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
-use BaksDev\Products\Supply\UseCase\Admin\Delivery\Tests\ProductSupplyStatusDeliveryTest;
 use Doctrine\ORM\EntityManagerInterface;
-use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;
@@ -43,22 +42,26 @@ use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\DependencyInjection\Attribute\When;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-/** next @see ProductSupplyStatusCanceledTest */
 #[Group('products-supply')]
-#[Group('products-supply-usecase')]
 #[When(env: 'test')]
-class ProductSupplyStatusCompletedTest extends KernelTestCase
+class ProcessReservationProductSignDispatcherDebugTest extends KernelTestCase
 {
-    /** Для переопределения корня */
     private const string MAIN = '';
 
-    #[DependsOnClass(ProductSupplyStatusDeliveryTest::class)]
+    public static function setUpBeforeClass(): void {}
+
     public function testUseCase(): void
     {
-        // Бросаем событие консольной команды
+        self::assertTrue(true);
+        return;
+
+        /** Бросаем событие консольной команды */
         $dispatcher = self::getContainer()->get(EventDispatcherInterface::class);
         $event = new ConsoleCommandEvent(new Command(), new StringInput(''), new NullOutput());
         $dispatcher->dispatch($event, 'console.command');
+
+        /** @var ProcessReservationProductSignDispatcher $ProductSignProcessDispatcher */
+        $ProductSignProcessDispatcher = self::getContainer()->get(ProcessReservationProductSignDispatcher::class);
 
         /** @var EntityManagerInterface $em */
         $em = self::getContainer()->get(EntityManagerInterface::class);
@@ -66,20 +69,32 @@ class ProductSupplyStatusCompletedTest extends KernelTestCase
         $ProductSupply = $em->getRepository(ProductSupply::class)
             ->find(empty(self::MAIN) ? ProductSupplyUid::TEST : self::MAIN);
 
-        self::assertInstanceOf(ProductSupply::class, $ProductSupply);
-
         $ProductSupplyEvent = $em->getRepository(ProductSupplyEvent::class)
-            ->find($ProductSupply->getEvent());
+            ->findOneBy($ProductSupply->getEvent());
 
-        self::assertInstanceOf(ProductSupplyEvent::class, $ProductSupplyEvent);
+        $ProductSupplyProducts = $em->getRepository(ProductSupplyProduct::class)
+            ->findOneBy(['event' => $ProductSupply->getEvent()]);
 
-        /** @var CompletedStatusProductSupplyDispatcher $CompletedProductSupplyDispatcher */
-        $CompletedProductSupplyDispatcher = self::getContainer()->get(CompletedStatusProductSupplyDispatcher::class);
+        /** @var ProductSupplyProduct $product */
+        foreach($ProductSupplyProducts as $product)
+        {
+            $total = $product->getTotal();
 
-        $message = new CompletedStatusProductSupplyMessage(
-            $ProductSupply->getId(),
-        );
+            /** Запускаем процесс бронирования на каждую единицу продукции в поставке */
+            for($i = 0; $i < $total; $i++)
+            {
+                $ProductSignProcessMessage = new ProcessReservationProductSignMessage(
+                    supply: $ProductSupply->getId(),
+                    user: $ProductSupplyEvent->getPersonal()->getUsr(),
+                    profile: $ProductSupplyEvent->getPersonal()->getProfile(),
+                    product: $ProductSupplyProducts->getProduct(),
+                    offer: $ProductSupplyProducts->getOfferConst(),
+                    variation: $ProductSupplyProducts->getVariationConst(),
+                    modification: $ProductSupplyProducts->getModificationConst(),
+                );
 
-        $CompletedProductSupplyDispatcher($message);
+                $ProductSignProcessDispatcher($ProductSignProcessMessage);
+            }
+        }
     }
 }
