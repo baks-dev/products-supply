@@ -50,8 +50,6 @@ setTimeout(function Hk91aSnRFfF()
 
     remove_channel.on('publication', function(ctx)
     {
-        console.log(' ->', ctx)
-
         const supply = document.getElementById(ctx.data.supply);
 
         if(supply !== null)

@@ -51,9 +51,7 @@ final readonly class CheckSignOnProductSupplyProductDispatcher
         #[Target('productsSupplyLogger')] private LoggerInterface $logger,
         private CentrifugoPublishInterface $centrifugo,
         private MessageDispatchInterface $messageDispatch,
-
         private ProductSupplyLockHandler $productSupplyLockHandler,
-
         private CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
         private AllProductSupplyProductInterface $allProductSupplyProductRepository,
         private ProductSignCountForSupplyInterface $productSignCountBySupplyRepository,
@@ -146,7 +144,7 @@ final readonly class CheckSignOnProductSupplyProductDispatcher
             $this->messageDispatch
                 ->dispatch(
                     message: $message,
-                    stamps: [new MessageDelay('15 seconds')],
+                    stamps: [new MessageDelay(sprintf('%s seconds', ($total - $reserve)))],
                     transport: 'products-supply',
                 );
         }

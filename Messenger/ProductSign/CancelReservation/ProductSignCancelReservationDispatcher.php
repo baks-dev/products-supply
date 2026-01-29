@@ -46,7 +46,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final readonly class ProductSignCancelReservationDispatcher
 {
     public function __construct(
-        #[Target('productsSupplyLogger')] private LoggerInterface $logger,
+        #[Target('productsSignLogger')] private LoggerInterface $logger,
         private CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
         private AllProductSignEventsRelatedProductSupplyInterface $allProductSignEventsRelatedProductSupplyRepository,
         private ProductSignStatusHandler $ProductSignStatusHandler,
@@ -61,7 +61,7 @@ final readonly class ProductSignCancelReservationDispatcher
         if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
         {
             $this->logger->critical(
-                message: 'Событие ProductSupplyEvent не найдено',
+                message: 'products-supply: Событие ProductSupplyEvent не найдено',
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),
@@ -98,7 +98,7 @@ final readonly class ProductSignCancelReservationDispatcher
             {
                 $this->logger->critical(
                     message: sprintf(
-                        'Поставка %s: Не удалось снять резерв Честного знака id - %s. Ошибка %s',
+                        'products-supply: Поставка %s: Не удалось снять резерв Честного знака id - %s. Ошибка %s',
                         $ProductSupplyEvent->getInvariable()->getNumber(),
                         $ProductSignEvent->getMain(),
                         $handle,

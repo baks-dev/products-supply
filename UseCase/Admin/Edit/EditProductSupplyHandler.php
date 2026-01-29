@@ -72,7 +72,7 @@ final class EditProductSupplyHandler extends AbstractHandler
                 message: sprintf('%s: Поставка заблокирована для изменений',
                     $error),
                 context: [
-                    $command->getEvent(),
+                    'event' => (string) $command->getEvent(),
                     self::class.':'.__LINE__
                 ],
             );

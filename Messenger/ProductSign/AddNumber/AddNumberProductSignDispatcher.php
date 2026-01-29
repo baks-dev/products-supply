@@ -46,7 +46,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final readonly class AddNumberProductSignDispatcher
 {
     public function __construct(
-        #[Target('productsSupplyLogger')] private LoggerInterface $logger,
+        #[Target('productsSignLogger')] private LoggerInterface $logger,
         private CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
         private AllProductSignEventsRelatedProductSupplyInterface $allProductSignEventsRelatedProductSupplyRepository,
         private ProductSignStatusHandler $ProductSignStatusHandler,
@@ -61,7 +61,7 @@ final readonly class AddNumberProductSignDispatcher
         if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
         {
             $this->logger->critical(
-                message: 'Событие ProductSupplyEvent не найдено',
+                message: 'products-supply: Событие ProductSupplyEvent не найдено',
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),
@@ -86,7 +86,7 @@ final readonly class AddNumberProductSignDispatcher
         {
             $this->logger->critical(
                 message: sprintf(
-                    'Поставка %s: Не найдено Честных знаков для присвоения комментария при смене статуса %s',
+                    'products-supply: Поставка %s: Не найдено Честных знаков для присвоения комментария при смене статуса %s',
                     $ProductSupplyEvent->getInvariable()->getNumber(),
                     $ProductSupplyEvent->getStatus(),
                 ),
@@ -114,7 +114,7 @@ final readonly class AddNumberProductSignDispatcher
             {
                 $this->logger->critical(
                     message: sprintf(
-                        'Поставка %s: Не удалось присвоить номер ГТД для Честного знака id - %s при изменении статуса поставки. Ошибка %s',
+                        'products-supply: Поставка %s: Не удалось присвоить номер ГТД для Честного знака id - %s при изменении статуса поставки. Ошибка %s',
                         $ProductSupplyEvent->getInvariable()->getNumber(),
                         $ProductSignEvent->getMain(),
                         $handle,

@@ -50,7 +50,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final readonly class ProcessReservationProductSignDispatcher
 {
     public function __construct(
-        #[Target('productsSupplyLogger')] private LoggerInterface $logger,
+        #[Target('productsSignLogger')] private LoggerInterface $logger,
         private MessageDispatchInterface $messageDispatch,
         private ProductSignStatusHandler $ProductSignStatusHandler,
         private CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
@@ -66,7 +66,7 @@ final readonly class ProcessReservationProductSignDispatcher
         if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
         {
             $this->logger->critical(
-                message: 'Событие ProductSupplyEvent не найдено',
+                message: 'products-supply: Событие ProductSupplyEvent не найдено',
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),
@@ -88,15 +88,15 @@ final readonly class ProcessReservationProductSignDispatcher
 
         if(false === ($ProductSignEvent instanceof ProductSignEvent))
         {
-            //            $this->logger->info(
-            //                message: sprintf(
-            //                    'Поставка %s: Повторная попытка зарезервировать Честный знак',
-            //                    $ProductSupplyEvent->getInvariable()->getNumber()),
-            //                context: [
-            //                    self::class.':'.__LINE__,
-            //                    var_export($message, true),
-            //                ],
-            //            );
+            //                        $this->logger->info(
+            //                            message: sprintf(
+            //                                'Поставка %s: Повторная попытка зарезервировать Честный знак',
+            //                                $ProductSupplyEvent->getInvariable()->getNumber()),
+            //                            context: [
+            //                                self::class.':'.__LINE__,
+            //                                var_export($message, true),
+            //                            ],
+            //                        );
 
             /** Повтор найти Честный знак, не принадлежащий какой-либо поставке */
             $this->messageDispatch
@@ -118,8 +118,9 @@ final readonly class ProcessReservationProductSignDispatcher
         if(false === ($handle instanceof ProductSign))
         {
             $this->logger->critical(
-                message: sprintf('Поставка %s: Ошибка при обновлении статуса ЧЗ: %s',
-                    $ProductSupplyEvent->getInvariable()->getNumber(), $handle
+                message: sprintf('products-sign: Ошибка %s при обновлении статуса ЧЗ в поставке %s',
+                    $handle,
+                    $ProductSupplyEvent->getInvariable()->getNumber(),
                 ),
                 context: [
                     self::class.':'.__LINE__,

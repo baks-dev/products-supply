@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -44,13 +44,13 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * При присвоении поставке статуса completed "Выполнен" -
- * вводит Честные знаки в оборот, переводя из в статус New «Новый»
+ * вводит Честные знаки в оборот, переводя в статус New «Новый»
  */
 #[AsMessageHandler(priority: 0)]
 final readonly class UpdateProductSignStatusNewBySupplyCompleteHandler
 {
     public function __construct(
-        #[Target('productsSupplyLogger')] private LoggerInterface $logger,
+        #[Target('productsSignLogger')] private LoggerInterface $logger,
         private MessageDispatchInterface $messageDispatch,
         private CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
         private AllProductSignEventsRelatedProductSupplyInterface $allProductSignEventsRelatedProductSupplyRepository,
@@ -65,7 +65,7 @@ final readonly class UpdateProductSignStatusNewBySupplyCompleteHandler
         if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
         {
             $this->logger->critical(
-                message: 'Событие ProductSupplyEvent не найдено',
+                message: 'products-supply: Событие ProductSupplyEvent не найдено',
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),

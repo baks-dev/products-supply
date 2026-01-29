@@ -122,8 +122,8 @@ final readonly class ReceivedProductSupplyProductDispatcher
 
         if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
         {
-            $this->logger->warning(
-                message: 'Не найдено ProductSupplyEvent',
+            $this->logger->critical(
+                message: 'products-supply: Не найдено ProductSupplyEvent',
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),
@@ -133,7 +133,7 @@ final readonly class ReceivedProductSupplyProductDispatcher
             return;
         }
 
-        /** Идентификаторы продукта из поставки (supply), соответсвующее идентификаторам в заявке (stock) */
+        /** Идентификаторы продукта из поставки (supply), соответствующее идентификаторам в заявке (stock) */
         $supplyProductBySupplyStock = $this->oneProductSupplyProductRepository
             ->forSupply($ProductSupplyEvent->getMain())
             ->forProduct($stockProduct->getProduct())
@@ -182,8 +182,8 @@ final readonly class ReceivedProductSupplyProductDispatcher
 
         if(null === $supplyProductForReceived)
         {
-            $this->logger->warning(
-                message: sprintf('Не найдено продукта ИЗ ПОСТАВКИ %s, соответствущего продукту ИЗ ЗАЯВКИ %s',
+            $this->logger->critical(
+                message: sprintf('products-supply: Не найдено продукта ИЗ ПОСТАВКИ %s, соответствующего продукту ИЗ ЗАЯВКИ %s',
                     $ProductSupplyEvent->getMain(), $message->getId(),
                 ),
                 context: [
@@ -204,8 +204,9 @@ final readonly class ReceivedProductSupplyProductDispatcher
         {
             $this->logger->critical(
                 message: sprintf(
-                    '%s: Ошибка обновления продукта в поставке %s при принятии складской заявки',
-                    $ProductSupply, $ProductSupplyEvent->getMain(),
+                    'products-supply: Ошибка %s обновления продукта в поставке %s при принятии складской заявки',
+                    $ProductSupply,
+                    $ProductSupplyEvent->getInvariable()->getNumber(),
                 ),
                 context: [
                     self::class.':'.__LINE__,
@@ -218,12 +219,16 @@ final readonly class ReceivedProductSupplyProductDispatcher
         {
             $this->logger->info(
                 message: sprintf(
-                    'Успешно обновили продукт %s (%s) при принятии складской заявки %s в поставке',
+                    'Поставка %s: Успешно обновили продукт %s (%s) при принятии складской заявки %s',
+                    $ProductSupplyEvent->getInvariable()->getNumber(),
                     $supplyProductForReceived->getId(),
                     $message->getId(),
                     $ProductSupply->getId(),
                 ),
-                context: [self::class.':'.__LINE__],
+                context: [
+                    self::class.':'.__LINE__,
+                    var_export($message, true),
+                ],
             );
 
             /**

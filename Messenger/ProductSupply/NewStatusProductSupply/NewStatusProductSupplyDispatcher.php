@@ -46,7 +46,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * При присвоении поставке статуса New «Новая» -
- * запускает процесс резервирования ОДИНОГО Честный знака на ОДНУ единицу продукции в поставке
+ * запускает процесс резервирования ОДНОГО Честный знака на ОДНУ единицу продукции в поставке
  * @see ProcessReservationProductSignDispatcher
  */
 #[AsMessageHandler(priority: 0)]
@@ -67,7 +67,7 @@ final readonly class NewStatusProductSupplyDispatcher
         if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
         {
             $this->logger->critical(
-                message: 'Событие ProductSupplyEvent не найдено',
+                message: 'products-supply: Событие ProductSupplyEvent не найдено',
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),

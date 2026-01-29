@@ -56,7 +56,7 @@ final readonly class CompletedStatusProductSupplyDispatcher
         if(false === ($currentSupply instanceof ProductSupplyEvent))
         {
             $this->logger->critical(
-                message: 'Не найдено событие ProductSupplyEvent',
+                message: 'products-supply: Не найдено событие ProductSupplyEvent',
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),
@@ -100,11 +100,11 @@ final readonly class CompletedStatusProductSupplyDispatcher
         {
             $this->logger->critical(
                 message: sprintf(
-                    '%s: Ошибка изменения статуса с %s на %s в поставке %s',
+                    'products-supply: Ошибка %s изменения статуса с %s на %s в поставке %s',
                     $handle,
                     $currentSupply->getStatus(),
                     $ProductSupplyStatusCompletedDTO->getStatus(),
-                    $currentSupply->getMain(),
+                    $currentSupply->getInvariable()->getNumber(),
                 ),
                 context: [
                     self::class.':'.__LINE__,
@@ -118,10 +118,13 @@ final readonly class CompletedStatusProductSupplyDispatcher
             $this->logger->info(
                 message: sprintf(
                     'Успешно переместили поставку %s со статуса %s в статус %s',
-                    $handle->getId(), $currentSupply->getStatus(), $ProductSupplyStatusCompletedDTO->getStatus(),
+                    $currentSupply->getInvariable()->getNumber(),
+                    $currentSupply->getStatus(),
+                    $ProductSupplyStatusCompletedDTO->getStatus(),
                 ),
                 context: [
                     self::class.':'.__LINE__,
+                    var_export($message, true),
                 ],
             );
         }
