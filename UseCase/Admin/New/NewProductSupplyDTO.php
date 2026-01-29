@@ -95,7 +95,6 @@ final class NewProductSupplyDTO implements ProductSupplyEventInterface
 
         /** Блокировка */
         $this->lock = new NewProductSupplyLockDTO();
-        $this->lock->setContext(self::class);
     }
 
     /**

@@ -38,8 +38,6 @@ final class ProductSupplyLockDTO implements ProductSupplyLockInterface
 
     private bool $lock;
 
-    private ?string $context;
-
     public function __construct(ProductSupplyEventUid $id)
     {
         $this->id = $id;
@@ -71,21 +69,6 @@ final class ProductSupplyLockDTO implements ProductSupplyLockInterface
     public function lock()
     {
         $this->lock = true;
-        return $this;
-    }
-
-    /**
-     * Context
-     */
-
-    public function getContext(): ?string
-    {
-        return $this->context;
-    }
-
-    public function setContext(?string $context): ProductSupplyLockDTO
-    {
-        $this->context = $context;
         return $this;
     }
 }

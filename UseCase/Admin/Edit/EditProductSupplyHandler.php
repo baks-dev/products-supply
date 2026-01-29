@@ -35,7 +35,6 @@ use BaksDev\Products\Supply\Entity\Event\ProductSupplyEventInterface;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Messenger\ProductSupplyMessage;
 use BaksDev\Products\Supply\Repository\LockProductSupply\ProductSupplyLockInfoInterface;
-use BaksDev\Products\Supply\Repository\LockProductSupply\ProductSupplyLockResult;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
@@ -58,15 +57,14 @@ final class EditProductSupplyHandler extends AbstractHandler
 
     public function handle(ProductSupplyEventInterface $command): ProductSupply|string
     {
-        /** Проверка на блокировку при изменении - блокировка EntityReadonly, поэтому всегда хранит активное событие */
-        $ProductSupplyLockResult = $this->productSupplyLockRepository
+        /**
+         * Проверка на блокировку при изменении - блокировка EntityReadonly, поэтому всегда хранит активное событие
+         */
+        $isLock = $this->productSupplyLockRepository
             ->forEvent($command->getEvent())
-            ->find();
+            ->isLock();
 
-        if(
-            true === ($ProductSupplyLockResult instanceof ProductSupplyLockResult) &&
-            true === $ProductSupplyLockResult->isLock()
-        )
+        if(true === $isLock)
         {
             $error = uniqid('', true);
 
@@ -74,40 +72,13 @@ final class EditProductSupplyHandler extends AbstractHandler
                 message: sprintf('%s: Поставка заблокирована для изменений',
                     $error),
                 context: [
-                    'context' => $ProductSupplyLockResult->getContext(),
-                    self::class.':'.__LINE__,
-                    $command,
+                    $command->getEvent(),
+                    self::class.':'.__LINE__
                 ],
             );
 
             return $error;
         }
-
-        //        /**
-        //         *  Так как изменение поставки возможно только при изменении статуса - применить статус повторно невозможно
-        //         */
-        //        $isExistsStatus = $this->existProductSupplyByStatusRepository
-        //            ->forEvent($command->getEvent())
-        //            ->forStatus($command->getStatus())
-        //            ->isExists();
-        //
-        //        if($isExistsStatus)
-        //        {
-        //            $error = uniqid('', true);
-        //
-        //            $this->logger->warning(
-        //                message: sprintf('%s: Невозможно применить статус %s повторно для поставки',
-        //                    $error,
-        //                    $command->getStatus()
-        //                ),
-        //                context: [
-        //                    self::class.':'.__LINE__,
-        //                    $command,
-        //                ],
-        //            );
-        //
-        //            return $error;
-        //        }
 
         $this
             ->setCommand($command)

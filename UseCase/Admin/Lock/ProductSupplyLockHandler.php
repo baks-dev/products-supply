@@ -32,12 +32,11 @@ final class ProductSupplyLockHandler extends AbstractHandler
 {
     public function handle(ProductSupplyLockDTO $command): ProductSupplyLock|string
     {
-        $this->setCommand($command);
-
         /** @var ProductSupplyLock $entity */
-        $entity = $this->prePersistOrUpdate(ProductSupplyLock::class, [
-            'event' => $command->getEvent(),
-        ]);
+        $entity = $this->getRepository(ProductSupplyLock::class)
+            ->findOneBy(['event' => $command->getEvent()]);
+
+        $entity->setEntity($command);
 
         /** Валидация всех объектов */
         if($this->validatorCollection->isInvalid())

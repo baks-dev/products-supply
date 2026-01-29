@@ -67,7 +67,6 @@ final class ProductSupplyStatusCanceledDTO implements ProductSupplyEventInterfac
 
         /** Блокировка */
         $this->lock = new EditProductSupplyLockDTO();
-        $this->lock->setContext(self::class);
     }
 
     /**

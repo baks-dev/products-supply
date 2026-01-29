@@ -57,12 +57,6 @@ class ProductSupplyLock extends EntityReadonly
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
     private bool $lock = false;
 
-    /**
-     * Значение свойства
-     */
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $context = null;
-
     public function __construct(ProductSupplyEvent $event)
     {
         $this->event = $event;

@@ -26,7 +26,6 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\Messenger\ProductSupply\CheckSignOnProductSupplyProduct\Tests;
 
-use BaksDev\Products\Supply\Entity\Event\Product\ProductSupplyProduct;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Messenger\ProductSupply\CheckSignOnProductSupplyProduct\CheckSignOnProductSupplyProductDispatcher;
 use BaksDev\Products\Supply\Messenger\ProductSupply\CheckSignOnProductSupplyProduct\CheckSignOnProductSupplyProductMessage;
@@ -43,7 +42,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 #[Group('products-supply')]
 #[When(env: 'test')]
-class CheckSignOnProductSupplyProductDispatcherTest extends KernelTestCase
+class CheckSignOnProductSupplyProductDispatcherDebugTest extends KernelTestCase
 {
     private const string MAIN = '';
 
@@ -63,19 +62,11 @@ class CheckSignOnProductSupplyProductDispatcherTest extends KernelTestCase
         $ProductSupply = $em->getRepository(ProductSupply::class)
             ->find(empty(self::MAIN) ? ProductSupplyUid::TEST : self::MAIN);
 
-        $ProductSupplyProducts = $em->getRepository(ProductSupplyProduct::class)
-            ->findOneBy(['event' => $ProductSupply->getEvent()]);
-
         /** @var CheckSignOnProductSupplyProductDispatcher $CheckSignOnProductSupplyProductDispatcher */
         $CheckSignOnProductSupplyProductDispatcher = self::getContainer()->get(CheckSignOnProductSupplyProductDispatcher::class);
 
         $message = new CheckSignOnProductSupplyProductMessage(
             supply: $ProductSupply->getId(),
-            product: $ProductSupplyProducts->getProduct(),
-            offerConst: $ProductSupplyProducts->getOfferConst(),
-            variationConst: $ProductSupplyProducts->getVariationConst(),
-            modificationConst: $ProductSupplyProducts->getModificationConst(),
-            total: $ProductSupplyProducts->getTotal(),
         );
 
         $CheckSignOnProductSupplyProductDispatcher($message);

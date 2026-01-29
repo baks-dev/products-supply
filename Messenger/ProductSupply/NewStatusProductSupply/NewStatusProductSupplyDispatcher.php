@@ -86,25 +86,28 @@ final readonly class NewStatusProductSupplyDispatcher
         $NewProductSupplyDTO = new NewProductSupplyDTO();
         $ProductSupplyEvent->getDto($NewProductSupplyDTO);
 
+        /** Задержка из расчета - 1 секунда на 1 одного ЧЗ */
+        $delay = 0;
+
         /** Процесс бронирования Честных знаков на продукты в поставке */
-        foreach($NewProductSupplyDTO->getProduct() as $product)
+        foreach($NewProductSupplyDTO->getProduct() as $key => $product)
         {
             $total = $product->getTotal();
 
-            /** Бронируем ОДИН Честный знак на ОДНУ единицу продукции в поставке */
+            /** Бронируем ОДИН ЧЗ на ОДНУ единицу продукции в поставке */
             for($i = 0; $i < $total; $i++)
             {
-                $this->logger->info(
-                    message: sprintf(
-                        'products-sign: Попытка зарезервировать Честный знак: `%s` продукт из `%s` в поставке %s',
-                        $i + 1, $total, $ProductSupplyEvent->getInvariable()->getNumber()
-                    ),
-                    context: [
-                        'номер поставки' => $NewProductSupplyDTO->getInvariable()->getNumber(),
-                        self::class.':'.__LINE__,
-                        var_export($product, true),
-                    ],
-                );
+                //                $this->logger->info(
+                //                    message: sprintf(
+                //                        'Поставка %s: Резервирование ЧЗ: продукт %s, %s единица продукции из %s',
+                //                        $ProductSupplyEvent->getInvariable()->getNumber(),
+                //                        $key + 1, $i + 1, $total,
+                //                    ),
+                //                    context: [
+                //                        self::class.':'.__LINE__,
+                //                        var_export($product, true),
+                //                    ],
+                //                );
 
                 $this->messageDispatch
                     ->dispatch(
@@ -121,26 +124,31 @@ final readonly class NewStatusProductSupplyDispatcher
                     );
             }
 
-            /**
-             * Сообщение для проверки резервирования ЧЗ на все количество продукции в поставке
-             */
-
-            $message = new CheckSignOnProductSupplyProductMessage(
-                supply: $ProductSupplyEvent->getMain(),
-                product: $product->getProduct(),
-                offerConst: $product->getOfferConst(),
-                variationConst: $product->getVariationConst(),
-                modificationConst: $product->getModificationConst(),
-                total: $total
-            );
-
-            $this->messageDispatch
-                ->dispatch(
-                    message: $message,
-                    stamps: [new MessageDelay('30 seconds')],
-                    transport: 'products-supply',
-                );
-
+            /** Задержка для проверки равна сумме количества ВСЕХ продуктов в поставке */
+            $delay += $total;
         }
+
+        /**
+         * Сообщение для проверки резервирования ЧЗ на все количество продукции в поставке
+         */
+
+        $this->logger->info(
+            message: sprintf(
+                'Поставка %s: Проверка резервирования ЧЗ с интервалом в %s секунд',
+                $NewProductSupplyDTO->getInvariable()->getNumber(),
+                $delay,
+            ),
+            context: [
+                self::class.':'.__LINE__,
+                var_export($message, true),
+            ],
+        );
+
+        $this->messageDispatch
+            ->dispatch(
+                message: new CheckSignOnProductSupplyProductMessage($ProductSupplyEvent->getMain()),
+                stamps: [new MessageDelay(sprintf('%s seconds', $delay))],
+                transport: 'products-supply',
+            );
     }
 }

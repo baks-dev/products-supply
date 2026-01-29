@@ -36,5 +36,5 @@ interface ProductSupplyLockInfoInterface
     /**
      * Метод возвращает информацию о блокировке
      */
-    public function find(): ProductSupplyLockResult|false;
+    public function isLock(): bool;
 }

@@ -31,6 +31,7 @@ use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Products\Supply\Entity\Event\Lock\ProductSupplyLock;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
+use BaksDev\Products\Supply\Repository\AllProductSupplyProduct\AllProductSupplyProductInterface;
 use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductSupplyEventInterface;
 use BaksDev\Products\Supply\Repository\ProductSign\ProductSignCountForSupply\ProductSignCountForSupplyInterface;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusNew;
@@ -54,6 +55,7 @@ final readonly class CheckSignOnProductSupplyProductDispatcher
         private ProductSupplyLockHandler $productSupplyLockHandler,
 
         private CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
+        private AllProductSupplyProductInterface $allProductSupplyProductRepository,
         private ProductSignCountForSupplyInterface $productSignCountBySupplyRepository,
     ) {}
 
@@ -82,24 +84,45 @@ final readonly class CheckSignOnProductSupplyProductDispatcher
             return;
         }
 
-        $productSignReserve = $this->productSignCountBySupplyRepository
-            ->forSupply($ProductSupplyEvent->getMain())
-            ->forProduct($message->getProduct())
-            ->forOffer($message->getOfferConst())
-            ->forVariation($message->getVariationConst())
-            ->forModification($message->getModificationConst())
-            ->count();
+        $ProductSupplyProduct = $this->allProductSupplyProductRepository
+            ->forSupply($message->getSupply())
+            ->findAll();
+
+        if(false === $ProductSupplyProduct)
+        {
+            return;
+        }
+
+        $total = 0;
+        $reserve = 0;
+
+        foreach($ProductSupplyEvent->getProduct() as $ProductSupplyProduct)
+        {
+            /** Суммируем все количество продуктов в поставке */
+            $total += $ProductSupplyProduct->getTotal();
+
+            $productSignReserve = $this->productSignCountBySupplyRepository
+                ->forSupply($ProductSupplyEvent->getMain())
+                ->forProduct($ProductSupplyProduct->getProduct())
+                ->forOffer($ProductSupplyProduct->getOfferConst())
+                ->forVariation($ProductSupplyProduct->getVariationConst())
+                ->forModification($ProductSupplyProduct->getModificationConst())
+                ->count();
+
+            /** Суммируем все резервы на ЧЗ */
+            $reserve += $productSignReserve;
+        }
 
         /** Ошибка */
-        if($productSignReserve > $message->getTotal())
+        if($reserve > $total)
         {
-            $this->logger->debug(
-                message: sprintf('Поставка %s: Количество зарезервированных ЧЗ больше количества продуктов в поставке',
+            $this->logger->warning(
+                message: sprintf('Поставка %s: Количество зарезервированных ЧЗ больше количества продуктов',
                     $ProductSupplyEvent->getInvariable()->getNumber(),
                 ),
                 context: [
-                    'зарезервировано' => $productSignReserve,
-                    'в поставке' => $message->getTotal(),
+                    'зарезервировано' => $reserve,
+                    'в поставке' => $total,
                     var_export($message, true),
                     self::class.':'.__LINE__],
             );
@@ -108,13 +131,13 @@ final readonly class CheckSignOnProductSupplyProductDispatcher
         }
 
         /** Повторяем сверку */
-        if($productSignReserve < $message->getTotal())
+        if($reserve < $total)
         {
             $this->logger->info(
-                message: sprintf('Поставка %s: Продолжаем поиск свободных ЧЗ. Зарезервировано %s ЧЗ для %s продуктов в поставке.',
+                message: sprintf('Поставка %s: Зарезервировано %s ЧЗ для %s единиц продукции. Продолжаем поиск свободных ЧЗ.',
                     $ProductSupplyEvent->getInvariable()->getNumber(),
-                    $productSignReserve,
-                    $message->getTotal()
+                    $reserve,
+                    $total,
                 ),
                 context: [self::class.':'.__LINE__],
             );
@@ -129,13 +152,13 @@ final readonly class CheckSignOnProductSupplyProductDispatcher
         }
 
         /** Разблокируем */
-        if($productSignReserve === $message->getTotal())
+        if($reserve === $total)
         {
             $this->logger->info(
                 message: sprintf('Поставка %s: Для всех продуктов (%s) из поставки найдены ЧЗ (%s)',
                     $ProductSupplyEvent->getInvariable()->getNumber(),
-                    $productSignReserve,
-                    $message->getTotal()
+                    $reserve,
+                    $total,
                 ),
                 context: [self::class.':'.__LINE__],
             );
@@ -150,24 +173,27 @@ final readonly class CheckSignOnProductSupplyProductDispatcher
         $ProductSupplyLockDTO = new ProductSupplyLockDTO($ProductSupplyEvent->getId());
         $ProductSupplyEvent->getLock()->getDto($ProductSupplyLockDTO);
 
-        $ProductSupplyLockDTO
-            ->unlock() // снимаем блокировку
-            ->setContext(self::class);
+        $ProductSupplyLockDTO->unlock(); // снимаем блокировку
 
         $lockHandler = $this->productSupplyLockHandler->handle($ProductSupplyLockDTO);
 
         if(true === $lockHandler instanceof ProductSupplyLock)
         {
             $this->logger->warning(
-                message: sprintf('Сняли блокировку с %s', $ProductSupplyEvent->getMain()),
-                context: [self::class.':'.__LINE__],
+                message: sprintf('Поставка %s: Сняли блокировку',
+                    $ProductSupplyEvent->getInvariable()->getNumber(),
+                ),
+                context: [
+                    'main' => (string) $ProductSupplyEvent->getMain(),
+                    'event' => (string) $ProductSupplyEvent->getId(),
+                    self::class.':'.__LINE__],
             );
 
             $socket = $this->centrifugo
                 ->addData(['supply' => (string) $ProductSupplyEvent->getMain()])
                 ->addData(['lock' => false])
                 ->addData(['context' => 'На все количество продуктов в поставке были зарезервированы Честные знаки'])
-                ->send('supplys');
+                ->send('supplys'); // канал для перетаскивания
 
             if($socket && $socket->isError())
             {

@@ -26,7 +26,6 @@ namespace BaksDev\Products\Supply\Repository\LockProductSupply\Tests;
 
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Repository\LockProductSupply\ProductSupplyLockInfoInterface;
-use BaksDev\Products\Supply\Repository\LockProductSupply\ProductSupplyLockResult;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use Doctrine\ORM\EntityManagerInterface;
 use NewProductSupplyHandlerTest;
@@ -58,25 +57,6 @@ class ProductSupplyLockInfoRepositoryTest extends KernelTestCase
 
         $result = $ProductSupplyLockInfoInterface
             ->forEvent($ProductSupply->getEvent())
-            ->find();
-
-        if(false === $result)
-        {
-            return;
-        }
-
-        // Вызываем все геттеры
-        $reflectionClass = new \ReflectionClass(ProductSupplyLockResult::class);
-        $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
-
-        foreach($methods as $method)
-        {
-            // Методы без аргументов
-            if($method->getNumberOfParameters() === 0)
-            {
-                // Вызываем метод
-                $data = $method->invoke($result);
-            }
-        }
+            ->isLock();
     }
 }

@@ -52,7 +52,7 @@ final class ProductSupplyLockInfoRepository implements ProductSupplyLockInfoInte
     /**
      * Метод возвращает информацию о блокировке
      */
-    public function find(): ProductSupplyLockResult|false
+    public function isLock(): bool
     {
         if(false === ($this->event instanceof ProductSupplyEventUid))
         {
@@ -61,19 +61,16 @@ final class ProductSupplyLockInfoRepository implements ProductSupplyLockInfoInte
 
         $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
 
-        $dbal
-            ->select('product_supply_lock.lock')
-            ->addSelect('product_supply_lock.context')
-            ->from(ProductSupplyLock::class, 'product_supply_lock');
+        $dbal->from(ProductSupplyLock::class, 'product_supply_lock');
 
         $dbal
-            ->where('product_supply_lock.event = :event')
+            ->where('product_supply_lock.event = :event AND product_supply_lock.lock IS TRUE')
             ->setParameter(
                 key: 'event',
                 value: $this->event,
                 type: ProductSupplyEventUid::TYPE,
             );
 
-        return $dbal->fetchHydrate(ProductSupplyLockResult::class);
+        return $dbal->fetchExist();
     }
 }

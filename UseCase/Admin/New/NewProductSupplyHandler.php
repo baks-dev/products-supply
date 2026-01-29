@@ -96,12 +96,12 @@ final class NewProductSupplyHandler extends AbstractHandler
 
         $this->logger->warning(
             message: sprintf(
-                'Блокируем изменение поставки %s',
+                'Поставка %s: Заблокировали изменения',
                 $command->getInvariable()->getNumber()
             ),
             context: [
-                'main' => $this->main->getId(),
-                'event' => $this->main->getEvent(),
+                'main' => (string) $this->main->getId(),
+                'event' => (string) $this->main->getEvent(),
                 self::class.':'.__LINE__,
             ],
         );

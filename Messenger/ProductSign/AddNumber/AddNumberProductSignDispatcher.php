@@ -86,8 +86,9 @@ final readonly class AddNumberProductSignDispatcher
         {
             $this->logger->critical(
                 message: sprintf(
-                    'products-sign: Не найдено Честных знаков для присвоения комментария при смене статуса %s поставки %s',
-                    $message->getId(), $ProductSupplyEvent->getStatus(),
+                    'Поставка %s: Не найдено Честных знаков для присвоения комментария при смене статуса %s',
+                    $ProductSupplyEvent->getInvariable()->getNumber(),
+                    $ProductSupplyEvent->getStatus(),
                 ),
                 context: [
                     self::class.':'.__LINE__,
@@ -113,8 +114,10 @@ final readonly class AddNumberProductSignDispatcher
             {
                 $this->logger->critical(
                     message: sprintf(
-                        'products-sign: ошибка %s: Не удалось присвоить номер ГТД для Честного знака %s при изменении статуса поставки %s',
-                        $handle, $ProductSignEvent->getMain(), $message->getId(),
+                        'Поставка %s: Не удалось присвоить номер ГТД для Честного знака id - %s при изменении статуса поставки. Ошибка %s',
+                        $ProductSupplyEvent->getInvariable()->getNumber(),
+                        $ProductSignEvent->getMain(),
+                        $handle,
                     ),
                     context: [
                         self::class.':'.__LINE__,
@@ -129,7 +132,8 @@ final readonly class AddNumberProductSignDispatcher
             {
                 $this->logger->info(
                     message: sprintf(
-                        'products-sign: Успешно присвоили номер ГТД Честного знака %s',
+                        'Поставка %s: Успешно присвоили номер ГТД Честного знака id - %s',
+                        $ProductSupplyEvent->getInvariable()->getNumber(),
                         $handle->getId(),
                     ),
                     context: [

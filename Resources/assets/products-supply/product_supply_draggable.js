@@ -46,9 +46,28 @@ setTimeout(function Hk91aSnRFfF()
         return setTimeout(Hk91aSnRFfF, init_counter_T1dfEVi);
     }
 
-    const publish = centrifuge.newSubscription('supplys');
+    const remove_channel = centrifuge.newSubscription('remove');
 
-    publish.on('publication', function(ctx)
+    remove_channel.on('publication', function(ctx)
+    {
+        console.log(' ->', ctx)
+
+        const supply = document.getElementById(ctx.data.supply);
+
+        if(supply !== null)
+        {
+            if(ctx.data.profile && window.current_profile && ctx.data.profile !== window.current_profile)
+            {
+                /** Удаляем поставку у остальных менеджеров */
+                supply.remove()
+            }
+        }
+
+    }).subscribe();
+
+    const supplys_channel = centrifuge.newSubscription('supplys');
+
+    supplys_channel.on('publication', function(ctx)
     {
         const supply = document.getElementById(ctx.data.supply);
 
@@ -56,13 +75,6 @@ setTimeout(function Hk91aSnRFfF()
         {
             const number = supply.querySelector('.number-supply')
             const label = supply.querySelector(`label[for="${number.dataset.copy}"]`);
-
-            /** Реакция если переданн профиль */
-            if(ctx.data.profile && window.current_profile && ctx.data.profile !== window.current_profile)
-            {
-                /** Удаляем поставку у остальных менеджеров */
-                supply.remove()
-            }
 
             let draggable = supply.querySelector('[class*="draggable"]')
 

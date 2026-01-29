@@ -34,21 +34,8 @@ final class EditProductSupplyLockDTO implements ProductSupplyLockInterface
     /** Снимаем блокировку при изменении */
     private bool $lock = false;
 
-    private ?string $context = null;
-
     public function getLock(): bool
     {
         return $this->lock;
-    }
-
-    public function setContext(?string $context): EditProductSupplyLockDTO
-    {
-        $this->context = $context;
-        return $this;
-    }
-
-    public function getContext(): ?string
-    {
-        return $this->context;
     }
 }

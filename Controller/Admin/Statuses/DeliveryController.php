@@ -188,7 +188,7 @@ final class DeliveryController extends AbstractController
                     $this->successful[] = $number;
 
                     $logger->info(
-                        message: sprintf('Статус поставки %s изменен на %s',
+                        message: sprintf('Поставка %s: Статус изменен на %s',
                             $ProductSupply->getId(),
                             $ProductSupplyStatusDeliveryDTO->getStatus()
                         ),
@@ -269,7 +269,7 @@ final class DeliveryController extends AbstractController
             $publish
                 ->addData(['supply' => (string) $ProductSupplyEvent->getMain()])
                 ->addData(['profile' => (string) $this->getCurrentProfileUid()])
-                ->send('supplys');
+                ->send('remove');
 
             $this->numbers[] = $ProductSupplyEvent->getInvariable()->getNumber();
         }

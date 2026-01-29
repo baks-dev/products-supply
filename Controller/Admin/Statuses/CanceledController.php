@@ -162,7 +162,7 @@ final class CanceledController extends AbstractController
                     $this->successful[] = $number;
 
                     $logger->info(
-                        message: sprintf('Статус поставки %s изменен на %s',
+                        message: sprintf('Поставка %s: Статус изменен на %s',
                             $ProductSupplyEvent->getInvariable()->getNumber(),
                             $ProductSupplyStatusCanceledDTO->getStatus()
                         ),
@@ -221,7 +221,7 @@ final class CanceledController extends AbstractController
             $publish
                 ->addData(['supply' => (string) $ProductSupplyEvent->getMain()])
                 ->addData(['profile' => (string) $this->getCurrentProfileUid()])
-                ->send('supplys');
+                ->send('remove');
 
             $this->numbers[] = $ProductSupplyEvent->getInvariable()->getNumber();
         }

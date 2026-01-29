@@ -86,7 +86,7 @@ final class DetailController extends AbstractController
         $socket = $centrifugo
             ->addData(['supply' => (string) $ProductSupplyEvent->getMain()])
             ->addData(['profile' => (string) $this->getCurrentProfileUid()])
-            ->send('supplys');
+            ->send('remove');
 
         if($socket && $socket->isError())
         {

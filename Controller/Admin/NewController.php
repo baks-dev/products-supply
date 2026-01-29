@@ -97,7 +97,7 @@ final class NewController extends AbstractController
                 $socket = $centrifugo
                     ->addData(['supply' => (string) $ProductSupply->getId()])
                     ->addData(['lock' => true])
-                    ->send('supplys');
+                    ->send('supplys'); // канал для перетаскивания
 
                 if($socket && $socket->isError())
                 {

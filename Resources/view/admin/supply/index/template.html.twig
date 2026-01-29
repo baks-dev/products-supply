@@ -20,25 +20,28 @@
 {% block javascript %}
 
 <script nonce='{{ csp_nonce() }}' async data-src="https://api-maps.yandex.ru/2.1/?apikey={{ MAPS_YANDEX_API }}&lang={{ app.request.locale|lower }}" class='lazy'></script>
-<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/plugins/nice-select2/nice-select2.min.js" class="lazy"></script>
-<script nonce='{{ csp_nonce() }}' async data-src='/assets/{{ version }}/plugins/datepicker/datepicker.js' class='lazy'></script>
-
-<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/plugins/draggable/draggable.bundle.min.js" class="lazy"></script>
-
-<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/products-supply/product_supply_draggable.min.js" class='lazy'></script>
-
-<script nonce='{{ csp_nonce() }}' async  data-src="/assets/{{ version }}/js/copy.min.js" class="lazy"></script>
 
 {#  Сокеты  #}
 
-{# @TODO зачем и откуда токен#}
-{#<script nonce="{{ csp_nonce() }}">#}
-    {#window.centrifugo_dsn = "{{ centrifugo_dsn }}";#}
-    {#window.centrifugo_token = "{{ token }}";#}
-{#</script>#}
+<script nonce="{{ csp_nonce() }}">
+    window.centrifugo_dsn = "{{ centrifugo_dsn }}";
+    window.centrifugo_token = "{{ token }}";
+    window.current_profile = "{{ current_profile }}";
+</script>
 
 <script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/centrifugo/centrifuge.min.js" class='lazy'></script>
 <script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/centrifugo/socket.min.js" class='lazy'></script>
+
+{# plugins #}
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/plugins/nice-select2/nice-select2.min.js" class="lazy"></script>
+<script nonce='{{ csp_nonce() }}' async data-src='/assets/{{ version }}/plugins/datepicker/datepicker.js' class='lazy'></script>
+
+{# Core #}
+<script nonce='{{ csp_nonce() }}' async  data-src="/assets/{{ version }}/js/copy.min.js" class="lazy"></script>
+
+{# Модули #}
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/plugins/draggable/draggable.bundle.min.js" class="lazy"></script>
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/products-supply/product_supply_draggable.min.js" class='lazy'></script>
 
 {% endblock %}
 

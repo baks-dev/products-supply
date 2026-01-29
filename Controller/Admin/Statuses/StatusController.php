@@ -99,7 +99,7 @@ final class StatusController extends AbstractController
                 $socket = $publish
                     ->addData(['supply' => (string) $ProductSupplyIdDTO->getId()])
                     ->addData(['profile' => (string) $this->getCurrentProfileUid()])
-                    ->send('supplys');
+                    ->send('remove');
 
                 if($socket && $socket->isError())
                 {

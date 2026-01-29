@@ -26,10 +26,6 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\Messenger\ProductSupply\CheckSignOnProductSupplyProduct;
 
-use BaksDev\Products\Product\Type\Id\ProductUid;
-use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
-use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
-use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 
 final readonly class CheckSignOnProductSupplyProductMessage
@@ -37,35 +33,9 @@ final readonly class CheckSignOnProductSupplyProductMessage
     /** ID поставки */
     private string $supply;
 
-    /** ID продукта */
-    private ?string $product;
-
-    /** Постоянный уникальный идентификатор ТП */
-    private ?string $offerConst;
-
-    /** Постоянный уникальный идентификатор варианта */
-    private ?string $variationConst;
-
-    /** Постоянный уникальный идентификатор модификации */
-    private ?string $modificationConst;
-
-
-    public function __construct(
-        ProductSupplyUid $supply,
-
-        ?ProductUid $product,
-        ?ProductOfferConst $offerConst,
-        ?ProductVariationConst $variationConst,
-        ?ProductModificationConst $modificationConst,
-        private int $total,
-    )
+    public function __construct(ProductSupplyUid $supply)
     {
         $this->supply = (string) $supply;
-
-        $this->product = $product ? (string) $product : null;
-        $this->offerConst = $offerConst ? (string) $offerConst : null;
-        $this->variationConst = $variationConst ? (string) $variationConst : null;
-        $this->modificationConst = $modificationConst ? (string) $modificationConst : null;
     }
 
     /**
@@ -74,45 +44,5 @@ final readonly class CheckSignOnProductSupplyProductMessage
     public function getSupply(): ProductSupplyUid
     {
         return new ProductSupplyUid($this->supply);
-    }
-
-    /**
-     * Product
-     */
-    public function getProduct(): ?ProductUid
-    {
-        return $this->product ? new ProductUid($this->product) : null;
-    }
-
-    /**
-     * Offer
-     */
-    public function getOfferConst(): ?ProductOfferConst
-    {
-        return $this->offerConst ? new ProductOfferConst($this->offerConst) : null;
-    }
-
-    /**
-     * Variation
-     */
-    public function getVariationConst(): ?ProductVariationConst
-    {
-        return $this->variationConst ? new ProductVariationConst($this->variationConst) : null;
-    }
-
-    /**
-     * Modification
-     */
-    public function getModificationConst(): ?ProductModificationConst
-    {
-        return $this->modificationConst ? new ProductModificationConst($this->modificationConst) : null;
-    }
-
-    /**
-     * Total
-     */
-    public function getTotal(): int
-    {
-        return $this->total;
     }
 }

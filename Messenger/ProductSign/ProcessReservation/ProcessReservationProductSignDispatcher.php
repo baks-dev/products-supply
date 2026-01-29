@@ -26,7 +26,6 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\Messenger\ProductSign\ProcessReservation;
 
-use BaksDev\Centrifugo\Server\Publish\CentrifugoPublishInterface;
 use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
@@ -45,6 +44,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * Бронирует Честный знак за продутом из поставки
  *
  * @see NewStatusProductSupplyDispatcher
+ * @note обработчик отработает на каждую единицу продукции в поставке, количество которых может быть десятки тысяч
  */
 #[AsMessageHandler(priority: 0)]
 final readonly class ProcessReservationProductSignDispatcher
@@ -52,10 +52,7 @@ final readonly class ProcessReservationProductSignDispatcher
     public function __construct(
         #[Target('productsSupplyLogger')] private LoggerInterface $logger,
         private MessageDispatchInterface $messageDispatch,
-        private CentrifugoPublishInterface $centrifugo,
-
         private ProductSignStatusHandler $ProductSignStatusHandler,
-
         private CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
         private OneProductSignEventInterface $productSignSupplyRepository,
     ) {}
@@ -91,15 +88,15 @@ final readonly class ProcessReservationProductSignDispatcher
 
         if(false === ($ProductSignEvent instanceof ProductSignEvent))
         {
-            $this->logger->info(
-                message: sprintf(
-                    'products-sign: Поставка %s - Повторная попытка зарезервировать Честный знак',
-                    $ProductSupplyEvent->getInvariable()->getNumber()),
-                context: [
-                    self::class.':'.__LINE__,
-                    var_export($message, true),
-                ],
-            );
+            //            $this->logger->info(
+            //                message: sprintf(
+            //                    'Поставка %s: Повторная попытка зарезервировать Честный знак',
+            //                    $ProductSupplyEvent->getInvariable()->getNumber()),
+            //                context: [
+            //                    self::class.':'.__LINE__,
+            //                    var_export($message, true),
+            //                ],
+            //            );
 
             /** Повтор найти Честный знак, не принадлежащий какой-либо поставке */
             $this->messageDispatch
@@ -121,22 +118,26 @@ final readonly class ProcessReservationProductSignDispatcher
         if(false === ($handle instanceof ProductSign))
         {
             $this->logger->critical(
-                message: sprintf('products-sign: Ошибка при обновлении статуса честного знака: %s', $handle),
+                message: sprintf('Поставка %s: Ошибка при обновлении статуса ЧЗ: %s',
+                    $ProductSupplyEvent->getInvariable()->getNumber(), $handle
+                ),
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),
                 ],
             );
 
-            throw new InvalidArgumentException('Ошибка при обновлении статуса честного знака');
+            throw new InvalidArgumentException('Ошибка при обновлении статуса ЧЗ');
         }
 
-        $this->logger->info(
-            message: 'products-sign: Зарезервировали Честный знак со статусом Supply «Поставка»',
-            context: [
-                self::class.':'.__LINE__,
-                var_export($message, true),
-            ],
-        );
+        //        $this->logger->info(
+        //            message: sprintf('Поставка %s: Зарезервировали ЧЗ со статусом Supply «Поставка»',
+        //                $ProductSupplyEvent->getInvariable()->getNumber()
+        //            ),
+        //            context: [
+        //                self::class.':'.__LINE__,
+        //                var_export($message, true),
+        //            ],
+        //        );
     }
 }

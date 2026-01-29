@@ -34,21 +34,8 @@ final class NewProductSupplyLockDTO implements ProductSupplyLockInterface
     /** Блокируем при создании */
     private bool $lock = true;
 
-    private ?string $context = null;
-
     public function getLock(): bool
     {
         return $this->lock;
-    }
-
-    public function setContext(?string $context): NewProductSupplyLockDTO
-    {
-        $this->context = $context;
-        return $this;
-    }
-
-    public function getContext(): ?string
-    {
-        return $this->context;
     }
 }
