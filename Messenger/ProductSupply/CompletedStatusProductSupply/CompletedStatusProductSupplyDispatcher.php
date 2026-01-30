@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -56,7 +56,7 @@ final readonly class CompletedStatusProductSupplyDispatcher
         if(false === ($currentSupply instanceof ProductSupplyEvent))
         {
             $this->logger->critical(
-                message: 'Не найдено событие ProductSupplyEvent',
+                message: 'products-supply: Не найдено событие ProductSupplyEvent',
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),
@@ -82,6 +82,15 @@ final readonly class CompletedStatusProductSupplyDispatcher
         /** Если не все продукты поступили на склад - прерываем  */
         if(true === $existNotReceived)
         {
+            $this->logger->warning(
+                message: sprintf('Поставка %s: Не все продукты из поставки поступили на склад.',
+                    $currentSupply->getInvariable()->getNumber()),
+                context: [
+                    self::class.':'.__LINE__,
+                    var_export($message, true),
+                ],
+            );
+
             return;
         }
 
@@ -91,11 +100,11 @@ final readonly class CompletedStatusProductSupplyDispatcher
         {
             $this->logger->critical(
                 message: sprintf(
-                    '%s: Ошибка изменения статуса с %s на %s в поставке %s',
+                    'products-supply: Ошибка %s изменения статуса с %s на %s в поставке %s',
                     $handle,
                     $currentSupply->getStatus(),
                     $ProductSupplyStatusCompletedDTO->getStatus(),
-                    $currentSupply->getMain(),
+                    $currentSupply->getInvariable()->getNumber(),
                 ),
                 context: [
                     self::class.':'.__LINE__,
@@ -109,10 +118,13 @@ final readonly class CompletedStatusProductSupplyDispatcher
             $this->logger->info(
                 message: sprintf(
                     'Успешно переместили поставку %s со статуса %s в статус %s',
-                    $handle->getId(), $currentSupply->getStatus(), $ProductSupplyStatusCompletedDTO->getStatus(),
+                    $currentSupply->getInvariable()->getNumber(),
+                    $currentSupply->getStatus(),
+                    $ProductSupplyStatusCompletedDTO->getStatus(),
                 ),
                 context: [
                     self::class.':'.__LINE__,
+                    var_export($message, true),
                 ],
             );
         }

@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -27,14 +27,12 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\Messenger\ProductSupply\Scanner;
 
 use BaksDev\Barcode\Reader\BarcodeRead;
-use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Products\Product\Repository\Ids\ProductIdsByBarcodesRepository\ProductIdsByBarcodesInterface;
 use BaksDev\Products\Product\Repository\Ids\ProductIdsByBarcodesRepository\ProductIdsByBarcodesResult;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\ProductSign;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignHandler;
 use BaksDev\Products\Supply\UseCase\Admin\ProductsSign\New\ProductSignNewDTO;
 use Doctrine\ORM\Mapping\Table;
@@ -47,14 +45,14 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
- * Сканирует файлы bpj,hf;tybq с честными знаками
+ * Сканирует файлы с честными знаками
  */
 #[AsMessageHandler(priority: 0)]
 final readonly class ScannerImageProductSupplyDispatcher
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%')] private string $projectDir,
-        #[Target('productsSupplyLogger')] private LoggerInterface $logger,
+        #[Target('productsSignLogger')] private LoggerInterface $logger,
         private MessageDispatchInterface $messageDispatch,
         private ProductSignHandler $productSignHandler,
         private BarcodeRead $barcodeRead,
@@ -79,7 +77,7 @@ final readonly class ScannerImageProductSupplyDispatcher
         {
             $this->logger->critical(
                 sprintf(
-                    'products-supply: Невозможно определить название таблицы из класса сущности %s',
+                    'products-supply:: Невозможно определить название таблицы из класса сущности %s',
                     ProductSignCode::class,
                 ),
                 [self::class.':'.__LINE__],
@@ -96,7 +94,7 @@ final readonly class ScannerImageProductSupplyDispatcher
         if(true === $decode->isError())
         {
             $this->logger->critical(
-                'products-supply: Ошибка при сканировании файла ',
+                'products-supply:: Ошибка при сканировании файла ',
                 [self::class.':'.__LINE__, $message->getRealPath()],
             );
 
@@ -158,7 +156,8 @@ final readonly class ScannerImageProductSupplyDispatcher
             {
                 $this->logger->warning(
                     message: sprintf(
-                        'Не удалось найти продукт по штрихкоду %s из Честного знака. Честный знак НЕ БУДЕТ создан', $partCode,
+                        'Не удалось найти продукт по штрихкоду %s из Честного знака. Честный знак НЕ БУДЕТ создан',
+                        $partCode,
                     ),
                     context: [
                         'штрихкоды' => $barcodes,
@@ -221,19 +220,22 @@ final readonly class ScannerImageProductSupplyDispatcher
         {
             if(false === $handle)
             {
-                $this->logger->warning(message: sprintf('Дубликат честного знака %s: ', $code));
+                $this->logger->warning(
+                    message: sprintf('Дубликат честного знака %s: ', $code),
+                    context: [self::class.':'.__LINE__],
+                );
                 return;
             }
 
             $this->logger->critical(
-                message: sprintf('products-sign: Ошибка %s при сохранении информации о Честном знаке: ', $handle),
+                message: sprintf('products-supply: Ошибка %s при сохранении информации о Честном знаке: ', $handle),
                 context: [self::class.':'.__LINE__],
             );
         }
         else
         {
             $this->logger->info(
-                sprintf('Добавили честный знак: %s: %s', $handle->getId(), $code),
+                sprintf('Добавили честный знак: id - %s; code - %s', $handle->getId(), $code),
                 [self::class.':'.__LINE__],
             );
 

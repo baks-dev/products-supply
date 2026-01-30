@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,7 @@ use BaksDev\Products\Supply\Forms\Statuses\Cleared\ClearedProductSupplyDTO;
 use BaksDev\Products\Supply\Forms\Statuses\Cleared\ClearedProductSupplyForm;
 use BaksDev\Products\Supply\Forms\Statuses\ProductSupplyIdDTO;
 use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductSupplyEventInterface;
+use BaksDev\Products\Supply\Repository\ExistProductSupplyByStatus\ExistProductSupplyByStatusInterface;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusCleared;
 use BaksDev\Products\Supply\UseCase\Admin\Cleared\ProductSupplyStatusClearedDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
@@ -76,6 +77,7 @@ final class ClearedController extends AbstractController
         Request $request,
         CentrifugoPublishInterface $publish,
         CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
+        ExistProductSupplyByStatusInterface $existProductSupplyByStatusRepository,
         EditProductSupplyHandler $editProductSupplyHandler,
     ): Response
     {
@@ -105,12 +107,9 @@ final class ClearedController extends AbstractController
                 $ProductSupplyEvent = $currentProductSupplyEventRepository
                     ->find($ProductSupplyIdDTO->getId());
 
-                /** Номер поставки */
-                $number = $ProductSupplyEvent->getInvariable()->getNumber();
-
                 if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
                 {
-                    $this->unsuccessful[] = $number;
+                    $this->unsuccessful[] = $ProductSupplyIdDTO->getId();
 
                     $logger->warning(
                         message: sprintf('Не найдено событие ProductSupplyEvent по ID: %s',
@@ -121,6 +120,8 @@ final class ClearedController extends AbstractController
                     continue;
                 }
 
+                /** Номер поставки */
+                $number = $ProductSupplyEvent->getInvariable()->getNumber();
 
                 /**
                  * Проверка перемещения поставки из корректного статуса
@@ -146,6 +147,32 @@ final class ClearedController extends AbstractController
                 $ProductSupplyStatusClearanceDTO = new ProductSupplyStatusClearedDTO($ProductSupplyEvent->getId());
                 $ProductSupplyEvent->getDto($ProductSupplyStatusClearanceDTO);
 
+                /**
+                 * Проверка существования поставки с переданным статусом
+                 */
+                $isExistsStatus = $existProductSupplyByStatusRepository
+                    ->forSupply($ProductSupplyEvent->getMain())
+                    ->forStatus($ProductSupplyStatusClearanceDTO->getStatus())
+                    ->isExists();
+
+                if($isExistsStatus)
+                {
+                    $this->successful[] = $number;
+
+                    $logger->warning(
+                        message: sprintf('%s: Невозможно применить статус %s повторно для поставки',
+                            $number,
+                            $ProductSupplyStatusClearanceDTO->getStatus(),
+                        ),
+                        context: [self::class.':'.__LINE__,],
+                    );
+
+                    continue;
+                }
+
+                /**
+                 * Проверка существования продуктов в поставке
+                 */
                 $existUndefinedProduct = $ProductSupplyStatusClearanceDTO->getProduct()->exists(
                     fn(int $k, EditProductSupplyProductDTO $product) => null === $product->getProduct()
                 );
@@ -163,7 +190,9 @@ final class ClearedController extends AbstractController
                     continue;
                 }
 
-                /** Присваиваем номер ГТД - единый для всех выбранных поставок */
+                /**
+                 * Присваиваем номер ГТД - единый для всех выбранных поставок
+                 */
                 $ProductSupplyStatusClearanceDTO->getInvariable()
                     ->setDeclaration($ClearanceProductSuppliesDTO->getNumber());
 
@@ -174,7 +203,7 @@ final class ClearedController extends AbstractController
                     $this->successful[] = $number;
 
                     $logger->info(
-                        message: sprintf('Статус поставки %s изменен на %s',
+                        message: sprintf('Поставка %s: Статус изменен на %s',
                             $handle->getId(), $ProductSupplyStatusClearanceDTO->getStatus()),
                         context: [self::class.':'.__LINE__]
                     );
@@ -242,7 +271,7 @@ final class ClearedController extends AbstractController
             $publish
                 ->addData(['supply' => (string) $ProductSupplyEvent->getMain()])
                 ->addData(['profile' => (string) $this->getCurrentProfileUid()])
-                ->send('supplys');
+                ->send('remove');
 
             $this->numbers[] = $ProductSupplyEvent->getInvariable()->getNumber();
         }

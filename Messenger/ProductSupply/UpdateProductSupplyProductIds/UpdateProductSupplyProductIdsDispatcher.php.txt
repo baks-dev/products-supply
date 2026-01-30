@@ -64,7 +64,7 @@ final readonly class UpdateProductSupplyProductIdsDispatcher
         if(false === ($currentSupply instanceof ProductSupplyEvent))
         {
             $this->logger->critical(
-                message: 'Не найдено событие ProductSupplyEvent',
+                message: 'products-supply: Не найдено событие ProductSupplyEvent',
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),
@@ -86,7 +86,7 @@ final readonly class UpdateProductSupplyProductIdsDispatcher
         {
             $this->logger->critical(
                 message: sprintf(
-                    'Не удалось найли продукт в поставке %s для обновления его идентификаторов',
+                    'products-supply: Не удалось найли продукт в поставке %s для обновления его идентификаторов',
                     $currentSupply->getMain()),
                 context: [
                     self::class.':'.__LINE__,
@@ -111,8 +111,9 @@ final readonly class UpdateProductSupplyProductIdsDispatcher
         {
             $this->logger->critical(
                 message: sprintf(
-                    '%s: Ошибка обновления продуктов в поставке %s',
-                    $handle, $currentSupply->getMain()
+                    'products-supply: Ошибка %s обновления продуктов в поставке %s',
+                    $handle,
+                    $currentSupply->getInvariable()->getNumber()
                 ),
                 context: [
                     self::class.':'.__LINE__,
@@ -125,11 +126,12 @@ final readonly class UpdateProductSupplyProductIdsDispatcher
         {
             $this->logger->info(
                 message: sprintf(
-                    'Успешно обновили идентификаторы продукта в поставке %s',
-                    $handle->getId()
+                    'Поставка %s: Успешно обновили идентификаторы продукта',
+                    $currentSupply->getInvariable()->getNumber()
                 ),
                 context: [
                     'продукты' => $EditProductSupplyDTO->getProduct()->toArray(),
+                    var_export($message, true),
                     self::class.':'.__LINE__
                 ],
             );

@@ -26,9 +26,9 @@ ROLE_PRODUCT_SUPPLY_DETAIL:
 
 ROLE_PRODUCT_SUPPLY_STATUS:
   name: 'Статусы поставок'
-  desc: 'Позволяет изменять статусы поставок без преформы'
+  desc: ''
 
-ROLE_PRODUCT_SUPPLY_STATUS_CANCEL:
+ROLE_PRODUCT_SUPPLY_STATUS_CANCELED:
   name: 'Отмена'
   desc: ''
 

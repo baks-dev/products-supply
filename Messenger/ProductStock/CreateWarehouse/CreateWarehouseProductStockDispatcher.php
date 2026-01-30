@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final readonly class CreateWarehouseProductStockDispatcher
 {
     public function __construct(
-        #[Target('productsSupplyLogger')] private LoggerInterface $logger,
+        #[Target('productsStocksLogger')] private LoggerInterface $logger,
         private OneProductSupplyByEventInterface $oneProductSupplyByEventRepository,
         private UserByUserProfileInterface $userByUserProfileRepository,
         private WarehouseProductStockHandler $WarehouseProductStockHandler,
@@ -62,7 +62,7 @@ final readonly class CreateWarehouseProductStockDispatcher
         if(false === ($OneProductSupply instanceof OneProductSupplyResult))
         {
             $this->logger->critical(
-                message: sprintf('Не найдено информации о поставке %s', $message->getSupply()),
+                message: sprintf('products-supply: Не найдено информации о поставке %s', $message->getSupply()),
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),
@@ -123,8 +123,9 @@ final readonly class CreateWarehouseProductStockDispatcher
             {
                 $this->logger->info(
                     message: sprintf(
-                        'products-stocks: Ошибка при создании заявки %s на поступление продукции на склад для поставки %s',
-                        $handle->getId(), $OneProductSupply->getId()
+                        'products-supply: Ошибка при создании заявки %s на поступление продукции на склад для поставки %s',
+                        $handle->getId(),
+                        $OneProductSupply->getId()
                     ),
                     context: [
                         self::class.':'.__LINE__,
@@ -139,8 +140,9 @@ final readonly class CreateWarehouseProductStockDispatcher
             {
                 $this->logger->info(
                     message: sprintf(
-                        'products-stocks: Создали заявку %s на поступление продукции на склад для поставки %s',
-                        $handle->getId(), $OneProductSupply->getId()
+                        'Создали заявку %s на поступление продукции на склад для поставки %s',
+                        $handle->getId(),
+                        $OneProductSupply->getId()
                     ),
                     context: [
                         self::class.':'.__LINE__,

@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,13 +26,18 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\Controller\Admin;
 
+use BaksDev\Centrifugo\Server\Publish\CentrifugoPublishInterface;
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
+use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Products\Supply\Entity\ProductSupply;
+use BaksDev\Products\Supply\Messenger\ProductSupply\Lock\ProductSupplyLockMessage;
 use BaksDev\Products\Supply\UseCase\Admin\File\ProductSupplyFilesHandler;
 use BaksDev\Products\Supply\UseCase\Admin\New\NewProductSupplyDTO;
 use BaksDev\Products\Supply\UseCase\Admin\New\NewProductSupplyForm;
 use BaksDev\Products\Supply\UseCase\Admin\New\NewProductSupplyHandler;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -49,7 +54,9 @@ final class NewController extends AbstractController
 
     #[Route(path: '/admin/products/supply/new', name: self::NAME, methods: ['GET', 'POST'])]
     public function new(
+        #[Target('productsSupplyLogger')] LoggerInterface $logger,
         Request $request,
+        CentrifugoPublishInterface $centrifugo,
         NewProductSupplyHandler $productSupplyHandler,
         ProductSupplyFilesHandler $ProductSupplyFilesHandler,
     ): Response
@@ -72,7 +79,7 @@ final class NewController extends AbstractController
             $this->refreshTokenForm($ProductSupplyFilesForm);
 
             /**
-             * Создаем новую поставку
+             * Создаем новую поставку с блокировкой изменений
              */
 
             $ProductSupply = $productSupplyHandler->handle($NewProductSupplyDTO);
@@ -83,6 +90,27 @@ final class NewController extends AbstractController
                 'products-supply.admin',
                 $ProductSupply instanceof ProductSupply ? null : $ProductSupply,
             );
+
+            if(true === $ProductSupply instanceof ProductSupply)
+            {
+                /** Блокируем перетаскивание карточки */
+                $socket = $centrifugo
+                    ->addData(['supply' => (string) $ProductSupply->getId()])
+                    ->addData(['lock' => true])
+                    ->send('supplys'); // канал для перетаскивания
+
+                if($socket && $socket->isError())
+                {
+                    $logger->warning(
+                        message: 'Ошибка при отправке информации о блокировке в Centrifugo',
+                        context: [
+                            self::class.':'.__LINE__,
+                            $socket->getMessage(),
+                            $ProductSupply->getId(),
+                        ],
+                    );
+                }
+            }
 
             /**
              * Загружаем файлы с честными знаками

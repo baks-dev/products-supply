@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,6 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\Messenger\ProductSign\CancelReservation;
 
-use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
@@ -47,7 +46,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final readonly class ProductSignCancelReservationDispatcher
 {
     public function __construct(
-        #[Target('productsSupplyLogger')] private LoggerInterface $logger,
+        #[Target('productsSignLogger')] private LoggerInterface $logger,
         private CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
         private AllProductSignEventsRelatedProductSupplyInterface $allProductSignEventsRelatedProductSupplyRepository,
         private ProductSignStatusHandler $ProductSignStatusHandler,
@@ -62,7 +61,7 @@ final readonly class ProductSignCancelReservationDispatcher
         if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
         {
             $this->logger->critical(
-                message: 'Событие ProductSupplyEvent не найдено',
+                message: 'products-supply: Событие ProductSupplyEvent не найдено',
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),
@@ -88,7 +87,6 @@ final readonly class ProductSignCancelReservationDispatcher
             return;
         }
 
-
         foreach($productSignForCancelReservation as $ProductSignEvent)
         {
             $CancelProductSignDTO = new CancelProductSignDTO();
@@ -100,8 +98,10 @@ final readonly class ProductSignCancelReservationDispatcher
             {
                 $this->logger->critical(
                     message: sprintf(
-                        'products-sign: Ошибка %s: Не удалось снять резерв Честного знака %s',
-                        $handle, $ProductSignEvent->getMain(),
+                        'products-supply: Поставка %s: Не удалось снять резерв Честного знака id - %s. Ошибка %s',
+                        $ProductSupplyEvent->getInvariable()->getNumber(),
+                        $ProductSignEvent->getMain(),
+                        $handle,
                     ),
                     context: [
                         self::class.':'.__LINE__,
@@ -116,7 +116,8 @@ final readonly class ProductSignCancelReservationDispatcher
             {
                 $this->logger->info(
                     message: sprintf(
-                        'products-sign: Успешно сняли резерв Честного знака %s',
+                        'Поставка %s: Успешно сняли резерв Честного знака id - %s',
+                        $ProductSupplyEvent->getInvariable()->getNumber(),
                         $handle->getId()
                     ),
                     context: [

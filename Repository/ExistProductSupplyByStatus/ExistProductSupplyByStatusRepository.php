@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@ namespace BaksDev\Products\Supply\Repository\ExistProductSupplyByStatus;
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Entity\ProductSupply;
+use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusInterface;
@@ -38,11 +39,13 @@ final class ExistProductSupplyByStatusRepository implements ExistProductSupplyBy
 {
     private ProductSupplyUid|false $supply = false;
 
+    private ProductSupplyEventUid|false $event = false;
+
     private ProductSupplyStatus|false $status = false;
 
     public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder) {}
 
-    public function forProductSupply(ProductSupply|ProductSupplyUid $order): self
+    public function forSupply(ProductSupply|ProductSupplyUid $order): self
     {
         if($order instanceof ProductSupply)
         {
@@ -50,6 +53,18 @@ final class ExistProductSupplyByStatusRepository implements ExistProductSupplyBy
         }
 
         $this->supply = $order;
+
+        return $this;
+    }
+
+    public function forEvent(ProductSupplyEvent|ProductSupplyEventUid $event): self
+    {
+        if($event instanceof ProductSupplyEvent)
+        {
+            $event = $event->getId();
+        }
+
+        $this->event = $event;
 
         return $this;
     }
@@ -67,31 +82,45 @@ final class ExistProductSupplyByStatusRepository implements ExistProductSupplyBy
     }
 
     /**
-     * Метод проверяет, имеется ли событие у заказа с указанным статусом
+     * Метод проверяет существование поставки с указанным статусом
      */
     public function isExists(): bool
     {
-        if(false === ($this->supply instanceof ProductSupplyUid))
+        if(false === ($this->supply instanceof ProductSupplyUid) && false === ($this->event instanceof ProductSupplyEventUid))
         {
-            throw new InvalidArgumentException('Invalid Argument ProductSupplyUid');
+            throw new InvalidArgumentException('Не передан обязательный параметр запроса: supply или event');
         }
 
         if(false === ($this->status instanceof ProductSupplyStatus))
         {
-            throw new InvalidArgumentException('Invalid Argument ProductSupplyStatus');
+            throw new InvalidArgumentException('Не передан обязательный параметр запроса: status');
         }
 
         $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
 
         $dbal->from(ProductSupplyEvent::class, 'event');
 
-        $dbal
-            ->where('event.main = :main')
-            ->setParameter(
-                key: 'main',
-                value: $this->supply,
-                type: ProductSupplyUid::TYPE,
-            );
+        if(true === $this->supply instanceof ProductSupplyUid)
+        {
+            $dbal
+                ->andWhere('event.main = :main')
+                ->setParameter(
+                    key: 'main',
+                    value: $this->supply,
+                    type: ProductSupplyUid::TYPE,
+                );
+        }
+
+        if(true === $this->event instanceof ProductSupplyEventUid)
+        {
+            $dbal
+                ->andWhere('event.id = :event')
+                ->setParameter(
+                    key: 'event',
+                    value: $this->event,
+                    type: ProductSupplyEventUid::TYPE,
+                );
+        }
 
         $dbal
             ->andWhere('event.status = :status')

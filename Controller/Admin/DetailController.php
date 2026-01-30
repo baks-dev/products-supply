@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\Controller\Admin;
 
+use BaksDev\Centrifugo\Server\Publish\CentrifugoPublishInterface;
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
@@ -46,6 +47,7 @@ use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyForm;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\Product\EditProductSupplyProductDTO;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -59,15 +61,18 @@ final class DetailController extends AbstractController
     #[Route('/admin/products/supply/detail/{id}', name: 'admin.supply.detail', methods: ['GET', 'POST'])]
     public function index(
         Request $request,
+        CentrifugoPublishInterface $centrifugo,
+        ProductSupplyStatusCollection $statuses,
+        EditProductSupplyHandler $handler,
+
         CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
         ProductDetailByConstInterface $productDetailByConstRepository,
         GroupProductSignsByProductSupplyInterface $groupProductSignsByProductSupplyRepository,
         ProductSupplyHistoryInterface $productSupplyHistoryRepository,
-        ProductSupplyStatusCollection $statuses,
-        EditProductSupplyHandler $handler,
         #[ParamConverter(ProductSupplyUid::class)] ProductSupplyUid $id,
     ): Response
     {
+
         /** Получаем активное событие */
         $ProductSupplyEvent = $currentProductSupplyEventRepository
             ->find($id);
@@ -75,6 +80,17 @@ final class DetailController extends AbstractController
         if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
         {
             throw new RouteNotFoundException('404 Page Not Found');
+        }
+
+        /** Отправляем сокет для скрытия поставки у других менеджеров */
+        $socket = $centrifugo
+            ->addData(['supply' => (string) $ProductSupplyEvent->getMain()])
+            ->addData(['profile' => (string) $this->getCurrentProfileUid()])
+            ->send('remove');
+
+        if($socket && $socket->isError())
+        {
+            return new JsonResponse($socket->getMessage());
         }
 
         $EditProductSupplyDTO = new EditProductSupplyDTO($ProductSupplyEvent->getId());

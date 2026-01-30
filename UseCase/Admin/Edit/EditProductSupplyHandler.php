@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,17 +26,63 @@
 namespace BaksDev\Products\Supply\UseCase\Admin\Edit;
 
 use BaksDev\Core\Entity\AbstractHandler;
+use BaksDev\Core\Messenger\MessageDispatchInterface;
+use BaksDev\Core\Validator\ValidatorCollectionInterface;
+use BaksDev\Files\Resources\Upload\File\FileUploadInterface;
+use BaksDev\Files\Resources\Upload\Image\ImageUploadInterface;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEventInterface;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Messenger\ProductSupplyMessage;
+use BaksDev\Products\Supply\Repository\LockProductSupply\ProductSupplyLockInfoInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 
 final class EditProductSupplyHandler extends AbstractHandler
 {
+    public function __construct(
+        #[Target('productsSupplyLogger')] private readonly LoggerInterface $logger,
+        private readonly ProductSupplyLockInfoInterface $productSupplyLockRepository,
+
+        EntityManagerInterface $entityManager,
+        MessageDispatchInterface $messageDispatch,
+        ValidatorCollectionInterface $validatorCollection,
+        ImageUploadInterface $imageUpload,
+        FileUploadInterface $fileUpload,
+    )
+    {
+        parent::__construct($entityManager, $messageDispatch, $validatorCollection, $imageUpload, $fileUpload);
+    }
+
     public function handle(ProductSupplyEventInterface $command): ProductSupply|string
     {
-        $this->setCommand($command);
-        $this->preEventPersistOrUpdate(ProductSupply::class, ProductSupplyEvent::class);
+        /**
+         * Проверка на блокировку при изменении - блокировка EntityReadonly, поэтому всегда хранит активное событие
+         */
+        $isLock = $this->productSupplyLockRepository
+            ->forEvent($command->getEvent())
+            ->isLock();
+
+        if(true === $isLock)
+        {
+            $error = uniqid('', true);
+
+            $this->logger->warning(
+                message: sprintf('%s: Поставка заблокирована для изменений',
+                    $error),
+                context: [
+                    'event' => (string) $command->getEvent(),
+                    self::class.':'.__LINE__
+                ],
+            );
+
+            return $error;
+        }
+
+        $this
+            ->setCommand($command)
+            ->preEventPersistOrUpdate(ProductSupply::class, ProductSupplyEvent::class);
 
         /** Валидация всех объектов */
         if($this->validatorCollection->isInvalid())

@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -29,15 +29,26 @@ namespace BaksDev\Products\Supply\UseCase\Admin\Delivery\Tests;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusCollection;
+use BaksDev\Products\Supply\UseCase\Admin\Cancel\Tests\ProductSupplyStatusClearedTest;
+use BaksDev\Products\Supply\UseCase\Admin\Delivery\Arrival\ProductSupplyArrivalDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Delivery\ProductSupplyStatusDeliveryDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
 use Doctrine\ORM\EntityManagerInterface;
+use PHPUnit\Framework\Attributes\DependsOnClass;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
+/** next @see ProductSupplyStatusCompletedTest */
+#[Group('products-supply')]
+#[Group('products-supply-usecase')]
 #[When(env: 'test')]
 class ProductSupplyStatusDeliveryTest extends KernelTestCase
 {
+    /** Для переопределения корня */
+    private const string MAIN = '';
+
+    #[DependsOnClass(ProductSupplyStatusClearedTest::class)]
     public function testUseCase(): void
     {
         /**
@@ -54,9 +65,14 @@ class ProductSupplyStatusDeliveryTest extends KernelTestCase
         $em = $container->get(EntityManagerInterface::class);
 
         $ProductSupply = $em->getRepository(ProductSupply::class)
-            ->find(ProductSupplyUid::TEST);
+            ->find(empty(self::MAIN) ? ProductSupplyUid::TEST : self::MAIN);
 
         $ProductSupplyStatusDeliveryDTO = new ProductSupplyStatusDeliveryDTO($ProductSupply->getEvent());
+
+        /** Ожидаемая дата прибытия */
+        $ProductSupplyArrivalDTO = new ProductSupplyArrivalDTO();
+        $ProductSupplyArrivalDTO->setValue(new \DateTimeImmutable('+1 day'));
+        $ProductSupplyStatusDeliveryDTO->setArrival($ProductSupplyArrivalDTO);
 
         /** @var EditProductSupplyHandler $EditProductSupplyHandler */
         $EditProductSupplyHandler = self::getContainer()->get(EditProductSupplyHandler::class);

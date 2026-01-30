@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -42,7 +43,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final readonly class ProductSignStatusNewDispatcher
 {
     public function __construct(
-        #[Target('productsSupplyLogger')] private LoggerInterface $logger,
+        #[Target('productsSignLogger')] private LoggerInterface $logger,
         private ProductSignCurrentEventInterface $ProductSignCurrentEventRepository,
         private DeduplicatorInterface $deduplicator,
         private ProductSignStatusHandler $ProductSignStatusHandler,
@@ -87,7 +88,7 @@ final readonly class ProductSignStatusNewDispatcher
         {
             $this->logger->critical(
                 message: sprintf(
-                    'products-sign: Ошибка %s: Не удалось применить статус %s для Честного знака %s. Повторяем попытку через интервал',
+                    'products-supply: Ошибка %s: Не удалось применить статус %s для Честного знака %s. Повторяем попытку через интервал',
                     $handle, $ProcessNewProductSignDTO->getStatus(), $ProductSignEvent->getMain(),
                 ),
                 context: [
@@ -109,7 +110,7 @@ final readonly class ProductSignStatusNewDispatcher
 
         $this->logger->info(
             message: sprintf(
-                'products-sign: Успешно применили статус %s для Честного знака %s',
+                'Успешно применили статус %s для Честного знака %s',
                 $ProcessNewProductSignDTO->getStatus(), $handle->getId(),
             ),
             context: [

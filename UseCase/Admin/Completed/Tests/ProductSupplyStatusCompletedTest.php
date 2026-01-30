@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -31,9 +31,10 @@ use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Messenger\ProductSupply\CompletedStatusProductSupply\CompletedStatusProductSupplyDispatcher;
 use BaksDev\Products\Supply\Messenger\ProductSupply\CompletedStatusProductSupply\CompletedStatusProductSupplyMessage;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
+use BaksDev\Products\Supply\UseCase\Admin\Delivery\Tests\ProductSupplyStatusDeliveryTest;
 use Doctrine\ORM\EntityManagerInterface;
-use NewProductSupplyHandlerTest;
 use PHPUnit\Framework\Attributes\DependsOnClass;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
@@ -42,10 +43,16 @@ use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\DependencyInjection\Attribute\When;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
+/** next @see ProductSupplyStatusCanceledTest */
+#[Group('products-supply')]
+#[Group('products-supply-usecase')]
 #[When(env: 'test')]
 class ProductSupplyStatusCompletedTest extends KernelTestCase
 {
-    #[DependsOnClass(NewProductSupplyHandlerTest::class)]
+    /** Для переопределения корня */
+    private const string MAIN = '';
+
+    #[DependsOnClass(ProductSupplyStatusDeliveryTest::class)]
     public function testUseCase(): void
     {
         // Бросаем событие консольной команды
@@ -57,18 +64,14 @@ class ProductSupplyStatusCompletedTest extends KernelTestCase
         $em = self::getContainer()->get(EntityManagerInterface::class);
 
         $ProductSupply = $em->getRepository(ProductSupply::class)
-            ->find(ProductSupplyUid::TEST);
+            ->find(empty(self::MAIN) ? ProductSupplyUid::TEST : self::MAIN);
 
         self::assertInstanceOf(ProductSupply::class, $ProductSupply);
-
 
         $ProductSupplyEvent = $em->getRepository(ProductSupplyEvent::class)
             ->find($ProductSupply->getEvent());
 
         self::assertInstanceOf(ProductSupplyEvent::class, $ProductSupplyEvent);
-
-
-
 
         /** @var CompletedStatusProductSupplyDispatcher $CompletedProductSupplyDispatcher */
         $CompletedProductSupplyDispatcher = self::getContainer()->get(CompletedStatusProductSupplyDispatcher::class);

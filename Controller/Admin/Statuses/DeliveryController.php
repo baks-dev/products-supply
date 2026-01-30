@@ -37,6 +37,7 @@ use BaksDev\Products\Supply\Forms\Statuses\Delivery\DeliveryProductSupplyForm;
 use BaksDev\Products\Supply\Forms\Statuses\ProductSupplyIdDTO;
 use BaksDev\Products\Supply\Messenger\ProductStock\CreateWarehouse\CreateWarehouseProductStockMessage;
 use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductSupplyEventInterface;
+use BaksDev\Products\Supply\Repository\ExistProductSupplyByStatus\ExistProductSupplyByStatusInterface;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusDelivery;
 use BaksDev\Products\Supply\UseCase\Admin\Delivery\Arrival\ProductSupplyArrivalDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Delivery\ProductSupplyStatusDeliveryDTO;
@@ -79,6 +80,7 @@ final class DeliveryController extends AbstractController
         Request $request,
         CentrifugoPublishInterface $publish,
         CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
+        ExistProductSupplyByStatusInterface $existProductSupplyByStatusRepository,
         EditProductSupplyHandler $editProductSupplyHandler,
     ): Response
     {
@@ -110,12 +112,9 @@ final class DeliveryController extends AbstractController
                 $ProductSupplyEvent = $currentProductSupplyEventRepository
                     ->find($ProductSupplyIdDTO->getId());
 
-                /** Номер поставки */
-                $number = $ProductSupplyEvent->getInvariable()->getNumber();
-
                 if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
                 {
-                    $this->unsuccessful[] = $number;
+                    $this->unsuccessful[] = $ProductSupplyIdDTO->getId();
 
                     $logger->critical(
                         message: sprintf('Не найдено событие ProductSupplyEvent по ID: %s',
@@ -125,6 +124,9 @@ final class DeliveryController extends AbstractController
 
                     continue;
                 }
+
+                /** Номер поставки */
+                $number = $ProductSupplyEvent->getInvariable()->getNumber();
 
                 /**
                  * Проверка перемещения поставки из корректного статуса
@@ -149,7 +151,32 @@ final class DeliveryController extends AbstractController
 
                 $ProductSupplyStatusDeliveryDTO = new ProductSupplyStatusDeliveryDTO($ProductSupplyEvent->getId());
 
-                /** Ожидаемая дата прибытия */
+                /**
+                 * Проверка существования поставки с переданным статусом
+                 */
+                $isExistsStatus = $existProductSupplyByStatusRepository
+                    ->forSupply($ProductSupplyEvent->getMain())
+                    ->forStatus($ProductSupplyStatusDeliveryDTO->getStatus())
+                    ->isExists();
+
+                if($isExistsStatus)
+                {
+                    $this->successful[] = $number;
+
+                    $logger->warning(
+                        message: sprintf('%s: Невозможно применить статус %s повторно для поставки',
+                            $number,
+                            $ProductSupplyStatusDeliveryDTO->getStatus(),
+                        ),
+                        context: [self::class.':'.__LINE__,],
+                    );
+
+                    continue;
+                }
+
+                /**
+                 * Устанавливаем ожидаемую дата прибытия поставки на склад из формы
+                 */
                 $ProductSupplyArrivalDTO = new ProductSupplyArrivalDTO();
                 $ProductSupplyArrivalDTO->setValue($DeliveryProductSupplyDTO->getArrival());
                 $ProductSupplyStatusDeliveryDTO->setArrival($ProductSupplyArrivalDTO);
@@ -161,7 +188,7 @@ final class DeliveryController extends AbstractController
                     $this->successful[] = $number;
 
                     $logger->info(
-                        message: sprintf('Статус поставки %s изменен на %s',
+                        message: sprintf('Поставка %s: Статус изменен на %s',
                             $ProductSupply->getId(),
                             $ProductSupplyStatusDeliveryDTO->getStatus()
                         ),
@@ -242,7 +269,7 @@ final class DeliveryController extends AbstractController
             $publish
                 ->addData(['supply' => (string) $ProductSupplyEvent->getMain()])
                 ->addData(['profile' => (string) $this->getCurrentProfileUid()])
-                ->send('supplys');
+                ->send('remove');
 
             $this->numbers[] = $ProductSupplyEvent->getInvariable()->getNumber();
         }
