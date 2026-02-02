@@ -24,19 +24,36 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Supply\Type;
+namespace BaksDev\Products\Supply\Forms\ProductSupplyFilter;
 
-use BaksDev\Core\Type\UidType\UidType;
+use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
 
-class ProductSupplyType extends UidType
+final class ProductSupplyFilterDTO implements ProductSupplyFilterInterface
 {
-    public function getClassType(): string
+    /**
+     * Статус поставки
+     */
+    private ?ProductSupplyStatus $status = null;
+
+    public function getStatus(): ?ProductSupplyStatus
     {
-        return ProductSupplyUid::class;
+        return $this->status;
     }
 
-    public function getName(): string
+    public function setStatus(ProductSupplyStatus|string|null $status): self
     {
-        return ProductSupplyUid::TYPE;
+        if(is_string($status))
+        {
+            $status = new ProductSupplyStatus($status);
+        }
+
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getAll(): bool
+    {
+        return false;
     }
 }

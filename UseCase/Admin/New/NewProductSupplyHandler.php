@@ -22,6 +22,7 @@
  *
  */
 
+declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\UseCase\Admin\New;
 

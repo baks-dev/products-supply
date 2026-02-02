@@ -22,21 +22,13 @@
  *
  */
 
-declare(strict_types=1);
+namespace BaksDev\Products\Supply\Forms\ProductSupplyFilter;
 
-namespace BaksDev\Products\Supply\Type;
+use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
 
-use BaksDev\Core\Type\UidType\UidType;
-
-class ProductSupplyType extends UidType
+interface ProductSupplyFilterInterface
 {
-    public function getClassType(): string
-    {
-        return ProductSupplyUid::class;
-    }
+    public function getStatus(): ?ProductSupplyStatus;
 
-    public function getName(): string
-    {
-        return ProductSupplyUid::TYPE;
-    }
+    public function getAll(): bool;
 }

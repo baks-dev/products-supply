@@ -22,11 +22,15 @@
  *
  */
 
+declare(strict_types=1);
+
 namespace BaksDev\Products\Supply\Repository\AllProductSupply;
 
 use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\User\Type\Id\UserUid;
 use DateTimeImmutable;
 
 final readonly class AllProductSupplyResult
@@ -36,12 +40,15 @@ final readonly class AllProductSupplyResult
         private string $event,
         private string $supply_status,
         private string $supply_number,
+        private string $supply_usr,
+        private string $supply_profile,
         private string $supply_products,
         private string $supply_mod_date,
         private ?bool $supply_lock,
         private ?string $supply_context,
         private ?string $supply_created,
         private ?string $supply_arrival,
+        private ?string $profile_username,
     ) {}
 
     public function getId(): ProductSupplyUid
@@ -109,5 +116,20 @@ final readonly class AllProductSupplyResult
     public function getSupplyContext(): ?string
     {
         return $this->supply_context;
+    }
+
+    public function getSupplyUsr(): UserUid
+    {
+        return new UserUid($this->supply_usr);
+    }
+
+    public function getSupplyProfile(): UserProfileUid
+    {
+        return new UserProfileUid($this->supply_profile);
+    }
+
+    public function getProfileUsername(): ?string
+    {
+        return $this->profile_username;
     }
 }

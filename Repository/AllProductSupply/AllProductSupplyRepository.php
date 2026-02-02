@@ -22,10 +22,13 @@
  *
  */
 
+declare(strict_types=1);
+
 namespace BaksDev\Products\Supply\Repository\AllProductSupply;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Core\Form\Search\SearchDTO;
+use BaksDev\Core\Services\Paginator\PaginatorInterface;
 use BaksDev\Products\Supply\Entity\Event\Arrival\ProductSupplyArrival;
 use BaksDev\Products\Supply\Entity\Event\Created\ProductSupplyCreated;
 use BaksDev\Products\Supply\Entity\Event\Invariable\ProductSupplyInvariable;
@@ -35,9 +38,12 @@ use BaksDev\Products\Supply\Entity\Event\Personal\ProductSupplyPersonal;
 use BaksDev\Products\Supply\Entity\Event\Product\ProductSupplyProduct;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Entity\ProductSupply;
+use BaksDev\Products\Supply\Forms\ProductSupplyFilter\ProductSupplyFilterInterface;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusInterface;
+use BaksDev\Users\Profile\UserProfile\Entity\Event\Personal\UserProfilePersonal;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
+use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Entity\User;
 use BaksDev\Users\User\Type\Id\UserUid;
@@ -46,6 +52,8 @@ use Generator;
 final class AllProductSupplyRepository implements AllProductSupplyInterface
 {
     private SearchDTO|false $search = false;
+
+    private ProductSupplyFilterInterface|false $filter = false;
 
     private UserUid|false $user = false;
 
@@ -57,11 +65,19 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
 
     public function __construct(
         private readonly DBALQueryBuilder $DBALQueryBuilder,
+        private readonly PaginatorInterface $paginator,
+        private readonly UserProfileTokenStorageInterface $UserProfileTokenStorage,
     ) {}
 
     public function search(SearchDTO $search): self
     {
         $this->search = $search;
+        return $this;
+    }
+
+    public function filter(ProductSupplyFilterInterface $filter): self
+    {
+        $this->filter = $filter;
         return $this;
     }
 
@@ -104,6 +120,22 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
      */
     public function findAll(): Generator|false
     {
+        $builder = $this->builder();
+
+        $result = $builder->fetchAllHydrate(AllProductSupplyResult::class);
+
+        return true === $result->valid() ? $result : false;
+    }
+
+    public function findPaginator(): PaginatorInterface
+    {
+        $builder = $this->builder();
+
+        return $this->paginator->fetchAllHydrate($builder, AllProductSupplyResult::class);
+    }
+
+    private function builder(): DBALQueryBuilder
+    {
         $dbal = $this->DBALQueryBuilder
             ->createQueryBuilder(self::class);
 
@@ -113,6 +145,11 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
             ->from(ProductSupply::class, 'product_supply');
 
         $status = $this->status instanceof ProductSupplyStatus;
+
+        if($this->filter instanceof ProductSupplyFilterInterface && $this->filter->getStatus() instanceof ProductSupplyStatus)
+        {
+            $status = $this->filter->getStatus();
+        }
 
         $dbal
             ->addSelect('product_supply_event.status AS supply_status')
@@ -128,7 +165,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
         {
             $dbal->setParameter(
                 key: 'status',
-                value: $this->status,
+                value: $this->status instanceof ProductSupplyStatus ? $this->status : $status,
                 type: ProductSupplyStatus::TYPE,
             );
         }
@@ -145,7 +182,6 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
 
         $dbal
             ->addSelect('product_supply_lock.lock AS supply_lock')
-            ->addSelect('product_supply_lock.context AS supply_context')
             ->leftJoin(
                 'product_supply_event',
                 ProductSupplyLock::class,
@@ -186,27 +222,23 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
         /**
          * Пользователь
          */
-
-        $profile = $this->profile instanceof UserProfileUid;
+        $user = ($this->user instanceof UserUid) ? $this->user : $this->UserProfileTokenStorage->getUser();
+        $profile = ($this->profile instanceof UserProfileUid) ? $this->profile : $this->UserProfileTokenStorage->getProfile();
 
         $dbal
-            //            ->addSelect('product_supply_personal.usr AS supply_usr')
-            //            ->addSelect('product_supply_personal.profile AS supply_profile')
+            ->addSelect('product_supply_personal.usr AS supply_usr')
+            ->addSelect('product_supply_personal.profile AS supply_profile')
             ->join(
                 'product_supply_event',
                 ProductSupplyPersonal::class,
                 'product_supply_personal',
                 '
                     product_supply_personal.event = product_supply_event.id AND
-                    product_supply_personal.usr = :usr'.
-                (
-                $profile
-                    ? ' AND product_supply_personal.profile = :profile'
-                    : ' AND product_supply_personal.profile IS NULL'
-                )
+                    product_supply_personal.usr = :usr AND 
+                    product_supply_personal.profile = :profile'
             )->setParameter(
                 key: 'usr',
-                value: $this->user,
+                value: $user,
                 type: UserUid::TYPE,
             );
 
@@ -214,10 +246,28 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
         {
             $dbal->setParameter(
                 key: 'profile',
-                value: $this->profile,
+                value: $profile,
                 type: UserProfileUid::TYPE,
             );
         }
+
+
+        $dbal
+            ->leftJoin(
+                'product_supply_personal',
+                UserProfile::class,
+                'order_project_profile',
+                'order_project_profile.id = product_supply_personal.profile',
+            );
+
+        $dbal
+            ->addSelect('order_project_personal.username AS profile_username')
+            ->leftJoin(
+                'order_project_profile',
+                UserProfilePersonal::class,
+                'order_project_personal',
+                'order_project_personal.event = order_project_profile.event',
+            );
 
         /** Продукты в Поставке */
         $dbal
@@ -260,8 +310,6 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
         /** Сортировка по uuid - дата */
         $dbal->addOrderBy('product_supply.id', 'ASC');
 
-        $result = $dbal->fetchAllHydrate(AllProductSupplyResult::class);
-
-        return true === $result->valid() ? $result : false;
+        return $dbal;
     }
 }

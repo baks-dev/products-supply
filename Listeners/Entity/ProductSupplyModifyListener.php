@@ -22,6 +22,8 @@
  *
  */
 
+declare(strict_types=1);
+
 namespace BaksDev\Products\Supply\Listeners\Entity;
 
 use BaksDev\Core\Type\Ip\IpAddress;

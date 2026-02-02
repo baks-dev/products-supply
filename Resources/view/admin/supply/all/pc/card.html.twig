@@ -1,0 +1,40 @@
+{% trans_default_domain 'products-supply.status' %}
+
+{# @var item \BaksDev\Products\Supply\Repository\AllProductSupply\AllProductSupplyResult #}
+
+<tr class="vertical-middle">
+
+    <td class="text-nowrap">
+        {# @TODO #}
+        {# Пользовательское меню #}
+        {#        {{ include(_self|replace({ "card.html.twig": "_usecase.html.twig" })) }} #}
+    </td>
+
+    <td class="w-100">
+        <button data-href='{{ path('products-supply:admin.supply.detail', { id: item.id }) }}'
+                data-id='{{ item.id }}'
+                class="btn btn-sm btn-link fw-bolder mb-1 text-decoration-none product-name offcanvas-link">
+
+            {{ item.supplyNumber }}
+        </button>
+    </td>
+
+    <td class="text-nowrap ">
+        {{ item.profileUsername }}
+    </td>
+
+    <td class="text-center">
+        <div class="badge" style='background-color: {{ item.supplyStatus.color }};'>
+            {{ item.supplyStatus|trans }}
+        </div>
+    </td>
+
+    <td class="text-center text-nowrap">
+        {{ item.supplyCreated|date('d.m.Y H:i') }}
+    </td>
+    <td class="text-nowrap">
+        {{ item.dateModify|date('d.m.Y H:i') }}
+    </td>
+</tr>
+
+
