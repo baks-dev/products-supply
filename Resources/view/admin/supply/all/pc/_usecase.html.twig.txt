@@ -1,0 +1,55 @@
+{# Пользовательское меню #}
+
+{# @var item \BaksDev\Orders\Order\Repository\AllOrders\AllOrdersResult #}
+
+{% set identifier = item.orderId %}
+
+<button class="btn btn-link btn-sm d-flex align-items-center"
+        id="usecase-{{ identifier }}"
+        data-bs-container="body"
+        data-bs-toggle="popover"
+        data-bs-placement="right"
+        data-bs-trigger="click"
+>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+         fill="currentColor" class="text-muted"
+         viewBox="0 0 16 16">
+        <path fill-rule="evenodd"
+              d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+    </svg>
+</button>
+
+<div id="usecase-{{ identifier }}-content" class="d-none">
+    <ul class="leader list-group list-group-flush ">
+
+        {% if item.orderStatusEquals('canceled') == false
+            and item.orderStatusEquals('completed') == false
+            and item.orderStatusEquals('return') == false
+            and (is_granted(ROLE~'_STATUS') or is_granted('ROLE_ADMIN')) %}
+
+            <li class="list-group-item d-flex justify-content-between bg-transparent border-0 text-truncate rounded-5">
+                <a
+                        href="{{ path('orders-order:admin.order.canceled') }}"
+                        class="text-decoration-none text-dark w-100 modal-link disabled"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modal"
+
+                        data-method="post"
+                        data-post-class="add-one-to-collection" {# признак одного элемента #}
+                        data-formname="{{ cancel_order_form_name }}" {# Название формы #}
+                        data-collection-form="orders" {# name коллекции из DTO #}
+                        data-id="{{ item.orderId }}"
+
+                        title="Отменить заказа">
+                    {{ 'btn.cancel'|trans({}, 'core.btn') }}
+                </a>
+            </li>
+
+        {% endif %}
+
+
+    </ul>
+</div>
+
+
+

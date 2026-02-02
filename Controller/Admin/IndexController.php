@@ -50,7 +50,7 @@ final class IndexController extends AbstractController
     private array $statuses = [];
 
     /**
-     * Управление заказами (Канбан)
+     * Управление поставками (Канбан)
      */
     #[Route('/admin/products/supply', name: 'admin.supply.index', methods: ['GET', 'POST'])]
     public function index(
@@ -82,7 +82,8 @@ final class IndexController extends AbstractController
                 ->status($status)
                 ->forUser($this->getUsr())
                 ->forProfile($this->getProfileUid())
-                ->findAll();
+                ->findPaginator()
+                ->getData();
 
             /** Получаем список поставок с ключом их статуса */
             $this->supplys[$status->getStatusValue()] =

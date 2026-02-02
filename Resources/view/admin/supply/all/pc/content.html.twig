@@ -1,0 +1,93 @@
+{% trans_default_domain 'products-supply.admin' %}
+
+<main class="main d-print-none">
+
+    <section class="container px-4 mb-5">
+
+        <div class="mt-3 d-flex justify-content-between">
+            {{ include(_self|replace({ "content.html.twig": "_breadcrumb.html.twig" })) }}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3 gap-3">
+
+            <div class="w-100 d-flex gap-3 align-items-center">
+                <h1 class="h4 text-uppercase fw-bolder mb-0">
+                    Список поставок
+                </h1>
+            </div>
+
+            <a href="{{ path('products-supply:admin.supply.index') }}"
+               class="btn btn-light"
+               role="tooltip"
+               data-bs-toggle="tooltip"
+               data-bs-placement="bottom"
+               data-bs-delay='{"show":600,"hide":100}'
+               title="Управление поставками">
+
+                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-truck"
+                     viewBox="0 0 16 16">
+                    <path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h9A1.5 1.5 0 0 1 12 3.5V5h1.02a1.5 1.5 0 0 1 1.17.563l1.481 1.85a1.5 1.5 0 0 1 .329.938V10.5a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 1 1-4 0H5a2 2 0 1 1-3.998-.085A1.5 1.5 0 0 1 0 10.5zm1.294 7.456A2 2 0 0 1 4.732 11h5.536a2 2 0 0 1 .732-.732V3.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .294.456M12 10a2 2 0 0 1 1.732 1h.768a.5.5 0 0 0 .5-.5V8.35a.5.5 0 0 0-.11-.312l-1.48-1.85A.5.5 0 0 0 13.02 6H12zm-9 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>
+                </svg>
+
+            </a>
+
+        </div>
+
+
+        <div class="border border-light rounded-4 p-3">
+
+
+            <div class="d-flex justify-content-between">
+                {# Форма поиска по разделу #}
+                {% include Template('/_includes/'~baks_settings.device~'/search.html.twig') %}
+
+                <div class="w-100">
+                    {{ form_start(filter) }}
+                    <div class="w-100 d-flex gap-3 justify-content-end" style="height: 55px;">
+                        <div style="width: 160px;">
+                            {{ form_row(filter.status, {  placeholder : 'Статус ...', attr : { 'data-select' : 'select2' }  }) }}
+                        </div>
+                    </div>
+                    {{ form_end(filter) }}
+                </div>
+            </div>
+
+            {% if query.data %}
+
+                <table class="table table-striped table-borderless mt-3"
+                       style='--bs-table-striped-bg: rgba(249,249,249,0.7);'>
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th class="w-100">Поставка</th>
+                        <th class="text-center">Ответственный</th>
+                        <th class="text-center">Состояние</th>
+                        <th class="text-center">Дата создания</th>
+                        <th class="text-center">Обновление</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    {% for item in query.data %}
+                        {{ include(_self|replace({ "content.html.twig": "card.html.twig" })) }}
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+            {% else %}
+
+                <div class="alert alert-warning" role="alert">
+                    Поставки отсутствуют
+                </div>
+
+            {% endif %}
+
+        </div>
+
+        {% include Template('_includes/'~baks_settings.device~'/pagination.html.twig') with { 'pagination' : query } %}
+
+    </section>
+
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas" style="--bs-offcanvas-width: 850px;"></div>
+
+</main>

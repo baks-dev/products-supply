@@ -22,6 +22,8 @@
  *
  */
 
+declare(strict_types=1);
+
 namespace BaksDev\Products\Supply\Repository\ProductSupplyHistory;
 
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;

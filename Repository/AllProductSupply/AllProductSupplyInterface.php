@@ -25,6 +25,8 @@
 namespace BaksDev\Products\Supply\Repository\AllProductSupply;
 
 use BaksDev\Core\Form\Search\SearchDTO;
+use BaksDev\Core\Services\Paginator\PaginatorInterface;
+use BaksDev\Products\Supply\Forms\ProductSupplyFilter\ProductSupplyFilterInterface;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusInterface;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
@@ -36,6 +38,8 @@ use Generator;
 interface AllProductSupplyInterface
 {
     public function search(SearchDTO $search): self;
+
+    public function filter(ProductSupplyFilterInterface $filter): self;
 
     public function setLimit(int $limit): self;
 
@@ -49,4 +53,6 @@ interface AllProductSupplyInterface
      * @return Generator<int, AllProductSupplyResult>|false
      */
     public function findAll(): Generator|false;
+
+    public function findPaginator(): PaginatorInterface;
 }
