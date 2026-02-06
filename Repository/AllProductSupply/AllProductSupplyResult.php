@@ -45,7 +45,6 @@ final readonly class AllProductSupplyResult
         private string $supply_products,
         private string $supply_mod_date,
         private ?bool $supply_lock,
-        private ?string $supply_context,
         private ?string $supply_created,
         private ?string $supply_arrival,
         private ?string $profile_username,
