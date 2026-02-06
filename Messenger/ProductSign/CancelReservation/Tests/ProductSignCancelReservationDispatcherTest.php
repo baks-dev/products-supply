@@ -31,6 +31,9 @@ use BaksDev\Products\Supply\Messenger\ProductSign\CancelReservation\ProductSignC
 use BaksDev\Products\Supply\Messenger\ProductSupplyMessage;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use Doctrine\ORM\EntityManagerInterface;
+use NewProductSupplyHandlerTest;
+use PHPUnit\Framework\Attributes\DependsOnClass;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
@@ -39,9 +42,11 @@ use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\DependencyInjection\Attribute\When;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
+#[Group('products-supply')]
 #[When(env: 'test')]
 class ProductSignCancelReservationDispatcherTest extends KernelTestCase
 {
+    #[DependsOnClass(NewProductSupplyHandlerTest::class)]
     public function testUseCase(): void
     {
         self::assertTrue(true);
@@ -62,7 +67,7 @@ class ProductSignCancelReservationDispatcherTest extends KernelTestCase
 
         $message = new ProductSupplyMessage(
             $ProductSupply->getId(),
-            $ProductSupply->getEvent()
+            $ProductSupply->getEvent(),
         );
 
         $CancelProductSignDispatcher($message);
