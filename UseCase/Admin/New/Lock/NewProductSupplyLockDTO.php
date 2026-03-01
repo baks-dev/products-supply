@@ -38,4 +38,10 @@ final class NewProductSupplyLockDTO implements ProductSupplyLockInterface
     {
         return $this->lock;
     }
+
+    public function unLock(): self
+    {
+        $this->lock = false;
+        return $this;
+    }
 }

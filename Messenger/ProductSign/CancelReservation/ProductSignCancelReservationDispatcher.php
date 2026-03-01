@@ -35,6 +35,7 @@ use BaksDev\Products\Supply\Repository\ProductSign\AllProductSignEventsRelatedPr
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusCancel;
 use BaksDev\Products\Supply\UseCase\Admin\ProductsSign\Edit\CancelProductSignDTO;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -42,6 +43,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * При присвоении поставке статуса cancel "Отменена" -
  * переводит зарезервированные Честные знаки в статус Undefined «Не определен»
  */
+#[Autoconfigure(public: true)]
 #[AsMessageHandler(priority: 0)]
 final readonly class ProductSignCancelReservationDispatcher
 {

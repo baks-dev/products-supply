@@ -92,6 +92,9 @@ class NewProductSupplyHandlerTest extends KernelTestCase
         /** Поставка */
         $NewProductSupplyDTO = new NewProductSupplyDTO();
 
+        /** Снимаем блокировку при тестировании */
+        $NewProductSupplyDTO->getLock()->unLock();
+
         /**
          * Номер контейнера
          */

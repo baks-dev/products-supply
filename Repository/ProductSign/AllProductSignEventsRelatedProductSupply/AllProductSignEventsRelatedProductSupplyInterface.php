@@ -30,7 +30,9 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignSt
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use Generator;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 
+#[Autoconfigure(public: true)]
 interface AllProductSignEventsRelatedProductSupplyInterface
 {
     /** Идентификатор поставки */

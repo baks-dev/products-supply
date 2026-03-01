@@ -39,6 +39,7 @@ use BaksDev\Products\Supply\Repository\ProductSign\AllProductSignEventsRelatedPr
 use BaksDev\Products\Supply\Type\ProductSign\Status\ProductSignStatusSupply;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusCompleted;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -46,6 +47,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * При присвоении поставке статуса completed "Выполнен" -
  * вводит Честные знаки в оборот, переводя в статус New «Новый»
  */
+#[Autoconfigure(public: true)]
 #[AsMessageHandler(priority: 0)]
 final readonly class UpdateProductSignStatusNewBySupplyCompleteHandler
 {

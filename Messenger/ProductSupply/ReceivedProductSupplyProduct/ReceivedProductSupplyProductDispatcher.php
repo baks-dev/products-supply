@@ -45,6 +45,7 @@ use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\Product\EditProductSupplyProductDTO;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -52,6 +53,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * Отмечает продукт в поставке при его поступления на склад
  * next @see CompletedStatusProductSupplyDispatcher
  */
+#[Autoconfigure(public: true)]
 #[AsMessageHandler(priority: 0)]
 final readonly class ReceivedProductSupplyProductDispatcher
 {

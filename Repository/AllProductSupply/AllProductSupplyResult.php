@@ -112,11 +112,6 @@ final readonly class AllProductSupplyResult
         return $this->supply_lock === true;
     }
 
-    public function getSupplyContext(): ?string
-    {
-        return $this->supply_context;
-    }
-
     public function getSupplyUsr(): UserUid
     {
         return new UserUid($this->supply_usr);

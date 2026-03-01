@@ -37,6 +37,7 @@ use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSu
 use BaksDev\Products\Supply\UseCase\Admin\ProductStock\ProductStockSupplyDTO;
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -44,6 +45,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * Создает заявку для поступления на склад каждого продукта из поставки
  * prev @see DeliveryController
  */
+#[Autoconfigure(public: true)]
 #[AsMessageHandler(priority: 0)]
 final readonly class CreateWarehouseProductStockDispatcher
 {
