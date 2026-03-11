@@ -47,7 +47,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * При присвоении поставке статуса completed "Выполнен" -
  * вводит Честные знаки в оборот, переводя в статус New «Новый»
  */
-#[Autoconfigure(public: true)]
+// #[Autoconfigure(public: true)]
 #[AsMessageHandler(priority: 0)]
 final readonly class UpdateProductSignStatusNewBySupplyCompleteHandler
 {

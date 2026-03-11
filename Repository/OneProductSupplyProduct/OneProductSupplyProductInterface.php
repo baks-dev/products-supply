@@ -32,7 +32,7 @@ use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductM
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 
-#[Autoconfigure(public: true)]
+// #[Autoconfigure(public: true)]
 interface OneProductSupplyProductInterface
 {
     public function forSupply(ProductSupplyUid $supply): self;

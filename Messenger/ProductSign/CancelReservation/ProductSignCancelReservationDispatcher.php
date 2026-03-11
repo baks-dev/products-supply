@@ -43,7 +43,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * При присвоении поставке статуса cancel "Отменена" -
  * переводит зарезервированные Честные знаки в статус Undefined «Не определен»
  */
-#[Autoconfigure(public: true)]
+// #[Autoconfigure(public: true)]
 #[AsMessageHandler(priority: 0)]
 final readonly class ProductSignCancelReservationDispatcher
 {

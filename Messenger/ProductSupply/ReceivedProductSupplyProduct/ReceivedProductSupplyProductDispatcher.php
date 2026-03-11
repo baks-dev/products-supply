@@ -53,7 +53,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * Отмечает продукт в поставке при его поступления на склад
  * next @see CompletedStatusProductSupplyDispatcher
  */
-#[Autoconfigure(public: true)]
+// #[Autoconfigure(public: true)]
 #[AsMessageHandler(priority: 0)]
 final readonly class ReceivedProductSupplyProductDispatcher
 {
