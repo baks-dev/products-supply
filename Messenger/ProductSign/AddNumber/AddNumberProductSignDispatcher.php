@@ -74,6 +74,18 @@ final readonly class AddNumberProductSignDispatcher
         /** Если статус поставки не cleared (Растаможены) - прерываем работу */
         if(false === $ProductSupplyEvent->getStatus()->equals(ProductSupplyStatusCleared::class))
         {
+            $this->logger->warning(
+                message: sprintf(
+                    'products-supply: Поставка %s: Не обновляем ГТД честного знака для статуса поставки %s',
+                    $ProductSupplyEvent->getInvariable()->getNumber(),
+                    $ProductSupplyEvent->getStatus(),
+                ),
+                context: [
+                    self::class.':'.__LINE__,
+                    var_export($message, true),
+                ],
+            );
+
             return;
         }
 
@@ -86,7 +98,7 @@ final readonly class AddNumberProductSignDispatcher
         {
             $this->logger->critical(
                 message: sprintf(
-                    'products-supply: Поставка %s: Не найдено Честных знаков для присвоения комментария при смене статуса %s',
+                    'products-supply: Поставка %s: Не найдено Честных знаков для присвоения ГТД при смене статуса %s',
                     $ProductSupplyEvent->getInvariable()->getNumber(),
                     $ProductSupplyEvent->getStatus(),
                 ),

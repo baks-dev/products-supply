@@ -44,7 +44,14 @@ final readonly class CurrentProductSupplyEventRepository implements CurrentProdu
     {
         $orm = $this->ORMQueryBuilder->createQueryBuilder(self::class);
 
-        $orm->from(ProductSupply::class, 'main');
+        $orm
+            ->from(ProductSupply::class, 'main')
+            ->where('main.id = :supply')
+            ->setParameter(
+                key: 'supply',
+                value: $supply,
+                type: ProductSupplyUid::TYPE,
+            );
 
         $orm
             ->select('event')
@@ -52,14 +59,7 @@ final readonly class CurrentProductSupplyEventRepository implements CurrentProdu
                 ProductSupplyEvent::class,
                 'event',
                 'WITH',
-                '
-                    event.id = main.event AND
-                    event.main = :supply
-                    '
-            )->setParameter(
-                key: 'supply',
-                value: $supply,
-                type: ProductSupplyUid::TYPE
+                'event.id = main.event',
             );
 
         return $orm->getOneOrNullResult() ?: false;
