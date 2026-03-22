@@ -64,14 +64,6 @@ class ProductSupply
     }
 
     /**
-     * Идентификатор
-     */
-    public function getId(): ProductSupplyUid
-    {
-        return $this->id;
-    }
-
-    /**
      * Идентификатор события
      */
     public function getEvent(): ProductSupplyEventUid
@@ -82,5 +74,13 @@ class ProductSupply
     public function setEvent(ProductSupplyEventUid|ProductSupplyEvent $event): void
     {
         $this->event = $event instanceof ProductSupplyEvent ? $event->getId() : $event;
+    }
+
+    /**
+     * Идентификатор
+     */
+    public function getId(): ProductSupplyUid
+    {
+        return $this->id;
     }
 }

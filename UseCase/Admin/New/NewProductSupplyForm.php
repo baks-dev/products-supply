@@ -89,7 +89,7 @@ final class NewProductSupplyForm extends AbstractType
         $builder->add(
             'product_supply_new',
             SubmitType::class,
-            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']]
+            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']],
         );
     }
 

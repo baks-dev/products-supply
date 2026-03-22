@@ -98,7 +98,7 @@ final class NewProductSupplyHandler extends AbstractHandler
         $this->logger->warning(
             message: sprintf(
                 'Поставка %s: Заблокировали изменения',
-                $command->getInvariable()->getNumber()
+                $command->getInvariable()->getNumber(),
             ),
             context: [
                 'main' => (string) $this->main->getId(),
@@ -111,7 +111,7 @@ final class NewProductSupplyHandler extends AbstractHandler
             ->addClearCacheOther('products-sign')
             ->dispatch(
                 message: new ProductSupplyMessage($this->main->getId(), $this->main->getEvent(), $command->getEvent()),
-                transport: 'products-supply'
+                transport: 'products-supply',
             );
 
         return $this->main;

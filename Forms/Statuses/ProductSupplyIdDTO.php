@@ -31,6 +31,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Объект для ПЕРЕДАЧИ идентификаторов поставки
+ *
  * @see ProductSupply
  */
 final class ProductSupplyIdDTO

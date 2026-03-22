@@ -114,7 +114,7 @@ final class ClearedController extends AbstractController
                     $logger->warning(
                         message: sprintf('Не найдено событие ProductSupplyEvent по ID: %s',
                             $ProductSupplyIdDTO->getId()),
-                        context: [self::class.':'.__LINE__]
+                        context: [self::class.':'.__LINE__],
                     );
 
                     continue;
@@ -136,9 +136,9 @@ final class ClearedController extends AbstractController
                         message: sprintf('Попытка присвоить ГТД для поставки %s (%s) не из статуса: %s',
                             $ProductSupplyEvent->getMain(),
                             $ProductSupplyEvent->getInvariable()->getNumber(),
-                            $previousStatus->getStatus()->getValue()
+                            $previousStatus->getStatus()->getValue(),
                         ),
-                        context: [self::class.':'.__LINE__]
+                        context: [self::class.':'.__LINE__],
                     );
 
                     continue;
@@ -174,7 +174,7 @@ final class ClearedController extends AbstractController
                  * Проверка существования продуктов в поставке
                  */
                 $existUndefinedProduct = $ProductSupplyStatusClearanceDTO->getProduct()->exists(
-                    fn(int $k, EditProductSupplyProductDTO $product) => null === $product->getProduct()
+                    fn(int $k, EditProductSupplyProductDTO $product) => null === $product->getProduct(),
                 );
 
                 if(true === $existUndefinedProduct)
@@ -184,7 +184,7 @@ final class ClearedController extends AbstractController
                     $logger->warning(
                         message: sprintf('Невозможно изменить статус поставки %s с неопределенными продуктами',
                             $ProductSupplyIdDTO->getId()),
-                        context: [self::class.':'.__LINE__]
+                        context: [self::class.':'.__LINE__],
                     );
 
                     continue;
@@ -205,7 +205,7 @@ final class ClearedController extends AbstractController
                     $logger->info(
                         message: sprintf('Поставка %s: Статус изменен на %s',
                             $handle->getId(), $ProductSupplyStatusClearanceDTO->getStatus()),
-                        context: [self::class.':'.__LINE__]
+                        context: [self::class.':'.__LINE__],
                     );
                 }
 

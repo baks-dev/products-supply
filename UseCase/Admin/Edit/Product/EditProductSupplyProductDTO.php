@@ -37,6 +37,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Объект для изменения идентификаторов продукта в поставке
+ *
  * @see ProductSupplyProduct
  */
 final class EditProductSupplyProductDTO implements ProductSupplyProductInterface
@@ -154,6 +155,11 @@ final class EditProductSupplyProductDTO implements ProductSupplyProductInterface
         return $this;
     }
 
+    public function getReceived(): bool
+    {
+        return $this->received;
+    }
+
     /**
      * Received
      */
@@ -161,11 +167,6 @@ final class EditProductSupplyProductDTO implements ProductSupplyProductInterface
     {
         $this->received = $received;
         return $this;
-    }
-
-    public function getReceived(): bool
-    {
-        return $this->received;
     }
 
     public function received(): EditProductSupplyProductDTO

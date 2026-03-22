@@ -57,7 +57,7 @@ final readonly class OneProductSupplyByEventRepository implements OneProductSupp
                 'event',
                 '
                     event.id = main.event AND 
-                    event.main = :supply'
+                    event.main = :supply',
             )
             ->setParameter(
                 key: 'supply',
@@ -73,7 +73,7 @@ final readonly class OneProductSupplyByEventRepository implements OneProductSupp
                 'event',
                 ProductSupplyInvariable::class,
                 'product_supply_invariable',
-                'product_supply_invariable.event = event.id'
+                'product_supply_invariable.event = event.id',
             );
 
         /** Продукты в Поставке */
@@ -82,7 +82,7 @@ final readonly class OneProductSupplyByEventRepository implements OneProductSupp
                 'event',
                 ProductSupplyProduct::class,
                 'product_supply_product',
-                'product_supply_product.event = event.id'
+                'product_supply_product.event = event.id',
             );
 
         $dbal->addSelect(

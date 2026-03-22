@@ -37,6 +37,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Объект для редактирования коллекции продуктов в поставке
+ *
  * @see ProductSupplyEvent
  */
 final class EditProductSupplyDTO implements ProductSupplyEventInterface
@@ -61,6 +62,7 @@ final class EditProductSupplyDTO implements ProductSupplyEventInterface
 
     /**
      * Продукты в поставке
+     *
      * @var ArrayCollection<int, EditProductSupplyProductDTO> $product
      */
     #[Assert\Valid]

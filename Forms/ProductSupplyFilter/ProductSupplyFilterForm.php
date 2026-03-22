@@ -101,7 +101,7 @@ final class ProductSupplyFilterForm extends AbstractType
 
                     $data->setStatus($sessionArray['status'] ?? null);
                 }
-            }
+            },
         );
 
 
@@ -138,7 +138,7 @@ final class ProductSupplyFilterForm extends AbstractType
                 /** @var ProductSupplyFilterDTO $data */
                 $data = $event->getData();
                 $this->request->getSession()->set('order_status', $data->getStatus());
-            }
+            },
         );
     }
 
@@ -148,7 +148,7 @@ final class ProductSupplyFilterForm extends AbstractType
             [
                 'data_class' => ProductSupplyFilterDTO::class,
                 'method' => 'POST',
-            ]
+            ],
         );
     }
 }

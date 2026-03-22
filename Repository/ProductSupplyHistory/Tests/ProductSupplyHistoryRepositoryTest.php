@@ -29,6 +29,8 @@ use BaksDev\Products\Supply\Repository\ProductSupplyHistory\ProductSupplyHistory
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusCollection;
 use PHPUnit\Framework\Attributes\Group;
+use ReflectionClass;
+use ReflectionMethod;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
@@ -65,8 +67,8 @@ class ProductSupplyHistoryRepositoryTest extends KernelTestCase
         $object = $result->current();
 
         // Вызываем все геттеры
-        $reflectionClass = new \ReflectionClass(ProductSupplyHistoryResult::class);
-        $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
+        $reflectionClass = new ReflectionClass(ProductSupplyHistoryResult::class);
+        $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
 
         foreach($methods as $method)
         {

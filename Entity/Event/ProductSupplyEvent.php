@@ -142,12 +142,9 @@ class ProductSupplyEvent extends EntityEvent
         return (string) $this->id;
     }
 
-    /**
-     * Идентификатор события
-     */
-    public function getId(): ProductSupplyEventUid
+    public function getMain(): ?ProductSupplyUid
     {
-        return $this->id;
+        return $this->main;
     }
 
     /**
@@ -158,9 +155,12 @@ class ProductSupplyEvent extends EntityEvent
         $this->main = $main instanceof ProductSupply ? $main->getId() : $main;
     }
 
-    public function getMain(): ?ProductSupplyUid
+    /**
+     * Идентификатор события
+     */
+    public function getId(): ProductSupplyEventUid
     {
-        return $this->main;
+        return $this->id;
     }
 
     public function getDto($dto): mixed

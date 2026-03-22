@@ -38,6 +38,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Данная форма используется вложенно
+ *
  * @see NewProductSupplyForm
  */
 final class ProductSupplyFilesForm extends AbstractType
@@ -82,8 +83,8 @@ final class ProductSupplyFilesForm extends AbstractType
                     $event->getForm()->add('product_supply_files', SubmitType::class, [
                             'label' => 'Save',
                             'label_html' => true,
-                            'attr' => ['class' => 'btn-primary']
-                        ]
+                            'attr' => ['class' => 'btn-primary'],
+                        ],
                     );
                 }
             });

@@ -65,14 +65,14 @@ final class CanceledProductSupplyDTO
         return $this;
     }
 
+    public function getComment(): ?string
+    {
+        return $this->comment;
+    }
+
     public function setComment(?string $comment): CanceledProductSupplyDTO
     {
         $this->comment = $comment;
         return $this;
-    }
-
-    public function getComment(): ?string
-    {
-        return $this->comment;
     }
 }

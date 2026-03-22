@@ -95,7 +95,7 @@ final class ExistProductSupplyByContainerNumberRepository implements ExistProduc
                 'product_supply_event',
                 '
                     product_supply_event.id = product_supply.event AND 
-                    product_supply_event.status = :status'
+                    product_supply_event.status = :status',
             )->setParameter(
                 key: 'status',
                 value: $this->status,
@@ -111,7 +111,7 @@ final class ExistProductSupplyByContainerNumberRepository implements ExistProduc
                 'product_supply_invariable',
                 '
                     product_supply_invariable.event = product_supply_event.id AND
-                    product_supply_invariable.number = :number'
+                    product_supply_invariable.number = :number',
             )->setParameter(
                 key: 'number',
                 value: $container->getNumber(),

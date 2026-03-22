@@ -169,7 +169,7 @@ final class ProductSignCodesBySupplyRepository implements ProductSignCodesBySupp
                 'event',
                 ProductSign::class,
                 'main',
-                'main.event = event.id'
+                'main.event = event.id',
             );
 
         /** Только для конкретной поставки */
@@ -180,12 +180,12 @@ final class ProductSignCodesBySupplyRepository implements ProductSignCodesBySupp
                 'sign_supply',
                 '
                     sign_supply.event = main.event AND
-                    sign_supply.supply = :supply'
+                    sign_supply.supply = :supply',
             )
             ->setParameter(
                 'supply',
                 $this->supply,
-                ProductSupplyUid::TYPE
+                ProductSupplyUid::TYPE,
             );
 
         /**
@@ -253,7 +253,7 @@ final class ProductSignCodesBySupplyRepository implements ProductSignCodesBySupp
                 'event',
                 ProductSignInvariable::class,
                 'invariable',
-                $invariableCondition
+                $invariableCondition,
             );
 
         /** Код */
@@ -265,7 +265,7 @@ final class ProductSignCodesBySupplyRepository implements ProductSignCodesBySupp
                    THEN CONCAT ( '/upload/".$dbal->table(ProductSignCode::class)."' , '/', code.name)
                    ELSE NULL
                 END AS code_image
-            "
+            ",
             )
             ->addSelect("code.ext AS code_ext")
             ->addSelect("code.cdn AS code_cdn")
@@ -274,7 +274,7 @@ final class ProductSignCodesBySupplyRepository implements ProductSignCodesBySupp
                 'event',
                 ProductSignCode::class,
                 'code',
-                'code.main = main.id'
+                'code.main = main.id',
             );
 
         $result = $dbal->fetchAllHydrate(ProductSignCodesBySupplyResult::class);

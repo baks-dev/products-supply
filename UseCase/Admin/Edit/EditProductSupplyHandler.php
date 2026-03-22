@@ -74,7 +74,7 @@ final class EditProductSupplyHandler extends AbstractHandler
                     $error),
                 context: [
                     'event' => (string) $command->getEvent(),
-                    self::class.':'.__LINE__
+                    self::class.':'.__LINE__,
                 ],
             );
 

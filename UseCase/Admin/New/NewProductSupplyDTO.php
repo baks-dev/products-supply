@@ -62,6 +62,7 @@ final class NewProductSupplyDTO implements ProductSupplyEventInterface
 
     /**
      * Продукты в поставке
+     *
      * @var ArrayCollection<int, NewProductSupplyProductDTO> $product
      */
     #[Assert\Valid]
@@ -127,6 +128,11 @@ final class NewProductSupplyDTO implements ProductSupplyEventInterface
         return $this;
     }
 
+    public function getPersonal(): NewProductSupplyPersonalDTO
+    {
+        return $this->personal;
+    }
+
     /**
      * Personal
      */
@@ -134,25 +140,6 @@ final class NewProductSupplyDTO implements ProductSupplyEventInterface
     {
         $this->personal = $personal;
         return $this;
-    }
-
-    public function getPersonal(): NewProductSupplyPersonalDTO
-    {
-        return $this->personal;
-    }
-
-    /**
-     * Коллекция продуктов в поставке
-     * @return ArrayCollection<int, NewProductSupplyProductDTO>
-     */
-    public function getProduct(): ArrayCollection
-    {
-        return $this->product;
-    }
-
-    public function setProduct(ArrayCollection $product): void
-    {
-        $this->product = $product;
     }
 
     public function addProduct(NewProductSupplyProductDTO $product): void
@@ -175,6 +162,21 @@ final class NewProductSupplyDTO implements ProductSupplyEventInterface
         {
             $this->product->add($product);
         }
+    }
+
+    /**
+     * Коллекция продуктов в поставке
+     *
+     * @return ArrayCollection<int, NewProductSupplyProductDTO>
+     */
+    public function getProduct(): ArrayCollection
+    {
+        return $this->product;
+    }
+
+    public function setProduct(ArrayCollection $product): void
+    {
+        $this->product = $product;
     }
 
     public function removeProduct(NewProductSupplyProductDTO $product): void

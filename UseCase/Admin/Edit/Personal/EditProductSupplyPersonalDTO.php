@@ -33,6 +33,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Объект с информацией о пользователе
+ *
  * @see ProductSupplyPersonal
  */
 final class EditProductSupplyPersonalDTO implements ProductSupplyPersonalInterface

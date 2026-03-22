@@ -119,7 +119,7 @@ final class DeliveryController extends AbstractController
                     $logger->critical(
                         message: sprintf('Не найдено событие ProductSupplyEvent по ID: %s',
                             $ProductSupplyIdDTO->getId()),
-                        context: [self::class.':'.__LINE__]
+                        context: [self::class.':'.__LINE__],
                     );
 
                     continue;
@@ -141,9 +141,9 @@ final class DeliveryController extends AbstractController
                         message: sprintf('Попытка присвоить ГТД для поставки %s (%s) не из статуса: %s',
                             $ProductSupplyEvent->getMain(),
                             $ProductSupplyEvent->getInvariable()->getNumber(),
-                            $previousStatus->getStatus()->getValue()
+                            $previousStatus->getStatus()->getValue(),
                         ),
-                        context: [self::class.':'.__LINE__]
+                        context: [self::class.':'.__LINE__],
                     );
 
                     continue;
@@ -190,9 +190,9 @@ final class DeliveryController extends AbstractController
                     $logger->info(
                         message: sprintf('Поставка %s: Статус изменен на %s',
                             $ProductSupply->getId(),
-                            $ProductSupplyStatusDeliveryDTO->getStatus()
+                            $ProductSupplyStatusDeliveryDTO->getStatus(),
                         ),
-                        context: [self::class.':'.__LINE__]
+                        context: [self::class.':'.__LINE__],
                     );
 
                     /** Создаем заявку для поступления продукции из поставки на склад */

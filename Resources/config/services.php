@@ -49,12 +49,12 @@ return static function(ContainerConfigurator $configurator) {
     /** Статусы поставок */
     $services->load(
         $NAMESPACE.'Type\Status\ProductSupplyStatus\\',
-        $PATH.implode(DIRECTORY_SEPARATOR, ['Type', 'Status', 'ProductSupplyStatus'])
+        $PATH.implode(DIRECTORY_SEPARATOR, ['Type', 'Status', 'ProductSupplyStatus']),
     );
 
     /** Статусы Честных знаков */
     $services->load(
         $NAMESPACE.'Type\ProductSign\Status\\',
-        $PATH.implode(DIRECTORY_SEPARATOR, ['Type', 'ProductSign', 'Status'])
+        $PATH.implode(DIRECTORY_SEPARATOR, ['Type', 'ProductSign', 'Status']),
     );
 };

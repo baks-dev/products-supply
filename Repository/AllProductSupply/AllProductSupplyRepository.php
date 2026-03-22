@@ -127,13 +127,6 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
         return true === $result->valid() ? $result : false;
     }
 
-    public function findPaginator(): PaginatorInterface
-    {
-        $builder = $this->builder();
-
-        return $this->paginator->fetchAllHydrate($builder, AllProductSupplyResult::class);
-    }
-
     private function builder(): DBALQueryBuilder
     {
         $dbal = $this->DBALQueryBuilder
@@ -158,7 +151,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 ProductSupplyEvent::class,
                 'product_supply_event',
                 'product_supply_event.id = product_supply.event'.
-                ($status ? ' AND product_supply_event.status = :status' : '')
+                ($status ? ' AND product_supply_event.status = :status' : ''),
             );
 
         if($status)
@@ -177,7 +170,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 'product_supply_event',
                 ProductSupplyInvariable::class,
                 'product_supply_invariable',
-                'product_supply_invariable.event = product_supply_event.id'
+                'product_supply_invariable.event = product_supply_event.id',
             );
 
         $dbal
@@ -186,7 +179,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 'product_supply_event',
                 ProductSupplyLock::class,
                 'product_supply_lock',
-                'product_supply_lock.event = product_supply_event.id'
+                'product_supply_lock.event = product_supply_event.id',
             );
 
         /** Created */
@@ -196,7 +189,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 'product_supply_event',
                 ProductSupplyCreated::class,
                 'product_supply_created',
-                'product_supply_created.event = product_supply_event.id'
+                'product_supply_created.event = product_supply_event.id',
             );
 
         /** Arrival */
@@ -206,7 +199,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 'product_supply_event',
                 ProductSupplyArrival::class,
                 'product_supply_arrival',
-                'product_supply_arrival.event = product_supply_event.id'
+                'product_supply_arrival.event = product_supply_event.id',
             );
 
         /** Modify */
@@ -216,7 +209,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 'product_supply_event',
                 ProductSupplyModify::class,
                 'product_supply_modify',
-                'product_supply_modify.event = product_supply_event.id'
+                'product_supply_modify.event = product_supply_event.id',
             );
 
         /**
@@ -235,7 +228,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 '
                     product_supply_personal.event = product_supply_event.id AND
                     product_supply_personal.usr = :usr AND 
-                    product_supply_personal.profile = :profile'
+                    product_supply_personal.profile = :profile',
             )->setParameter(
                 key: 'usr',
                 value: $user,
@@ -275,7 +268,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 'product_supply_event',
                 ProductSupplyProduct::class,
                 'product_supply_product',
-                'product_supply_product.event = product_supply_event.id'
+                'product_supply_product.event = product_supply_event.id',
             );
 
         $dbal->addSelect(
@@ -311,5 +304,12 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
         $dbal->addOrderBy('product_supply.id', 'ASC');
 
         return $dbal;
+    }
+
+    public function findPaginator(): PaginatorInterface
+    {
+        $builder = $this->builder();
+
+        return $this->paginator->fetchAllHydrate($builder, AllProductSupplyResult::class);
     }
 }

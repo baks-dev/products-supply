@@ -80,6 +80,11 @@ final class NewProductSupplyProductDTO implements ProductSupplyProductInterface
         $this->id = $id;
     }
 
+    public function getTotal(): int
+    {
+        return $this->total;
+    }
+
     /**
      * Total
      */
@@ -87,11 +92,6 @@ final class NewProductSupplyProductDTO implements ProductSupplyProductInterface
     {
         $this->total = $total;
         return $this;
-    }
-
-    public function getTotal(): int
-    {
-        return $this->total;
     }
 
     /**
@@ -150,6 +150,11 @@ final class NewProductSupplyProductDTO implements ProductSupplyProductInterface
         return $this;
     }
 
+    public function getReceived(): bool
+    {
+        return $this->received;
+    }
+
     /**
      * Received
      */
@@ -157,11 +162,6 @@ final class NewProductSupplyProductDTO implements ProductSupplyProductInterface
     {
         $this->received = $received;
         return $this;
-    }
-
-    public function getReceived(): bool
-    {
-        return $this->received;
     }
 
     /** HELPERS */

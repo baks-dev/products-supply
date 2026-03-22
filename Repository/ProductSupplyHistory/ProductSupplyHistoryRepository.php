@@ -83,7 +83,7 @@ final class ProductSupplyHistoryRepository implements ProductSupplyHistoryInterf
                 'event',
                 ProductSupplyModify::class,
                 'modify',
-                'modify.event = event.id'
+                'modify.event = event.id',
             );
 
         $dbal
@@ -92,14 +92,14 @@ final class ProductSupplyHistoryRepository implements ProductSupplyHistoryInterf
                 'event',
                 ProductSupplyPersonal::class,
                 'personal',
-                'personal.event = event.id'
+                'personal.event = event.id',
             );
 
         $dbal->join(
             'modify',
             UserProfileInfo::class,
             'profile_info',
-            'profile_info.usr = modify.usr AND profile_info.active = true'
+            'profile_info.usr = modify.usr AND profile_info.active = true',
         );
 
         $dbal
@@ -108,7 +108,7 @@ final class ProductSupplyHistoryRepository implements ProductSupplyHistoryInterf
                 'profile_info',
                 UserProfile::class,
                 'profile',
-                'profile.id = profile_info.profile'
+                'profile.id = profile_info.profile',
             );
 
         $dbal
@@ -117,7 +117,7 @@ final class ProductSupplyHistoryRepository implements ProductSupplyHistoryInterf
                 'profile',
                 UserProfilePersonal::class,
                 'profile_personal',
-                'profile_personal.event = profile.event'
+                'profile_personal.event = profile.event',
             );
 
         $dbal
@@ -128,7 +128,7 @@ final class ProductSupplyHistoryRepository implements ProductSupplyHistoryInterf
                 'profile',
                 UserProfileAvatar::class,
                 'profile_avatar',
-                'profile_avatar.event = profile.event'
+                'profile_avatar.event = profile.event',
             );
 
         $dbal->orderBy('modify.mod_date');

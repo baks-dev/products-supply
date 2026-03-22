@@ -33,6 +33,7 @@ use BaksDev\Products\Supply\UseCase\Admin\Cancel\Tests\ProductSupplyStatusCleare
 use BaksDev\Products\Supply\UseCase\Admin\Delivery\Arrival\ProductSupplyArrivalDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Delivery\ProductSupplyStatusDeliveryDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
@@ -71,7 +72,7 @@ class ProductSupplyStatusDeliveryTest extends KernelTestCase
 
         /** Ожидаемая дата прибытия */
         $ProductSupplyArrivalDTO = new ProductSupplyArrivalDTO();
-        $ProductSupplyArrivalDTO->setValue(new \DateTimeImmutable('+1 day'));
+        $ProductSupplyArrivalDTO->setValue(new DateTimeImmutable('+1 day'));
         $ProductSupplyStatusDeliveryDTO->setArrival($ProductSupplyArrivalDTO);
 
         /** @var EditProductSupplyHandler $EditProductSupplyHandler */

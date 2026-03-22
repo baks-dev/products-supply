@@ -47,6 +47,11 @@ class ProductSupplyStatusCanceledTest extends KernelTestCase
     /** Для переопределения корня */
     private const string MAIN = '';
 
+    public static function tearDownAfterClass(): void
+    {
+        NewProductSupplyHandlerTest::setUpBeforeClass();
+    }
+
     #[DependsOnClass(ProductSupplyStatusCompletedTest::class)]
     public function testUseCase(): void
     {
@@ -75,10 +80,5 @@ class ProductSupplyStatusCanceledTest extends KernelTestCase
         $handle = $EditProductSupplyHandler->handle($ProductSupplyStatusCanceledDTO);
 
         self::assertTrue(($handle instanceof ProductSupply), $handle.': Ошибка ProductSupply');
-    }
-
-    public static function tearDownAfterClass(): void
-    {
-        NewProductSupplyHandlerTest::setUpBeforeClass();
     }
 }

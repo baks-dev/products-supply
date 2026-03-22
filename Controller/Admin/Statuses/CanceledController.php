@@ -164,7 +164,7 @@ final class CanceledController extends AbstractController
                     $logger->info(
                         message: sprintf('Поставка %s: Статус изменен на %s',
                             $ProductSupplyEvent->getInvariable()->getNumber(),
-                            $ProductSupplyStatusCanceledDTO->getStatus()
+                            $ProductSupplyStatusCanceledDTO->getStatus(),
                         ),
                         context: [self::class.':'.__LINE__],
                     );

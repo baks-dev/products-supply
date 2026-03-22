@@ -33,6 +33,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Объект для перемещения поставки в любой статус
+ *
  * @see ProductSupplyEvent
  */
 final class ProductSupplyStatusesDTO implements ProductSupplyEventInterface

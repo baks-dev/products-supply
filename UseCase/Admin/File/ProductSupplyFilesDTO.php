@@ -53,6 +53,7 @@ final class ProductSupplyFilesDTO
 
     /**
      * Коллекция загружаемых файлов
+     *
      * @var ArrayCollection<int, ProductSupplyFileDTO> $files
      */
     #[Assert\Valid]
@@ -67,12 +68,9 @@ final class ProductSupplyFilesDTO
         $this->addFiles($ProductSupplyFileDTO);
     }
 
-    /**
-     * User
-     */
-    public function setUsr(UserUid $usr): ProductSupplyFilesDTO
+    public function addFiles(ProductSupplyFileDTO $file): self
     {
-        $this->usr = $usr;
+        $this->files->add($file);
         return $this;
     }
 
@@ -82,11 +80,11 @@ final class ProductSupplyFilesDTO
     }
 
     /**
-     * Profile
+     * User
      */
-    public function setProfile(UserProfileUid $profile): ProductSupplyFilesDTO
+    public function setUsr(UserUid $usr): ProductSupplyFilesDTO
     {
-        $this->profile = $profile;
+        $this->usr = $usr;
         return $this;
     }
 
@@ -100,17 +98,20 @@ final class ProductSupplyFilesDTO
      */
 
     /**
+     * Profile
+     */
+    public function setProfile(UserProfileUid $profile): ProductSupplyFilesDTO
+    {
+        $this->profile = $profile;
+        return $this;
+    }
+
+    /**
      * @return ArrayCollection<int, ProductSupplyFileDTO>
      */
     public function getFiles(): ArrayCollection
     {
         return $this->files;
-    }
-
-    public function addFiles(ProductSupplyFileDTO $file): self
-    {
-        $this->files->add($file);
-        return $this;
     }
 
     public function setFiles(ArrayCollection $files): self

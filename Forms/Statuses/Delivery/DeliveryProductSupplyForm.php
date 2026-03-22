@@ -55,7 +55,7 @@ final class DeliveryProductSupplyForm extends AbstractType
                 'entry_options' => ['label' => false],
                 'label' => false,
                 'allow_add' => true,
-            ]
+            ],
         );
 
         /**
@@ -78,7 +78,7 @@ final class DeliveryProductSupplyForm extends AbstractType
                 },
                 'label' => false,
                 'required' => true,
-            ]
+            ],
         );
 
         $builder->add('arrival', DateType::class, [
@@ -108,7 +108,7 @@ final class DeliveryProductSupplyForm extends AbstractType
         $builder->add(
             'delivery',
             SubmitType::class,
-            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']]
+            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']],
         );
     }
 
@@ -119,7 +119,7 @@ final class DeliveryProductSupplyForm extends AbstractType
                 'data_class' => DeliveryProductSupplyDTO::class,
                 'method' => 'POST',
                 'attr' => ['class' => 'w-100'],
-            ]
+            ],
         );
     }
 }

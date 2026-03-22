@@ -120,7 +120,7 @@ final readonly class ProductSignCancelReservationDispatcher
                     message: sprintf(
                         'Поставка %s: Успешно сняли резерв Честного знака id - %s',
                         $ProductSupplyEvent->getInvariable()->getNumber(),
-                        $handle->getId()
+                        $handle->getId(),
                     ),
                     context: [
                         self::class.':'.__LINE__,

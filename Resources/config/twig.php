@@ -31,7 +31,7 @@ return static function(TwigConfig $twig) {
 
     $twig->path(
         BaksDevProductsSupplyBundle::PATH.implode(DIRECTORY_SEPARATOR, ['Resources', 'view', '']),
-        'products-supply'
+        'products-supply',
     );
 
 };

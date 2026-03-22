@@ -44,7 +44,7 @@ final class CanceledProductSupplyForm extends AbstractType
                 'entry_options' => ['label' => false],
                 'label' => false,
                 'allow_add' => true,
-            ]
+            ],
         );
 
         $builder->add('comment', TextareaType::class);
@@ -52,7 +52,7 @@ final class CanceledProductSupplyForm extends AbstractType
         $builder->add(
             'canceled',
             SubmitType::class,
-            ['label' => 'Cancel', 'label_html' => true, 'attr' => ['class' => 'btn-danger']]
+            ['label' => 'Cancel', 'label_html' => true, 'attr' => ['class' => 'btn-danger']],
         );
     }
 
@@ -63,7 +63,7 @@ final class CanceledProductSupplyForm extends AbstractType
                 'data_class' => CanceledProductSupplyDTO::class,
                 'method' => 'POST',
                 'attr' => ['class' => 'w-100'],
-            ]
+            ],
         );
     }
 }

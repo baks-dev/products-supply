@@ -43,6 +43,7 @@ interface AllProductSignEventsRelatedProductSupplyInterface
 
     /**
      * Возвращает объекты Честного знака, связанные с поставкой
+     *
      * @return Generator<int, ProductSignEvent>|false
      */
     public function findAll(): Generator|false;

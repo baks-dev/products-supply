@@ -41,14 +41,14 @@ final class ProductSupplyFileForm extends AbstractType
                 'attr' => ['accept' => ".pdf"],
                 'multiple' => true,
                 'required' => true,
-            ]
+            ],
         );
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => ProductSupplyFileDTO::class
+            'data_class' => ProductSupplyFileDTO::class,
         ]);
     }
 }

@@ -139,7 +139,7 @@ final class OneProductSupplyProductRepository implements OneProductSupplyProduct
                 '
                     event.id = main.event AND
                     event.main = :supply
-                '
+                ',
             )->setParameter(
                 key: 'supply',
                 value: $this->supply,
@@ -189,7 +189,7 @@ final class OneProductSupplyProductRepository implements OneProductSupplyProduct
                 'event',
                 ProductSupplyProduct::class,
                 'product',
-                $productCondition
+                $productCondition,
             )->setParameter(
                 key: 'product',
                 value: $this->product,

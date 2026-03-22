@@ -54,7 +54,7 @@ final class SignController extends AbstractController
         $ProductSupplyFilesForm = $this->createForm(
             ProductSupplyFilesForm::class,
             $ProductSupplyFilesDTO = new ProductSupplyFilesDTO(),
-            ['action' => $this->generateUrl('products-supply:'.self::NAME)]
+            ['action' => $this->generateUrl('products-supply:'.self::NAME)],
         )
             ->handleRequest($request);
 
@@ -71,7 +71,7 @@ final class SignController extends AbstractController
             $this->addFlash(
                 true === $handle ? 'success' : 'danger',
                 true === $handle ? 'file.success' : 'file.danger',
-                'products-supply.admin'
+                'products-supply.admin',
             );
 
             return $this->redirectToReferer();

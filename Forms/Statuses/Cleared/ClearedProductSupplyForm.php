@@ -43,7 +43,7 @@ final class ClearedProductSupplyForm extends AbstractType
                 'entry_options' => ['label' => false],
                 'label' => false,
                 'allow_add' => true,
-            ]
+            ],
         );
 
         $builder->add('number', TextType::class);
@@ -52,7 +52,7 @@ final class ClearedProductSupplyForm extends AbstractType
         $builder->add(
             'cleared',
             SubmitType::class,
-            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']]
+            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']],
         );
     }
 
@@ -63,7 +63,7 @@ final class ClearedProductSupplyForm extends AbstractType
                 'data_class' => ClearedProductSupplyDTO::class,
                 'method' => 'POST',
                 'attr' => ['class' => 'w-100'],
-            ]
+            ],
         );
     }
 }

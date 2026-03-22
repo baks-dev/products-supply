@@ -29,9 +29,6 @@ use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 #[AutoconfigureTag('baks.products.supply.status')]
 interface ProductSupplyStatusInterface
 {
-    /** Возвращает значение (value) */
-    public function getValue(): string;
-
     /** Сортировка */
     public static function priority(): int;
 
@@ -40,4 +37,7 @@ interface ProductSupplyStatusInterface
 
     /** Правило доступа */
     public static function getVoter(): string;
+
+    /** Возвращает значение (value) */
+    public function getValue(): string;
 }

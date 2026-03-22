@@ -49,6 +49,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * Изменяет статус поставки на тот, который был передан в url
+ *
  * @see assets/products-supply/supply_draggable.js
  */
 #[AsController]
@@ -84,7 +85,7 @@ final class StatusController extends AbstractController
         $ProductSupplysForm = $this->createForm(
             type: ProductSupplysForm::class,
             data: $ProductSupplysDTO = new ProductSupplysDTO(),
-            options: ['action' => $this->generateUrl('products-supply:'.self::NAME, ['status' => $status])]
+            options: ['action' => $this->generateUrl('products-supply:'.self::NAME, ['status' => $status])],
         )
             ->handleRequest($request);
 
@@ -118,7 +119,7 @@ final class StatusController extends AbstractController
                         message: sprintf(
                             'Не найдено событие ProductSupplyEvent по ID поставки: %s',
                             $ProductSupplyIdDTO->getId()),
-                        context: [self::class.':'.__LINE__]
+                        context: [self::class.':'.__LINE__],
                     );
 
                     continue;
@@ -150,9 +151,9 @@ final class StatusController extends AbstractController
                             $ProductSupplyEvent->getMain(),
                             $ProductSupplyEvent->getInvariable()->getNumber(),
                             $currentProductSupplyStatus->getStatus()->getValue(),
-                            $newProductSupplyStatus->getStatus()->getValue()
+                            $newProductSupplyStatus->getStatus()->getValue(),
                         ),
-                        context: [self::class.':'.__LINE__]
+                        context: [self::class.':'.__LINE__],
                     );
 
                     continue;
@@ -194,9 +195,9 @@ final class StatusController extends AbstractController
                         message: sprintf(
                             'Статус поставки %s изменен на %s',
                             $ProductSupply->getId(),
-                            $ProductSupplyStatusesDTO->getStatus()
+                            $ProductSupplyStatusesDTO->getStatus(),
                         ),
-                        context: [self::class.':'.__LINE__]
+                        context: [self::class.':'.__LINE__],
                     );
                 }
 
@@ -208,7 +209,7 @@ final class StatusController extends AbstractController
                             $ProductSupplyStatusesDTO->getStatus(),
                             $ProductSupplyEvent->getInvariable()->getNumber(),
                         ),
-                        context: [self::class.':'.__LINE__]
+                        context: [self::class.':'.__LINE__],
                     );
 
                     $this->unsuccessful[] = $number;

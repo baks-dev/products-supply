@@ -175,7 +175,7 @@ final class PdfController extends AbstractController
 
             $logger->critical(
                 message: sprintf('Лист %s: ошибка изображения %s', $key, $url),
-                context: [$code->getSignId()]
+                context: [$code->getSignId()],
             );
         }
 

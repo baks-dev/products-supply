@@ -32,6 +32,8 @@ use BaksDev\Products\Supply\Repository\OneProductSupplyProduct\OneProductSupplyP
 use BaksDev\Products\Supply\Repository\OneProductSupplyProduct\OneProductSupplyProductResult;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use PHPUnit\Framework\Attributes\Group;
+use ReflectionClass;
+use ReflectionMethod;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
@@ -57,8 +59,8 @@ class OneProductSupplyProductRepositoryTest extends KernelTestCase
         if(false !== $result)
         {
             // Вызываем все геттеры
-            $reflectionClass = new \ReflectionClass(OneProductSupplyProductResult::class);
-            $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
+            $reflectionClass = new ReflectionClass(OneProductSupplyProductResult::class);
+            $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
 
             foreach($methods as $method)
             {

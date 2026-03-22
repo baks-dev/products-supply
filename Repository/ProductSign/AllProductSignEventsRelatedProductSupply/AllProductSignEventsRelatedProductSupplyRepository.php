@@ -78,6 +78,7 @@ final class AllProductSignEventsRelatedProductSupplyRepository implements AllPro
 
     /**
      * Возвращает объекты Честного знака, связанные с поставкой
+     *
      * @return Generator<int, ProductSignEvent>|false
      */
     public function findAll(): Generator|false
@@ -100,7 +101,7 @@ final class AllProductSignEventsRelatedProductSupplyRepository implements AllPro
                 ProductSignInvariable::class,
                 'invariable',
                 Join::WITH,
-                'invariable.main = main.id'
+                'invariable.main = main.id',
             );
 
         /**
@@ -125,7 +126,7 @@ final class AllProductSignEventsRelatedProductSupplyRepository implements AllPro
                 ProductSignEvent::class,
                 'event',
                 Join::WITH,
-                $statusCondition
+                $statusCondition,
             )
             ->setParameter(
                 key: 'undefined',
@@ -157,7 +158,7 @@ final class AllProductSignEventsRelatedProductSupplyRepository implements AllPro
                 ProductSignCode::class,
                 'code',
                 Join::WITH,
-                "code.event = main.event"
+                "code.event = main.event",
             );
 
         $orm

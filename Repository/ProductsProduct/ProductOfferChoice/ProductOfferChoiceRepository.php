@@ -128,7 +128,7 @@ final class ProductOfferChoiceRepository implements ProductOfferChoiceInterface
             'product',
             ProductOffer::class,
             'offer',
-            'offer.event = product.event'
+            'offer.event = product.event',
         );
 
         $dbal->join(

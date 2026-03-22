@@ -29,6 +29,8 @@ use BaksDev\Products\Supply\Repository\AllProductSupply\AllProductSupplyResult;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 use PHPUnit\Framework\Attributes\Group;
+use ReflectionClass;
+use ReflectionMethod;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
@@ -66,8 +68,8 @@ class AllProductSupplyRepositoryTest extends KernelTestCase
         $AllServicesResult = $results->current();
 
         // Вызываем все геттеры
-        $reflectionClass = new \ReflectionClass(AllProductSupplyResult::class);
-        $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
+        $reflectionClass = new ReflectionClass(AllProductSupplyResult::class);
+        $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
 
         foreach($methods as $method)
         {

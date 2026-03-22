@@ -33,6 +33,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Объект с информацией о пользователе
+ *
  * @see ProductSupplyPersonal
  */
 final class NewProductSupplyPersonalDTO implements ProductSupplyPersonalInterface
@@ -51,6 +52,11 @@ final class NewProductSupplyPersonalDTO implements ProductSupplyPersonalInterfac
     #[Assert\Uuid]
     private UserProfileUid $profile;
 
+    public function getUsr(): UserUid
+    {
+        return $this->usr;
+    }
+
     /**
      * User
      */
@@ -60,9 +66,9 @@ final class NewProductSupplyPersonalDTO implements ProductSupplyPersonalInterfac
         return $this;
     }
 
-    public function getUsr(): UserUid
+    public function getProfile(): UserProfileUid
     {
-        return $this->usr;
+        return $this->profile;
     }
 
     /**
@@ -72,10 +78,5 @@ final class NewProductSupplyPersonalDTO implements ProductSupplyPersonalInterfac
     {
         $this->profile = $profile;
         return $this;
-    }
-
-    public function getProfile(): UserProfileUid
-    {
-        return $this->profile;
     }
 }

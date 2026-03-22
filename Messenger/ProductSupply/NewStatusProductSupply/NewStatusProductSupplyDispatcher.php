@@ -47,6 +47,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 /**
  * При присвоении поставке статуса New «Новая» -
  * запускает процесс резервирования ОДНОГО Честный знака на ОДНУ единицу продукции в поставке
+ *
  * @see ProcessReservationProductSignDispatcher
  */
 #[AsMessageHandler(priority: 0)]

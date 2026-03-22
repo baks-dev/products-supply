@@ -132,7 +132,7 @@ final class AllProductSignByProductSupplyRepository implements AllProductSignByP
                     invariable.usr = :usr AND
                     invariable.profile = :profile AND
                     invariable.product IS NULL
-                    '
+                    ',
             )->setParameter(
                 key: 'usr',
                 value: $this->user,
@@ -188,7 +188,7 @@ final class AllProductSignByProductSupplyRepository implements AllProductSignByP
                 "
                     code.event = main.event AND
                     code.code LIKE :code
-                    "
+                    ",
             )
             ->setParameter(
                 key: 'code',

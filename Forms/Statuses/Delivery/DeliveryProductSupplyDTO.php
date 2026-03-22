@@ -84,15 +84,15 @@ final class DeliveryProductSupplyDTO
         return $this;
     }
 
+    public function getComment(): ?string
+    {
+        return $this->comment;
+    }
+
     public function setComment(?string $comment): DeliveryProductSupplyDTO
     {
         $this->comment = $comment;
         return $this;
-    }
-
-    public function getComment(): ?string
-    {
-        return $this->comment;
     }
 
     /**

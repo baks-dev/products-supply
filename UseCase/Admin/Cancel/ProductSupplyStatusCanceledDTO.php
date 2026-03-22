@@ -35,6 +35,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Объект для перемещения поставки в Статус cancel (Выполнен)
+ *
  * @see ProductSupplyEvent
  */
 final class ProductSupplyStatusCanceledDTO implements ProductSupplyEventInterface
@@ -82,15 +83,15 @@ final class ProductSupplyStatusCanceledDTO implements ProductSupplyEventInterfac
         return $this->status;
     }
 
+    public function getComment(): string
+    {
+        return $this->comment;
+    }
+
     public function setComment(string $comment): ProductSupplyStatusCanceledDTO
     {
         $this->comment = $comment;
         return $this;
-    }
-
-    public function getComment(): string
-    {
-        return $this->comment;
     }
 
     public function getLock(): EditProductSupplyLockDTO

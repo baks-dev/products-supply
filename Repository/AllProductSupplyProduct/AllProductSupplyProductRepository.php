@@ -69,7 +69,7 @@ final class AllProductSupplyProductRepository implements AllProductSupplyProduct
                 '
                     event.id = main.event AND
                     event.main = :supply
-                '
+                ',
             )->setParameter(
                 key: 'supply',
                 value: $this->supply,
@@ -82,7 +82,7 @@ final class AllProductSupplyProductRepository implements AllProductSupplyProduct
                 'event',
                 ProductSupplyProduct::class,
                 'product',
-                'product.event = event.id'
+                'product.event = event.id',
             );
 
         $dbal->addSelect(

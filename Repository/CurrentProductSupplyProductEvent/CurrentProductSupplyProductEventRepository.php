@@ -70,11 +70,11 @@ final class CurrentProductSupplyProductEventRepository implements CurrentProduct
                 'WITH',
                 '
                     main.event = supply_product.event AND
-                    main.id = :supply'
+                    main.id = :supply',
             )->setParameter(
                 key: 'supply',
                 value: $this->supply,
-                type: ProductSupplyUid::TYPE
+                type: ProductSupplyUid::TYPE,
             );
 
         $orm
@@ -82,7 +82,7 @@ final class CurrentProductSupplyProductEventRepository implements CurrentProduct
             ->setParameter(
                 key: 'barcode',
                 value: $barcode,
-                type: ProductBarcode::TYPE
+                type: ProductBarcode::TYPE,
             );
 
         return $orm->getOneOrNullResult() ?: false;

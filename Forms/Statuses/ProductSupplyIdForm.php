@@ -47,8 +47,8 @@ final class ProductSupplyIdForm extends AbstractType
                 },
                 function($supply) {
                     return new ProductSupplyUid($supply);
-                }
-            )
+                },
+            ),
         );
     }
 
@@ -59,7 +59,7 @@ final class ProductSupplyIdForm extends AbstractType
                 'data_class' => ProductSupplyIdDTO::class,
                 'method' => 'POST',
                 'attr' => ['class' => 'w-100'],
-            ]
+            ],
         );
     }
 }

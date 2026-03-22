@@ -35,6 +35,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Объект для перемещения поставки в Статус delivery (Доставка)
+ *
  * @see ProductSupplyEvent
  */
 final class ProductSupplyStatusDeliveryDTO implements ProductSupplyEventInterface
@@ -77,6 +78,11 @@ final class ProductSupplyStatusDeliveryDTO implements ProductSupplyEventInterfac
         return $this->status;
     }
 
+    public function getArrival(): ProductSupplyArrivalDTO
+    {
+        return $this->arrival;
+    }
+
     /**
      * Планируемая дата прибытия
      */
@@ -84,10 +90,5 @@ final class ProductSupplyStatusDeliveryDTO implements ProductSupplyEventInterfac
     {
         $this->arrival = $arrival;
         return $this;
-    }
-
-    public function getArrival(): ProductSupplyArrivalDTO
-    {
-        return $this->arrival;
     }
 }

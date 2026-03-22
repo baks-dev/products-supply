@@ -70,7 +70,7 @@ final class EditProductSupplyForm extends AbstractType
                 'data_class' => EditProductSupplyDTO::class,
                 'method' => 'POST',
                 'attr' => ['class' => 'w-100'],
-            ]
+            ],
         );
     }
 }

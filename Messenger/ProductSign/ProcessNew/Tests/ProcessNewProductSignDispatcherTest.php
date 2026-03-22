@@ -68,7 +68,7 @@ class ProcessNewProductSignDispatcherTest extends KernelTestCase
 
         $message = new ProductSupplyMessage(
             $ProductSupply->getId(),
-            $ProductSupply->getEvent()
+            $ProductSupply->getEvent(),
         );
 
         $ProcessNewProductSignDispatcher($message);

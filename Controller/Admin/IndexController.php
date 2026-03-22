@@ -100,7 +100,7 @@ final class IndexController extends AbstractController
                 'search' => $searchForm->createView(),
                 'token' => $tokenUserGenerator->generate($this->getUsr()),
                 'current_profile' => $this->getCurrentProfileUid(),
-            ]
+            ],
         );
     }
 }

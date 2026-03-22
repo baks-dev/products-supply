@@ -87,6 +87,7 @@ final readonly class CreateWarehouseProductStockDispatcher
 
         /**
          * На каждый продукт из поставки создаем заявку на поступление
+         *
          * @var ProductSupplyProductResult $product
          */
         foreach($OneProductSupply->getProducts() as $product)
@@ -127,7 +128,7 @@ final readonly class CreateWarehouseProductStockDispatcher
                     message: sprintf(
                         'products-supply: Ошибка при создании заявки %s на поступление продукции на склад для поставки %s',
                         $handle->getId(),
-                        $OneProductSupply->getId()
+                        $OneProductSupply->getId(),
                     ),
                     context: [
                         self::class.':'.__LINE__,
@@ -144,7 +145,7 @@ final readonly class CreateWarehouseProductStockDispatcher
                     message: sprintf(
                         'Создали заявку %s на поступление продукции на склад для поставки %s',
                         $handle->getId(),
-                        $OneProductSupply->getId()
+                        $OneProductSupply->getId(),
                     ),
                     context: [
                         self::class.':'.__LINE__,

@@ -98,6 +98,7 @@ final class DetailController extends AbstractController
 
         /**
          * Продукты в поставке
+         *
          * @var EditProductSupplyProductDTO $product
          */
         foreach($EditProductSupplyDTO->getProduct() as $product)
@@ -124,7 +125,7 @@ final class DetailController extends AbstractController
                 type: EditProductSupplyForm::class,
                 data: $EditProductSupplyDTO,
                 options: ['action' => $this->generateUrl('products-supply:admin.supply.detail',
-                    ['id' => $ProductSupplyEvent->getMain()])]
+                    ['id' => $ProductSupplyEvent->getMain()])],
             )
             ->handleRequest($request);
 
@@ -150,7 +151,7 @@ final class DetailController extends AbstractController
                 $this->addFlash(
                     'success',
                     'success.update',
-                    'products-supply.admin'
+                    'products-supply.admin',
                 );
             }
             else
@@ -187,7 +188,7 @@ final class DetailController extends AbstractController
                 'product_signs' => $ProductSigns,
                 'statuses' => $statuses,
                 'histories' => $histories,
-            ]
+            ],
         );
     }
 }

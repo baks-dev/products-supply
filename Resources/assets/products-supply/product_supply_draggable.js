@@ -37,7 +37,7 @@ let init_counter_T1dfEVi = 100;
 /** Сокеты */
 setTimeout(function Hk91aSnRFfF()
 {
-    if(typeof centrifuge !== 'object')
+    if(typeof centrifuge !== "object")
     {
         if(init_counter_T1dfEVi > 1000)
         { return; }
@@ -46,9 +46,9 @@ setTimeout(function Hk91aSnRFfF()
         return setTimeout(Hk91aSnRFfF, init_counter_T1dfEVi);
     }
 
-    const remove_channel = centrifuge.newSubscription('remove');
+    const remove_channel = centrifuge.newSubscription("remove");
 
-    remove_channel.on('publication', function(ctx)
+    remove_channel.on("publication", function(ctx)
     {
         const supply = document.getElementById(ctx.data.supply);
 
@@ -57,41 +57,41 @@ setTimeout(function Hk91aSnRFfF()
             if(ctx.data.profile && window.current_profile && ctx.data.profile !== window.current_profile)
             {
                 /** Удаляем поставку у остальных менеджеров */
-                supply.remove()
+                supply.remove();
             }
         }
 
     }).subscribe();
 
-    const supplys_channel = centrifuge.newSubscription('supplys');
+    const supplys_channel = centrifuge.newSubscription("supplys");
 
-    supplys_channel.on('publication', function(ctx)
+    supplys_channel.on("publication", function(ctx)
     {
         const supply = document.getElementById(ctx.data.supply);
 
         if(supply !== null)
         {
-            const number = supply.querySelector('.number-supply')
+            const number = supply.querySelector(".number-supply");
             const label = supply.querySelector(`label[for="${number.dataset.copy}"]`);
 
-            let draggable = supply.querySelector('[class*="draggable"]')
+            let draggable = supply.querySelector("[class*=\"draggable\"]");
 
             if(draggable !== null)
             {
                 /** Блокируем draggable */
                 if(ctx.data.lock === true)
                 {
-                    let draggableMove = draggable.querySelector('.bi-arrows-move')
-                    draggableMove.classList.add('d-none');
+                    let draggableMove = draggable.querySelector(".bi-arrows-move");
+                    draggableMove.classList.add("d-none");
 
-                    let draggableLock = draggable.querySelector('.bi-ban')
+                    let draggableLock = draggable.querySelector(".bi-ban");
                     draggableLock.classList.remove("d-none");
 
                     /** Скрываем чекбокс выбора карточки */
-                    label?.classList.add('fade')
+                    label?.classList.add("fade");
 
-                    draggable.classList.remove('draggable-handle')
-                    draggable.classList.add('draggable-lock');
+                    draggable.classList.remove("draggable-handle");
+                    draggable.classList.add("draggable-lock");
 
                     let lockMessage = `{
                       "type": "danger",
@@ -105,17 +105,17 @@ setTimeout(function Hk91aSnRFfF()
                 /** Разлокируем draggable */
                 if(ctx.data.lock === false)
                 {
-                    let draggableLock = draggable.querySelector('.bi-ban')
-                    draggableLock.classList.add('d-none');
+                    let draggableLock = draggable.querySelector(".bi-ban");
+                    draggableLock.classList.add("d-none");
 
-                    let draggableMove = draggable.querySelector('.bi-arrows-move')
+                    let draggableMove = draggable.querySelector(".bi-arrows-move");
                     draggableMove.classList.remove("d-none");
 
                     /** Показываем чекбокс выбора карточки */
-                    label?.classList.remove('fade')
+                    label?.classList.remove("fade");
 
-                    draggable.classList.remove('draggable-lock')
-                    draggable.classList.add('draggable-handle');
+                    draggable.classList.remove("draggable-lock");
+                    draggable.classList.add("draggable-handle");
 
                     let unlockMessage = `{
                       "type": "success",
@@ -125,7 +125,7 @@ setTimeout(function Hk91aSnRFfF()
 
                     createToast(JSON.parse(unlockMessage));
 
-                    return;
+
                 }
             }
 
@@ -167,11 +167,11 @@ executeFunc(function lW9JEBic()
         containers = document.querySelectorAll(".draggable-zone");
 
         droppable = new Droppable.default(containers, {
-            draggable: ".draggable",
-            dropzone: ".draggable-zone",
-            handle: ".draggable .draggable-handle",
-            mirror: {
-                appendTo: "body",
+            draggable : ".draggable",
+            dropzone : ".draggable-zone",
+            handle : ".draggable .draggable-handle",
+            mirror : {
+                appendTo : "body",
                 //constrainDimensions : true,
             },
         });
@@ -219,7 +219,8 @@ executeFunc(function lW9JEBic()
                         }
                     }
                 });
-            } else
+            }
+            else
             {
                 isDraggingSelected = false;
                 draggedOrderIds = [draggedOrderId];
@@ -229,7 +230,8 @@ executeFunc(function lW9JEBic()
                     if(draggable.id !== draggedOrderId)
                     {
                         draggable.classList.add("opacity-50"); // полупрозрачный заказ
-                    } else
+                    }
+                    else
                     {
                         // перетаскиваемуму заказа присваиваем высокий индекс позиционирования
                         draggable.classList.replace("z-0", "z-2");
@@ -282,7 +284,8 @@ executeFunc(function lW9JEBic()
                 {
                     // Групповое перетаскивание
                     supplysToProcess = draggedOrderIds;
-                } else
+                }
+                else
                 {
                     // Одиночное перетаскивание
                     supplysToProcess = [e.originalSource.id];
@@ -309,11 +312,11 @@ executeFunc(function lW9JEBic()
 
                     /** Формируем запрос на форму по статусу */
                     const response = await fetch(url, {
-                        method: "POST",
-                        headers: {
-                            "X-Requested-With": "XMLHttpRequest",
+                        method : "POST",
+                        headers : {
+                            "X-Requested-With" : "XMLHttpRequest",
                         },
-                        body: formData,
+                        body : formData,
                     });
 
                     /** Если формы не отрисовалась - Изменение статуса без вызова формы */
@@ -334,11 +337,11 @@ executeFunc(function lW9JEBic()
 
                         /** Запрос на изменение статуса */
                         const status_request = await fetch(status_url + status_url_param, {
-                            method: "POST",
-                            headers: {
-                                "X-Requested-With": "XMLHttpRequest",
+                            method : "POST",
+                            headers : {
+                                "X-Requested-With" : "XMLHttpRequest",
                             },
-                            body: formData,
+                            body : formData,
                         }).then(response => response.json());
 
                         let status_response = await status_request;
@@ -404,12 +407,14 @@ executeFunc(function lW9JEBic()
                         lazy.src = "/assets/" + $version + "/js/lazyload.min.js";
                         document.head.appendChild(lazy);
 
-                    } else
+                    }
+                    else
                     {
                         throw new Error(`Unexpected status code ${response.status}`);
                     }
 
-                } catch(error)
+                }
+                catch(error)
                 {
                     modal_bootstrap.hide();
                     selectedProductSupplys.clear();
@@ -445,8 +450,8 @@ executeFunc(function lW9JEBic()
         });
     }
 
-    initMultiSelectForProductsSupply()
-    updateMultiSelectedVisualForProductsSupply()
+    initMultiSelectForProductsSupply();
+    updateMultiSelectedVisualForProductsSupply();
 
     // Initial call to set up Droppable
     initializeDroppable();
@@ -481,7 +486,8 @@ function initMultiSelectForProductsSupply()
                 selectedProductSupplys.add(selectedId);
                 draggableElement.classList.add("muilti-selected");
 
-            } else
+            }
+            else
             {
                 selectedProductSupplys.delete(selectedId);
                 draggableElement.classList.remove("muilti-selected");
@@ -513,7 +519,8 @@ function initMultiSelectForProductsSupply()
                         selectedProductSupplys.add(selectedId);
                         draggableElement.classList.add("muilti-selected");
 
-                    } else
+                    }
+                    else
                     {
                         selectedProductSupplys.delete(selectedId);
                         draggableElement.classList.remove("muilti-selected");
@@ -552,7 +559,8 @@ function updateMultiSelectedVisualForProductsSupply()
             {
                 draggableHandle.style.pointerEvents = "auto";
             }
-        } else
+        }
+        else
         {
             draggable.removeAttribute("style");
 

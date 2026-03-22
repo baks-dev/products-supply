@@ -37,6 +37,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Объект для перемещения поставки в статус cleared (Растаможены)
+ *
  * @see ProductSupplyEvent
  */
 final class ProductSupplyStatusClearedDTO implements ProductSupplyEventInterface
@@ -59,6 +60,7 @@ final class ProductSupplyStatusClearedDTO implements ProductSupplyEventInterface
 
     /**
      * Продукты в поставке
+     *
      * @var ArrayCollection<int, EditProductSupplyProductDTO> $product
      */
     #[Assert\Valid]

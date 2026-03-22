@@ -158,7 +158,7 @@ final class ProductSignCountForSupplyRepository implements ProductSignCountForSu
                 'event',
                 ProductSign::class,
                 'main',
-                'main.event = event.id'
+                'main.event = event.id',
             );
 
         /** Только для конкретной поставки */
@@ -170,12 +170,12 @@ final class ProductSignCountForSupplyRepository implements ProductSignCountForSu
                 'sign_supply',
                 '
                     sign_supply.event = main.event AND
-                    sign_supply.supply = :supply'
+                    sign_supply.supply = :supply',
             )
             ->setParameter(
                 'supply',
                 $this->supply,
-                ProductSupplyUid::TYPE
+                ProductSupplyUid::TYPE,
             );
 
         /**
@@ -243,7 +243,7 @@ final class ProductSignCountForSupplyRepository implements ProductSignCountForSu
                 'event',
                 ProductSignInvariable::class,
                 'invariable',
-                $invariableCondition
+                $invariableCondition,
             );
 
         return (int) $dbal->fetchOne();

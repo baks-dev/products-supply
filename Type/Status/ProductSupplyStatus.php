@@ -79,14 +79,19 @@ final class ProductSupplyStatus
         throw new InvalidArgumentException(sprintf('Not found ProductSupplyStatus %s', $status));
     }
 
-    public function __toString(): string
-    {
-        return $this->status->getValue();
-    }
-
     public function getStatus(): ProductSupplyStatusInterface
     {
         return $this->status;
+    }
+
+    private static function getDeclared(): array
+    {
+        return array_filter(
+            get_declared_classes(),
+            static function($className) {
+                return in_array(ProductSupplyStatusInterface::class, class_implements($className), true);
+            },
+        );
     }
 
     public function getStatusValue(): string
@@ -94,15 +99,14 @@ final class ProductSupplyStatus
         return $this->status->getValue();
     }
 
+    public function __toString(): string
+    {
+        return $this->status->getValue();
+    }
+
     public function getColor(): string
     {
         return $this->status::color();
-    }
-
-    public function equals(mixed $status): bool
-    {
-        $status = new self($status);
-        return $this->getStatusValue() === $status->getStatusValue();
     }
 
     /** Находит предыдущий статус поставки относительно переданного */
@@ -160,14 +164,9 @@ final class ProductSupplyStatus
         return $case;
     }
 
-
-    private static function getDeclared(): array
+    public function equals(mixed $status): bool
     {
-        return array_filter(
-            get_declared_classes(),
-            static function($className) {
-                return in_array(ProductSupplyStatusInterface::class, class_implements($className), true);
-            }
-        );
+        $status = new self($status);
+        return $this->getStatusValue() === $status->getStatusValue();
     }
 }

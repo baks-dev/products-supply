@@ -51,8 +51,8 @@ final class EditProductSupplyProductForm extends AbstractType
                 },
                 function(string $product) {
                     return new ProductUid($product);
-                }
-            )
+                },
+            ),
         );
 
         $builder->add('offerConst', HiddenType::class);
@@ -64,8 +64,8 @@ final class EditProductSupplyProductForm extends AbstractType
                 },
                 function(string $offer) {
                     return new ProductOfferConst($offer);
-                }
-            )
+                },
+            ),
         );
 
         $builder->add('variationConst', HiddenType::class);
@@ -77,8 +77,8 @@ final class EditProductSupplyProductForm extends AbstractType
                 },
                 function(string $variation) {
                     return new ProductVariationConst($variation);
-                }
-            )
+                },
+            ),
         );
 
         $builder->add('modificationConst', HiddenType::class);
@@ -90,8 +90,8 @@ final class EditProductSupplyProductForm extends AbstractType
                 },
                 function(string $modification) {
                     return new ProductModificationConst ($modification);
-                }
-            )
+                },
+            ),
         );
     }
 

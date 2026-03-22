@@ -63,7 +63,7 @@ final class ProductSupplyLockHandler extends AbstractHandler
                 message: 'products-supply: ProductSupplyLock не найдена',
                 context: [
                     'event' => (string) $command->getEvent(),
-                    self::class.':'.__LINE__
+                    self::class.':'.__LINE__,
                 ],
             );
 

@@ -23,14 +23,14 @@
 
 executeFunc(function productsSignPdf()
 {
-    const fileAddCollectionButton = document.getElementById('file-add-collection');
+    const fileAddCollectionButton = document.getElementById("file-add-collection");
 
-    if(fileAddCollectionButton === null || typeof fileAddCollectionButton === 'undefined')
+    if(fileAddCollectionButton === null || typeof fileAddCollectionButton === "undefined")
     {
         return false;
     }
 
-    fileAddCollectionButton.addEventListener('click', addFile);
+    fileAddCollectionButton.addEventListener("click", addFile);
 
     return true;
 });
@@ -45,20 +45,20 @@ function addFile()
 
     newForm = newForm.replace(/__supply_file__/g, index);
 
-    let div = document.createElement('div');
+    let div = document.createElement("div");
     div.innerHTML = newForm;
-    div.id = 'item_product_supply_files_form_files_' + index;
-    div.classList.add('mb-3');
+    div.id = "item_product_supply_files_form_files_" + index;
+    div.classList.add("mb-3");
 
     let $collection = document.getElementById(collection);
     $collection.append(div);
 
-    (div.querySelector('.del-item-file'))?.addEventListener('click', deleteFile);
+    (div.querySelector(".del-item-file"))?.addEventListener("click", deleteFile);
 
     this.dataset.index = (index + 1).toString();
 }
 
 function deleteFile()
 {
-    document.getElementById('item_' + this.dataset.delete).remove();
+    document.getElementById("item_" + this.dataset.delete).remove();
 }
