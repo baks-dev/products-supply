@@ -110,8 +110,8 @@ final readonly class ScannerImageProductSupplyDispatcher
         if(0 === $parseCode || false === $parseCode)
         {
             $this->logger->critical(
-                message: 'products-supply: Не удалось извлечь штрихкод после сканирования Честного знака. Code: '.$code,
-                context: [self::class.':'.__LINE__, $code],
+                message: sprintf('products-supply: Не удалось извлечь штрихкод после сканирования Честного знака. Code: %s', $code),
+                context: [self::class.':'.__LINE__],
             );
 
             $this->filesystem->remove($message->getRealPath());
@@ -183,26 +183,27 @@ final readonly class ScannerImageProductSupplyDispatcher
 
         $renameDir = $productSignDir.$scanDirName.DIRECTORY_SEPARATOR.'image.png';
 
-        if(true === $this->filesystem->exists($renameDir))
-        {
-            // Удаляем файл если уже имеется
-            $this->filesystem->remove($message->getRealPath());
-            return;
-        }
 
-        /** Создаем директорию для перемещения если отсутствует  */
-        $productImageSignDir = $productSignDir.$scanDirName;
+        /**
+         * Перемещаем файл с изображением в директорию честного знака
+         */
 
-        if(false === $this->filesystem->exists($productImageSignDir))
+        if(false === $this->filesystem->exists($renameDir))
         {
-            $this->filesystem->mkdir($productImageSignDir);
+            /** Создаем директорию для перемещения если отсутствует  */
+            $productImageSignDir = $productSignDir.$scanDirName;
+
+            if(false === $this->filesystem->exists($productImageSignDir))
+            {
+                $this->filesystem->mkdir($productImageSignDir);
+            }
+
+            $this->filesystem->rename($message->getRealPath(), $renameDir, true);
         }
 
         /**
-         * Перемещаем файл с изображением в директорию честного знака и присваиваем результат сканера
+         * Присваиваем результат сканера
          */
-
-        $this->filesystem->rename($message->getRealPath(), $renameDir, true);
 
         $ProductSignNewDTO->getCode()
             ->setCode($code)

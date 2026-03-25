@@ -27,7 +27,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\Messenger\ProductSign\AddNumber\Tests;
 
 use BaksDev\Products\Supply\Entity\ProductSupply;
-use BaksDev\Products\Supply\Messenger\ProductSign\AddNumber\AddNumberProductSignDispatcher;
+use BaksDev\Products\Supply\Messenger\ProductSign\AddNumber\AddNumberProductSignHandler;
 use BaksDev\Products\Supply\Messenger\ProductSupplyMessage;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use Doctrine\ORM\EntityManagerInterface;
@@ -60,8 +60,8 @@ class AddNumberProductSignDebugDispatcherTest extends KernelTestCase
         $ProductSupply = $em->getRepository(ProductSupply::class)
             ->find(ProductSupplyUid::TEST);
 
-        /** @var AddNumberProductSignDispatcher $CommentProductSignDispatcher */
-        $CommentProductSignDispatcher = self::getContainer()->get(AddNumberProductSignDispatcher::class);
+        /** @var AddNumberProductSignHandler $CommentProductSignDispatcher */
+        $CommentProductSignDispatcher = self::getContainer()->get(AddNumberProductSignHandler::class);
 
         $message = new ProductSupplyMessage(
             $ProductSupply->getId(),

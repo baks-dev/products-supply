@@ -96,7 +96,9 @@ final class EditProductSupplyHandler extends AbstractHandler
         $this->messageDispatch
             ->addClearCacheOther('products-sign')
             ->dispatch(
-                message: new ProductSupplyMessage($this->main->getId(), $this->main->getEvent(), $command->getEvent()));
+                message: new ProductSupplyMessage($this->main->getId(), $this->main->getEvent(), $command->getEvent()),
+                transport: 'products-supply',
+            );
 
         return $this->main;
     }
