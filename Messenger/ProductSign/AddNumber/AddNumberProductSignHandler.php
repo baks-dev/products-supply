@@ -1,0 +1,126 @@
+<?php
+/*
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
+ *  
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is furnished
+ *  to do so, subject to the following conditions:
+ *  
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *  
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ *
+ */
+
+declare(strict_types=1);
+
+namespace BaksDev\Products\Supply\Messenger\ProductSign\AddNumber;
+
+use BaksDev\Core\Messenger\MessageDispatchInterface;
+use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
+use BaksDev\Products\Supply\Messenger\ProductSupplyMessage;
+use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductSupplyEventInterface;
+use BaksDev\Products\Supply\Repository\ProductSign\AllProductSignEventsRelatedProductSupply\AllProductSignEventsRelatedProductSupplyInterface;
+use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusCleared;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+/**
+ * При присвоении поставке статуса cleared "Растаможены" -
+ * присваивает ГТД для связанных Честных знаков как номер
+ */
+#[AsMessageHandler(priority: 0)]
+final readonly class AddNumberProductSignHandler
+{
+    public function __construct(
+        #[Target('productsSignLogger')] private LoggerInterface $logger,
+        private CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
+        private AllProductSignEventsRelatedProductSupplyInterface $allProductSignEventsRelatedProductSupplyRepository,
+        private MessageDispatchInterface $messageDispatch,
+    ) {}
+
+    public function __invoke(ProductSupplyMessage $message): void
+    {
+        /** Текущее событие поставки */
+        $ProductSupplyEvent = $this->currentProductSupplyEventRepository
+            ->find($message->getId());
+
+        if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
+        {
+            $this->logger->critical(
+                message: 'products-supply: Событие ProductSupplyEvent не найдено',
+                context: [
+                    self::class.':'.__LINE__,
+                    var_export($message, true),
+                ],
+            );
+
+            return;
+        }
+
+        /** Если статус поставки не cleared (Растаможены) - прерываем работу */
+        if(false === $ProductSupplyEvent->getStatus()->equals(ProductSupplyStatusCleared::class))
+        {
+            $this->logger->warning(
+                message: sprintf(
+                    'products-supply: Поставка %s: Не обновляем ГТД честного знака для статуса поставки %s',
+                    $ProductSupplyEvent->getInvariable()->getNumber(),
+                    $ProductSupplyEvent->getStatus(),
+                ),
+                context: [
+                    self::class.':'.__LINE__,
+                    var_export($message, true),
+                ],
+            );
+
+            return;
+        }
+
+        /** Честные знаки связанные с поставкой */
+        $productSignForComment = $this->allProductSignEventsRelatedProductSupplyRepository
+            ->forSupply($ProductSupplyEvent->getMain())
+            ->findAll();
+
+        if(false === $productSignForComment || false === $productSignForComment->valid())
+        {
+            $this->logger->critical(
+                message: sprintf(
+                    'products-supply: Поставка %s: Не найдено Честных знаков для присвоения ГТД при смене статуса %s',
+                    $ProductSupplyEvent->getInvariable()->getNumber(),
+                    $ProductSupplyEvent->getStatus(),
+                ),
+                context: [
+                    self::class.':'.__LINE__,
+                    var_export($message, true),
+                ],
+            );
+
+            return;
+        }
+
+        foreach($productSignForComment as $ProductSignEvent)
+        {
+            $AddNumberProductSignMessage = new AddNumberProductSignMessage(
+                id: $ProductSignEvent->getMain(),
+                number: $ProductSupplyEvent->getInvariable()->getNumber(),
+                declaration: $ProductSupplyEvent->getInvariable()->getDeclaration(),
+            );
+
+            $this->messageDispatch->dispatch(
+                message: $AddNumberProductSignMessage,
+                transport: 'barcode',
+            );
+        }
+    }
+}
