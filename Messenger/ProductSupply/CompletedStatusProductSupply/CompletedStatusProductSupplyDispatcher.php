@@ -33,12 +33,14 @@ use BaksDev\Products\Supply\UseCase\Admin\Completed\ProductSupplyStatusCompleted
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\Product\EditProductSupplyProductDTO;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * Обновляет идентификаторы продукта в поставке
  */
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 0)]
 final readonly class CompletedStatusProductSupplyDispatcher
 {

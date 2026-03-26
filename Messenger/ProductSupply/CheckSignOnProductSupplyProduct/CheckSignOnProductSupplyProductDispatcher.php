@@ -38,12 +38,14 @@ use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSu
 use BaksDev\Products\Supply\UseCase\Admin\Lock\ProductSupplyLockDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Lock\ProductSupplyLockHandler;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * Получает количество зарезервированных ЧЗ на продукты в поставке
  */
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 0)]
 final readonly class CheckSignOnProductSupplyProductDispatcher
 {

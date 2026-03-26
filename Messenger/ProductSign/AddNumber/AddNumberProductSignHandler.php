@@ -33,6 +33,7 @@ use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductS
 use BaksDev\Products\Supply\Repository\ProductSign\AllProductSignEventsRelatedProductSupply\AllProductSignEventsRelatedProductSupplyInterface;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusCleared;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -40,6 +41,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * При присвоении поставке статуса cleared "Растаможены" -
  * присваивает ГТД для связанных Честных знаков как номер
  */
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 0)]
 final readonly class AddNumberProductSignHandler
 {

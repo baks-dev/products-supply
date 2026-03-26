@@ -32,10 +32,12 @@ use BaksDev\Products\Supply\Messenger\ProductSupply\Scanner\ScannerImageProductS
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /** Парсит pdf документ, разбивает его на отдельные файлы с одной страницей и сохраняет как изображение */
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 0)]
 final readonly class LoadFilesSignsDispatcher
 {

@@ -37,6 +37,7 @@ use BaksDev\Products\Supply\Repository\ProductSign\OneProductSignSupply\OneProdu
 use BaksDev\Products\Supply\UseCase\Admin\ProductsSign\Edit\ProcessReservationProductSignDTO;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -46,6 +47,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * @see NewStatusProductSupplyDispatcher
  * @note обработчик отработает на каждую единицу продукции в поставке, количество которых может быть десятки тысяч
  */
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 0)]
 final readonly class ProcessReservationProductSignDispatcher
 {

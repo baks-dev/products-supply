@@ -45,7 +45,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * Создает заявку для поступления на склад каждого продукта из поставки
  * prev @see DeliveryController
  */
-// #[Autoconfigure(public: true)]
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 0)]
 final readonly class CreateWarehouseProductStockDispatcher
 {

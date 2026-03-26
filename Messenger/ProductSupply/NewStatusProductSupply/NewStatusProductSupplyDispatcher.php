@@ -41,6 +41,7 @@ use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductS
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusNew;
 use BaksDev\Products\Supply\UseCase\Admin\New\NewProductSupplyDTO;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -50,6 +51,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  *
  * @see ProcessReservationProductSignDispatcher
  */
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 0)]
 final readonly class NewStatusProductSupplyDispatcher
 {
