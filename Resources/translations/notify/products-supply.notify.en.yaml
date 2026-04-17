@@ -1,0 +1,8 @@
+success:
+  header: '%number%: Supply ready for change'
+  message: 'Honest marks were reserved for the entire quantity of products in supply'
+
+danger:
+  header: '%number%: Supply in progress'
+  message: 'The process of reserving Fair Marks for products in supply has begun.'
+

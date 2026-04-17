@@ -96,8 +96,8 @@ final class NewController extends AbstractController
                 /** Блокируем перетаскивание карточки */
                 $socket = $centrifugo
                     ->addData(['supply' => (string) $ProductSupply->getId()])
-                    ->addData(['lock' => true])
-                    ->send('supplys'); // канал для перетаскивания
+                    ->addData(['lock' => true]) // разблокировка перетаскивания карточки на UI
+                    ->send('supplys'); // канал поставок
 
                 if($socket && $socket->isError())
                 {

@@ -39,6 +39,7 @@ use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
+use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -209,5 +210,10 @@ class ProductSupplyEvent extends EntityEvent
     public function getLock(): ProductSupplyLock
     {
         return $this->lock;
+    }
+
+    public function getModifyUser(): ?UserUid
+    {
+        return $this->modify->getUsr();
     }
 }
