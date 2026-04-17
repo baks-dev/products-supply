@@ -27,6 +27,8 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\Messenger\ProductSupply\CheckSignOnProductSupplyProduct;
 
 use BaksDev\Centrifugo\Server\Publish\CentrifugoPublishInterface;
+use BaksDev\Centrifugo\Services\Notification\CentrifugoNotification;
+use BaksDev\Centrifugo\Services\Notification\CentrifugoNotificationDTO;
 use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Products\Supply\Entity\Event\Lock\ProductSupplyLock;
@@ -37,6 +39,9 @@ use BaksDev\Products\Supply\Repository\ProductSign\ProductSignCountForSupply\Pro
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusNew;
 use BaksDev\Products\Supply\UseCase\Admin\Lock\ProductSupplyLockDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Lock\ProductSupplyLockHandler;
+use BaksDev\Users\Profile\UserProfile\Repository\CurrentUserProfile\CurrentUserProfileInterface;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\User\Type\Id\UserUid;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
@@ -52,6 +57,7 @@ final readonly class CheckSignOnProductSupplyProductDispatcher
     public function __construct(
         #[Target('productsSupplyLogger')] private LoggerInterface $logger,
         private CentrifugoPublishInterface $centrifugo,
+        private CentrifugoNotification $centrifugoNotification,
         private MessageDispatchInterface $messageDispatch,
         private ProductSupplyLockHandler $productSupplyLockHandler,
         private CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
@@ -191,9 +197,8 @@ final readonly class CheckSignOnProductSupplyProductDispatcher
 
             $socket = $this->centrifugo
                 ->addData(['supply' => (string) $ProductSupplyEvent->getMain()])
-                ->addData(['lock' => false])
-                ->addData(['context' => 'На все количество продуктов в поставке были зарезервированы Честные знаки'])
-                ->send('supplys'); // канал для перетаскивания
+                ->addData(['lock' => false]) // разблокировка перетаскивания карточки на UI
+                ->send('supplys'); // канал поставок
 
             if($socket && $socket->isError())
             {
@@ -205,6 +210,29 @@ final readonly class CheckSignOnProductSupplyProductDispatcher
                         self::class.':'.__LINE__,
                     ],
                 );
+            }
+
+            /**
+             * Отправляем системное уведомление
+             */
+
+            /** Получатель - пользователь, создавший поставку */
+            $receiver = $ProductSupplyEvent->getModifyUser();
+
+            if(true === $receiver instanceof UserUid)
+            {
+                $notification = new CentrifugoNotificationDTO(
+                    type: 'success',
+                    header: sprintf('Поставка %s готова к изменению', $ProductSupplyEvent->getInvariable()->getNumber()),
+                    message: 'На все количество продуктов в поставке были зарезервированы Честные знаки',
+                    identifier: (string) $receiver,
+                );
+
+
+                $this->centrifugoNotification
+                    ->addNotification($notification)
+                    ->receiver($receiver)
+                    ->notify(save: true);
             }
         }
 

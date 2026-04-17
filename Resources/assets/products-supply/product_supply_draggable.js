@@ -102,7 +102,7 @@ setTimeout(function Hk91aSnRFfF()
                     createToast(JSON.parse(lockMessage));
                 }
 
-                /** Разлокируем draggable */
+                /** Разблокируем draggable */
                 if(ctx.data.lock === false)
                 {
                     let draggableLock = draggable.querySelector(".bi-ban");
@@ -116,16 +116,6 @@ setTimeout(function Hk91aSnRFfF()
 
                     draggable.classList.remove("draggable-lock");
                     draggable.classList.add("draggable-handle");
-
-                    let unlockMessage = `{
-                      "type": "success",
-                      "header": "Поставка ${number.dataset.copy} готова к изменению",
-                      "message": "${ctx.data.context}."
-                    }`;
-
-                    createToast(JSON.parse(unlockMessage));
-
-
                 }
             }
 

@@ -80,6 +80,8 @@ final class ProductSupplyLockHandler extends AbstractHandler
 
         $this->flush();
 
+        $this->messageDispatch->addClearCacheOther('products-supply');
+
         return $entity;
     }
 }
