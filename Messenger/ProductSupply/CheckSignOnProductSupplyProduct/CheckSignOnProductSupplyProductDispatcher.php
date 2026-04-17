@@ -46,6 +46,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Получает количество зарезервированных ЧЗ на продукты в поставке
@@ -59,6 +60,7 @@ final readonly class CheckSignOnProductSupplyProductDispatcher
         private CentrifugoPublishInterface $centrifugo,
         private CentrifugoNotification $centrifugoNotification,
         private MessageDispatchInterface $messageDispatch,
+        private TranslatorInterface $translator,
         private ProductSupplyLockHandler $productSupplyLockHandler,
         private CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
         private AllProductSupplyProductInterface $allProductSupplyProductRepository,
@@ -223,11 +225,15 @@ final readonly class CheckSignOnProductSupplyProductDispatcher
             {
                 $notification = new CentrifugoNotificationDTO(
                     type: 'success',
-                    header: sprintf('Поставка %s готова к изменению', $ProductSupplyEvent->getInvariable()->getNumber()),
-                    message: 'На все количество продуктов в поставке были зарезервированы Честные знаки',
+                    header: $this->translator->trans(
+                        id: 'success.header',
+                        parameters: ['%number%' => $ProductSupplyEvent->getInvariable()->getNumber()],
+                        domain: 'products-supply.notify'
+                    ),
+                    message: $this->translator->trans(
+                        id: 'success.message', domain: 'products-supply.notify'),
                     identifier: (string) $receiver,
                 );
-
 
                 $this->centrifugoNotification
                     ->addNotification($notification)
