@@ -64,7 +64,7 @@ final class NewProductSupplyHandler extends AbstractHandler
             ->forStatus($command->getStatus())
             ->forUser($personal->getUsr())
             ->forProfile($personal->getProfile())
-            ->isExist($command->getInvariable());
+            ->isExist($command->getInvariable()->getNumber());
 
         if(true === $isExistsSupply)
         {

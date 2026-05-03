@@ -33,21 +33,24 @@ use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 use DateTimeImmutable;
 
-final readonly class AllProductSupplyResult
+final class AllProductSupplyResult
 {
+
+    private ?array $supply_products_decode = null;
+
     public function __construct(
-        private string $id,
-        private string $event,
-        private string $supply_status,
-        private string $supply_number,
-        private string $supply_usr,
-        private string $supply_profile,
-        private string $supply_products,
-        private string $supply_mod_date,
-        private ?bool $supply_lock,
-        private ?string $supply_created,
-        private ?string $supply_arrival,
-        private ?string $profile_username,
+        private readonly string $id,
+        private readonly string $event,
+        private readonly string $supply_status,
+        private readonly string $supply_number,
+        private readonly string $supply_usr,
+        private readonly string $supply_profile,
+        private readonly ?string $supply_products,
+        private readonly string $supply_mod_date,
+        private readonly ?bool $supply_lock,
+        private readonly ?string $supply_created,
+        private readonly ?string $supply_arrival,
+        private readonly ?string $profile_username,
     ) {}
 
     public function getId(): ProductSupplyUid
@@ -72,25 +75,57 @@ final readonly class AllProductSupplyResult
 
     public function getSupplyProducts(): array|null
     {
-        if(is_null($this->supply_products))
+
+        if(true === is_null($this->supply_products_decode))
         {
-            return null;
+            if(empty($this->supply_products))
+            {
+                return null;
+            }
+
+            if(false === json_validate($this->supply_products))
+            {
+                return null;
+            }
+
+            $this->supply_products_decode = json_decode($this->supply_products, false, 512, JSON_THROW_ON_ERROR);
         }
 
-        if(false === json_validate($this->supply_products))
-        {
-            return null;
-        }
+        return $this->supply_products_decode;
 
-        $products = json_decode($this->supply_products, true, 512, JSON_THROW_ON_ERROR);
-
-        if(null === current($products))
-        {
-            return null;
-        }
-
-        return $products;
     }
+
+    public function getSupplyProductsLength(): int
+    {
+        $products = $this->getSupplyProducts();
+
+        if(empty($products))
+        {
+            return 0;
+        }
+
+        return count($products);
+    }
+
+    public function getSupplyProductsCount(): int
+    {
+        $products = $this->getSupplyProducts();
+
+        if(empty($products))
+        {
+            return 0;
+        }
+
+        $sum = 0;
+
+        foreach($products as $item)
+        {
+            $sum += $item->total;
+        }
+
+        return $sum;
+    }
+
 
     public function getDateModify(): DateTimeImmutable
     {

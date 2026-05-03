@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\Repository\OneProductSupplyProduct;
 
 use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
@@ -41,9 +42,6 @@ final readonly class OneProductSupplyProductResult
         private string $event,
         private string $status,
         private string $product,
-        private ?string $offer_const,
-        private ?string $variation_const,
-        private ?string $modification_const,
         private bool $received,
     ) {}
 
@@ -62,24 +60,9 @@ final readonly class OneProductSupplyProductResult
         return new ProductSupplyStatus($this->status);
     }
 
-    public function getProduct(): ProductUid
+    public function getProduct(): ProductInvariableUid
     {
-        return new ProductUid($this->product);
-    }
-
-    public function getOfferConst(): ?ProductOfferConst
-    {
-        return null !== $this->offer_const ? new ProductOfferConst($this->offer_const) : null;
-    }
-
-    public function getVariationConst(): ?ProductVariationConst
-    {
-        return null !== $this->variation_const ? new ProductVariationConst($this->variation_const) : null;
-    }
-
-    public function getModificationConst(): ?ProductModificationConst
-    {
-        return null !== $this->modification_const ? new ProductModificationConst($this->modification_const) : null;
+        return new ProductInvariableUid($this->product);
     }
 
     public function isReceived(): bool

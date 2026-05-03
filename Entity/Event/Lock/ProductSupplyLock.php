@@ -28,6 +28,7 @@ namespace BaksDev\Products\Supply\Entity\Event\Lock;
 
 use BaksDev\Core\Entity\EntityReadonly;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
+use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use InvalidArgumentException;
@@ -42,11 +43,19 @@ use Symfony\Component\Validator\Constraints as Assert;
 class ProductSupplyLock extends EntityReadonly
 {
     /**
-     * Идентификатор События
+     * Идентификатор main
      */
     #[Assert\NotBlank]
     #[Assert\Uuid]
     #[ORM\Id]
+    #[ORM\Column(type: ProductSupplyUid::TYPE, nullable: false)]
+    private ProductSupplyUid $main;
+
+    /**
+     * Идентификатор События
+     */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
     #[ORM\OneToOne(targetEntity: ProductSupplyEvent::class, inversedBy: 'lock')]
     #[ORM\JoinColumn(name: 'event', referencedColumnName: 'id')]
     private ProductSupplyEvent $event;
@@ -59,12 +68,23 @@ class ProductSupplyLock extends EntityReadonly
 
     public function __construct(ProductSupplyEvent $event)
     {
+        $this->main = $event->getMain();
         $this->event = $event;
     }
 
     public function __toString(): string
     {
         return (string) $this->event;
+    }
+
+    public function getMain(): ProductSupplyUid
+    {
+        return $this->main;
+    }
+
+    public function isLock(): bool
+    {
+        return $this->lock === true;
     }
 
     public function getDto($dto): mixed
@@ -74,8 +94,12 @@ class ProductSupplyLock extends EntityReadonly
             return parent::getDto($dto);
         }
 
-        throw new InvalidArgumentException(sprintf(
-            'Class %s interface error in %s', $dto::class, self::class.':'.__LINE__));
+        throw new InvalidArgumentException(
+            sprintf(
+                'Class %s interface error in %s',
+                $dto::class, self::class.':'.__LINE__,
+            ),
+        );
     }
 
     public function setEntity($dto): mixed
@@ -85,7 +109,11 @@ class ProductSupplyLock extends EntityReadonly
             return parent::setEntity($dto);
         }
 
-        throw new InvalidArgumentException(sprintf(
-            'Class %s interface error in %s', $dto::class, self::class.':'.__LINE__));
+        throw new InvalidArgumentException(
+            sprintf(
+                'Class %s interface error in %s',
+                $dto::class, self::class.':'.__LINE__,
+            ),
+        );
     }
 }

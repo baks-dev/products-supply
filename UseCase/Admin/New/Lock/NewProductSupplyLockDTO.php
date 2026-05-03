@@ -32,16 +32,16 @@ use BaksDev\Products\Supply\Entity\Event\Lock\ProductSupplyLockInterface;
 final class NewProductSupplyLockDTO implements ProductSupplyLockInterface
 {
     /** Блокируем при создании */
-    private bool $lock = true;
+    private bool $value = true;
 
-    public function getLock(): bool
+    public function getValue(): bool
     {
-        return $this->lock;
+        return $this->value;
     }
 
     public function unLock(): self
     {
-        $this->lock = false;
+        $this->value = false;
         return $this;
     }
 }

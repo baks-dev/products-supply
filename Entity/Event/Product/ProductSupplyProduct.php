@@ -29,11 +29,11 @@ namespace BaksDev\Products\Supply\Entity\Event\Product;
 
 use BaksDev\Core\Entity\EntityEvent;
 use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
-use BaksDev\Products\Supply\Type\Product\ProductSupplyProductUid;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use InvalidArgumentException;
@@ -43,54 +43,24 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'product_supply_product')]
 class ProductSupplyProduct extends EntityEvent
 {
-    /**
-     * Идентификатор
-     */
+    /** Идентификатор События */
     #[Assert\NotBlank]
     #[Assert\Uuid]
     #[ORM\Id]
-    #[ORM\Column(type: ProductSupplyProductUid::TYPE, nullable: false)]
-    private ProductSupplyProductUid $id;
-
-    /**
-     * Идентификатор События
-     */
-    #[Assert\NotBlank]
-    #[Assert\Uuid]
     #[ORM\ManyToOne(targetEntity: ProductSupplyEvent::class, inversedBy: 'product')]
     #[ORM\JoinColumn(name: 'event', referencedColumnName: 'id')]
     private ProductSupplyEvent $event;
 
-    /**
-     * Количество продуктов в поставке
-     */
+    /** ID Invariable продукта */
+    #[Assert\Uuid]
+    #[ORM\Id]
+    #[ORM\Column(type: ProductInvariableUid::TYPE)]
+    private ProductInvariableUid $product;
+
+    /** Количество продуктов в поставке */
     #[Assert\NotBlank]
     #[ORM\Column(type: Types::INTEGER, nullable: false)]
-    private readonly int $total;
-
-    /**
-     * Продукт
-     */
-
-    /** ID продукта (не уникальное) */
-    #[Assert\Uuid]
-    #[ORM\Column(type: ProductUid::TYPE, nullable: true)]
-    private ?ProductUid $product = null;
-
-    /** Константа ТП */
-    #[Assert\Uuid]
-    #[ORM\Column(name: 'offer_const', type: ProductOfferConst::TYPE, nullable: true)]
-    private ?ProductOfferConst $offerConst = null;
-
-    /** Константа множественного варианта */
-    #[Assert\Uuid]
-    #[ORM\Column(name: 'variation_const', type: ProductVariationConst::TYPE, nullable: true)]
-    private ?ProductVariationConst $variationConst = null;
-
-    /** Константа модификации множественного варианта */
-    #[Assert\Uuid]
-    #[ORM\Column(name: 'modification_const', type: ProductModificationConst::TYPE, nullable: true)]
-    private ?ProductModificationConst $modificationConst = null;
+    private int $total = 0;
 
     /** Принят ли на склад */
     #[ORM\Column(type: Types::BOOLEAN, nullable: false, options: ['default' => false])]
@@ -98,23 +68,17 @@ class ProductSupplyProduct extends EntityEvent
 
     public function __construct(ProductSupplyEvent $event)
     {
-        $this->id = new ProductSupplyProductUid();
         $this->event = $event;
-    }
-
-    public function __clone()
-    {
-        $this->id = clone $this->id;
-    }
-
-    public function getId(): ProductSupplyProductUid
-    {
-        return $this->id;
     }
 
     public function getEvent(): ProductSupplyEvent
     {
         return $this->event;
+    }
+
+    public function getProduct(): ProductInvariableUid
+    {
+        return $this->product;
     }
 
     public function getDto($dto): mixed
@@ -142,25 +106,12 @@ class ProductSupplyProduct extends EntityEvent
         return $this->total;
     }
 
-    public function getProduct(): ?ProductUid
+    /** Добавляем к общему количеству */
+    public function addTotal(int $append): int
     {
-        return $this->product;
+        return $this->total += $append;
     }
 
-    public function getOfferConst(): ?ProductOfferConst
-    {
-        return $this->offerConst;
-    }
-
-    public function getVariationConst(): ?ProductVariationConst
-    {
-        return $this->variationConst;
-    }
-
-    public function getModificationConst(): ?ProductModificationConst
-    {
-        return $this->modificationConst;
-    }
 
     public function isReceived(): bool
     {

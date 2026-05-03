@@ -26,5 +26,5 @@ namespace BaksDev\Products\Supply\Entity\Event\Lock;
 
 interface ProductSupplyLockInterface
 {
-    public function getLock(): bool;
+    public function getValue(): bool;
 }

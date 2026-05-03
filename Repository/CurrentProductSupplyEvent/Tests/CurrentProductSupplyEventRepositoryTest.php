@@ -55,6 +55,7 @@ class CurrentProductSupplyEventRepositoryTest extends KernelTestCase
         $productSupply = new ProductSupplyUid;
 
         $result = $CurrentProductSupplyEventInterface
-            ->find($productSupply);
+            ->forMain($productSupply)
+            ->find();
     }
 }

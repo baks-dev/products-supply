@@ -30,9 +30,10 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
-use BaksDev\Products\Supply\Type\ProductSign\Status\ProductSignStatusUndefined;
+use BaksDev\Products\Supply\Type\ProductSign\Status\ProductSignStatusSupply;
 use BaksDev\Products\Supply\UseCase\Admin\ProductsSign\New\Code\ProductSignCodeDTO;
 use BaksDev\Products\Supply\UseCase\Admin\ProductsSign\New\Invariable\ProductSignInvariableDTO;
+use BaksDev\Products\Supply\UseCase\Admin\ProductsSign\New\Supply\ProductSignSupplyDTO;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -66,11 +67,19 @@ final class ProductSignNewDTO implements ProductSignEventInterface
     #[Assert\Valid]
     private ProductSignInvariableDTO $invariable;
 
+
+    /**
+     * Код честного знака
+     */
+    #[Assert\Valid]
+    private ProductSignSupplyDTO $supply;
+
     public function __construct()
     {
-        $this->status = new ProductSignStatus(ProductSignStatusUndefined::class);
+        $this->status = new ProductSignStatus(ProductSignStatusSupply::class);
         $this->code = new ProductSignCodeDTO();
         $this->invariable = new ProductSignInvariableDTO();
+        $this->supply = new ProductSignSupplyDTO();
     }
 
     public function setId(ProductSignEventUid $id): void
@@ -108,12 +117,6 @@ final class ProductSignNewDTO implements ProductSignEventInterface
         return $this->code;
     }
 
-    public function setCode(ProductSignCodeDTO $code): self
-    {
-        $this->code = $code;
-        return $this;
-    }
-
     /**
      * Invariable
      */
@@ -122,9 +125,11 @@ final class ProductSignNewDTO implements ProductSignEventInterface
         return $this->invariable;
     }
 
-    public function setInvariable(ProductSignInvariableDTO $invariable): self
+    /**
+     * Supply
+     */
+    public function getSupply(): ProductSignSupplyDTO
     {
-        $this->invariable = $invariable;
-        return $this;
+        return $this->supply;
     }
 }

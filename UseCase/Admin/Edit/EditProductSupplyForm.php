@@ -26,10 +26,15 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\UseCase\Admin\Edit;
 
+use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusCompleted;
+use BaksDev\Products\Supply\UseCase\Admin\Edit\Files\EditProductSupplyFilesForm;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\Product\EditProductSupplyProductForm;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 final class EditProductSupplyForm extends AbstractType
@@ -46,21 +51,23 @@ final class EditProductSupplyForm extends AbstractType
             //            'allow_add' => true,
         ]);
 
+        $builder->add('files', EditProductSupplyFilesForm::class, ['label' => false]);
+
         /** Сохранить изменения, только если статус не completed "Выполнен" */
-        //        $builder->addEventListener(FormEvents::PRE_SET_DATA, function(FormEvent $event): void {
-        //
-        //            /** @var EditProductSupplyDTO $data */
-        //            $data = $event->getData();
-        //
-        //            if(false === $data->getStatus()->equals(ProductSupplyStatusCompleted::class))
-        //            {
-        //                $event->getForm()->add(
-        //                    'product_supply_edit',
-        //                    SubmitType::class,
-        //                    ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']]
-        //                );
-        //            }
-        //        });
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function(FormEvent $event): void {
+
+            /** @var EditProductSupplyDTO $data */
+            $data = $event->getData();
+
+            if(false === $data->getStatus()->equals(ProductSupplyStatusCompleted::class))
+            {
+                $event->getForm()->add(
+                    'product_supply_edit',
+                    SubmitType::class,
+                    ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']],
+                );
+            }
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void

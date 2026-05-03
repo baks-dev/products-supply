@@ -27,12 +27,17 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent;
 
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
+use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 
 interface CurrentProductSupplyEventInterface
 {
+    public function forMain(ProductSupplyUid $main): self;
+
+    public function forEvent(ProductSupplyEventUid $event): self;
+
     /**
      * Метод возвращает текущее активное событие заказа
      */
-    public function find(ProductSupplyUid $supply): ProductSupplyEvent|false;
+    public function find(): ProductSupplyEvent|false;
 }

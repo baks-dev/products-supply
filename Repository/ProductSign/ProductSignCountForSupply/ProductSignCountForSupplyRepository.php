@@ -170,7 +170,7 @@ final class ProductSignCountForSupplyRepository implements ProductSignCountForSu
                 'sign_supply',
                 '
                     sign_supply.event = main.event AND
-                    sign_supply.supply = :supply',
+                    sign_supply.value = :supply',
             )
             ->setParameter(
                 'supply',

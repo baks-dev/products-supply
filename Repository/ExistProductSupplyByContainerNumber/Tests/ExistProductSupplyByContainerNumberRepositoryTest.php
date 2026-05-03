@@ -60,7 +60,7 @@ class ExistProductSupplyByContainerNumberRepositoryTest extends KernelTestCase
             ->forUser(new UserUid($user))
             ->forProfile(new UserProfileUid($profile))
             ->forStatus('new')
-            ->isExist($container);
+            ->isExist($container->getNumber());
 
     }
 }

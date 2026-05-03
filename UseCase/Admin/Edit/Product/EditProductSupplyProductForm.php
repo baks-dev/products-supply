@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\UseCase\Admin\Edit\Product;
 
 use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
@@ -38,61 +39,21 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 final class EditProductSupplyProductForm extends AbstractType
 {
-    public function __construct() {}
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('product', HiddenType::class);
 
         $builder->get('product')->addModelTransformer(
             new CallbackTransformer(
-                function(?ProductUid $product) {
-                    return $product instanceof ProductUid ? $product->getValue() : $product;
+                function(?ProductInvariableUid $product) {
+                    return $product instanceof ProductInvariableUid ? $product->getValue() : $product;
                 },
                 function(string $product) {
-                    return new ProductUid($product);
+                    return new ProductInvariableUid($product);
                 },
             ),
         );
 
-        $builder->add('offerConst', HiddenType::class);
-
-        $builder->get('offerConst')->addModelTransformer(
-            new CallbackTransformer(
-                function(?ProductOfferConst $offer) {
-                    return $offer instanceof ProductOfferConst ? $offer->getValue() : $offer;
-                },
-                function(string $offer) {
-                    return new ProductOfferConst($offer);
-                },
-            ),
-        );
-
-        $builder->add('variationConst', HiddenType::class);
-
-        $builder->get('variationConst')->addModelTransformer(
-            new CallbackTransformer(
-                function(?ProductVariationConst $variation) {
-                    return $variation instanceof ProductVariationConst ? $variation->getValue() : $variation;
-                },
-                function(string $variation) {
-                    return new ProductVariationConst($variation);
-                },
-            ),
-        );
-
-        $builder->add('modificationConst', HiddenType::class);
-
-        $builder->get('modificationConst')->addModelTransformer(
-            new CallbackTransformer(
-                function(?ProductModificationConst $modification) {
-                    return $modification instanceof ProductModificationConst ? $modification->getValue() : $modification;
-                },
-                function(string $modification) {
-                    return new ProductModificationConst ($modification);
-                },
-            ),
-        );
     }
 
     public function configureOptions(OptionsResolver $resolver): void

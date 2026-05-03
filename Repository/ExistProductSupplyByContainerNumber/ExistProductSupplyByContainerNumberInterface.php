@@ -26,7 +26,6 @@ namespace BaksDev\Products\Supply\Repository\ExistProductSupplyByContainerNumber
 
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusInterface;
-use BaksDev\Products\Supply\UseCase\Admin\New\Invariable\NewProductSupplyInvariableDTO;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Entity\User;
 use BaksDev\Users\User\Type\Id\UserUid;
@@ -42,5 +41,5 @@ interface ExistProductSupplyByContainerNumberInterface
 
     public function forProfile(UserProfileUid $profile): self;
 
-    public function isExist(NewProductSupplyInvariableDTO $container): bool;
+    public function isExist(string $number): bool;
 }

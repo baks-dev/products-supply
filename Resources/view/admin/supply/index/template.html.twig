@@ -23,14 +23,14 @@
 
 {#  Сокеты  #}
 
-<script nonce="{{ csp_nonce() }}">
+{#<script nonce="{{ csp_nonce() }}">
     window.centrifugo_dsn = "{{ centrifugo_dsn }}";
     window.centrifugo_token = "{{ token }}";
     window.current_profile = "{{ current_profile }}";
 </script>
 
 <script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/centrifugo/centrifuge.min.js" class='lazy'></script>
-<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/centrifugo/socket.min.js" class='lazy'></script>
+<script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/centrifugo/socket.min.js" class='lazy'></script>#}
 
 {# plugins #}
 <script nonce='{{ csp_nonce() }}' async data-src="/assets/{{ version }}/plugins/nice-select2/nice-select2.min.js" class="lazy"></script>

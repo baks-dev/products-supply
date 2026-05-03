@@ -24,6 +24,8 @@
 
 declare(strict_types=1);
 
+namespace BaksDev\Products\Supply\UseCase\Admin\New\Tests;
+
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;

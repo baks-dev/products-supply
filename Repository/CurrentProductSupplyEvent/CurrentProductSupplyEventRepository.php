@@ -29,29 +29,79 @@ namespace BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent;
 use BaksDev\Core\Doctrine\ORMQueryBuilder;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Entity\ProductSupply;
+use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
+use InvalidArgumentException;
 
-final readonly class CurrentProductSupplyEventRepository implements CurrentProductSupplyEventInterface
+final class CurrentProductSupplyEventRepository implements CurrentProductSupplyEventInterface
 {
-    public function __construct(
-        private ORMQueryBuilder $ORMQueryBuilder
-    ) {}
+    private ProductSupplyUid|false $main = false;
+
+    private ProductSupplyEventUid|false $event = false;
+
+    public function __construct(private readonly ORMQueryBuilder $ORMQueryBuilder) {}
+
+    public function forMain(ProductSupplyUid $main): self
+    {
+        $this->main = $main;
+        return $this;
+    }
+
+    public function forEvent(ProductSupplyEventUid $event): self
+    {
+        $this->event = $event;
+        return $this;
+    }
 
     /**
-     * Метод возвращает текущее активное событие
+     * Метод возвращает текущее активное событие поставки
      */
-    public function find(ProductSupplyUid $supply): ProductSupplyEvent|false
+    public function find(): ProductSupplyEvent|false
     {
         $orm = $this->ORMQueryBuilder->createQueryBuilder(self::class);
 
-        $orm
-            ->from(ProductSupply::class, 'main')
-            ->where('main.id = :supply')
-            ->setParameter(
-                key: 'supply',
-                value: $supply,
-                type: ProductSupplyUid::TYPE,
-            );
+        if(false === ($this->main instanceof ProductSupplyUid) && false === ($this->event instanceof ProductSupplyEventUid))
+        {
+            throw new InvalidArgumentException('Invalid Argument ProductSupplyUid or ProductSupplyEventUid');
+        }
+
+        if(true === ($this->main instanceof ProductSupplyUid) && true === ($this->event instanceof ProductSupplyEventUid))
+        {
+            throw new InvalidArgumentException('Вызов двух аргументов ProductSupplyUid и ProductSupplyEventUid');
+        }
+
+
+        if(true === ($this->main instanceof ProductSupplyUid))
+        {
+            $orm
+                ->from(ProductSupply::class, 'main')
+                ->where('main.id = :supply')
+                ->setParameter(
+                    key: 'supply',
+                    value: $this->main,
+                    type: ProductSupplyUid::TYPE,
+                );
+        }
+
+        if(true === ($this->event instanceof ProductSupplyEventUid))
+        {
+            $orm
+                ->from(ProductSupplyEvent::class, 'tmp')
+                ->where('tmp.id = :event')
+                ->setParameter(
+                    key: 'event',
+                    value: $this->event,
+                    type: ProductSupplyEventUid::TYPE,
+                );
+
+            $orm
+                ->join(
+                    ProductSupply::class,
+                    'main',
+                    'WITH',
+                    'main.id = tmp.main',
+                );
+        }
 
         $orm
             ->select('event')
@@ -62,6 +112,11 @@ final readonly class CurrentProductSupplyEventRepository implements CurrentProdu
                 'event.id = main.event',
             );
 
-        return $orm->getOneOrNullResult() ?: false;
+        $result = $orm->getOneOrNullResult() ?: false;
+
+        $this->main = false;
+        $this->event = false;
+
+        return $result;
     }
 }

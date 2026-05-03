@@ -29,6 +29,7 @@ namespace BaksDev\Products\Supply\Repository\OneProductSupplyProduct;
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Products\Product\Entity\Product;
 use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
@@ -44,13 +45,8 @@ final class OneProductSupplyProductRepository implements OneProductSupplyProduct
 
     /** Фильтр по продукту */
 
-    private ProductUid|false $product = false;
+    private ProductInvariableUid|false $product = false;
 
-    private ProductOfferConst|false $offer = false;
-
-    private ProductVariationConst|false $variation = false;
-
-    private ProductModificationConst|false $modification = false;
 
     public function __construct(
         private readonly DBALQueryBuilder $DBALQueryBuilder,
@@ -62,50 +58,9 @@ final class OneProductSupplyProductRepository implements OneProductSupplyProduct
         return $this;
     }
 
-    public function forProduct(Product|ProductUid $product): self
+    public function forProduct(ProductInvariableUid $product): self
     {
-        if($product instanceof Product)
-        {
-            $product = $product->getId();
-        }
-
         $this->product = $product;
-        return $this;
-    }
-
-    public function forOffer(ProductOfferConst|null $offer): self
-    {
-        if(null === $offer)
-        {
-            $this->offer = false;
-            return $this;
-        }
-
-        $this->offer = $offer;
-        return $this;
-    }
-
-    public function forVariation(ProductVariationConst|null $variation): self
-    {
-        if(null === $variation)
-        {
-            $this->variation = false;
-            return $this;
-        }
-
-        $this->variation = $variation;
-        return $this;
-    }
-
-    public function forModification(ProductModificationConst|null $modification): self
-    {
-        if(null === $modification)
-        {
-            $this->modification = false;
-            return $this;
-        }
-
-        $this->modification = $modification;
         return $this;
     }
 
@@ -119,9 +74,9 @@ final class OneProductSupplyProductRepository implements OneProductSupplyProduct
             throw new InvalidArgumentException('Не передан обязательный параметр запроса ProductSupplyUid');
         }
 
-        if(false === $this->product instanceof ProductUid)
+        if(false === $this->product instanceof ProductInvariableUid)
         {
-            throw new InvalidArgumentException('Не передан обязательный параметр запроса ProductUid');
+            throw new InvalidArgumentException('Не передан обязательный параметр запроса ProductInvariableUid');
         }
 
         $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
@@ -148,52 +103,19 @@ final class OneProductSupplyProductRepository implements OneProductSupplyProduct
 
         /** Продукт в Поставке */
 
-        $productParam = '= :product';
-        $dbal->setParameter('product', $this->product, ProductUid::TYPE);
-
-        $offerParam = ' IS NULL';
-        $variationParam = ' IS NULL';
-        $modificationParam = ' IS NULL';
-
-        if(true === ($this->offer instanceof ProductOfferConst))
-        {
-            $offerParam = '= :offer';
-            $dbal->setParameter('offer', $this->offer, ProductOfferConst::TYPE);
-        }
-
-        if(true === ($this->variation instanceof ProductVariationConst))
-        {
-            $variationParam = '= :variation';
-            $dbal->setParameter('variation', $this->variation, ProductVariationConst::TYPE);
-        }
-
-        if(true === ($this->modification instanceof ProductModificationConst))
-        {
-            $modificationParam = '= :modification';
-            $dbal->setParameter('modification', $this->modification, ProductModificationConst::TYPE);
-        }
-
-        $productCondition = 'product.event = event.id AND 
-                    product.product '.$productParam.' AND
-                    product.offer_const '.$offerParam.' AND
-                    product.variation_const '.$variationParam.' AND
-                    product.modification_const '.$modificationParam;
-
         $dbal
             ->addSelect('product.product')
-            ->addSelect('product.offer_const')
-            ->addSelect('product.variation_const')
-            ->addSelect('product.modification_const')
             ->addSelect('product.received')
             ->join(
                 'event',
                 ProductSupplyProduct::class,
                 'product',
-                $productCondition,
-            )->setParameter(
+                'product.event = event.id AND product.product = :product',
+            )
+            ->setParameter(
                 key: 'product',
                 value: $this->product,
-                type: ProductUid::TYPE,
+                type: ProductInvariableUid::TYPE,
             );
 
         return $dbal->fetchHydrate(OneProductSupplyProductResult::class);

@@ -26,6 +26,7 @@ namespace BaksDev\Products\Supply\Repository\OneProductSupplyProduct;
 
 use BaksDev\Products\Product\Entity\Product;
 use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
@@ -37,13 +38,7 @@ interface OneProductSupplyProductInterface
 {
     public function forSupply(ProductSupplyUid $supply): self;
 
-    public function forProduct(Product|ProductUid $product): self;
-
-    public function forOffer(ProductOfferConst|null $offer): self;
-
-    public function forVariation(ProductVariationConst|null $variation): self;
-
-    public function forModification(ProductModificationConst|null $modification): self;
+    public function forProduct(ProductInvariableUid $product): self;
 
     /**
      * Возвращает продукт из поставки по его идентификаторам

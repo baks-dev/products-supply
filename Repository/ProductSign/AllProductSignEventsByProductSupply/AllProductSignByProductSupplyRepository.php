@@ -171,7 +171,7 @@ final class AllProductSignByProductSupplyRepository implements AllProductSignByP
                 Join::WITH,
                 '
                     supply.event = main.event AND
-                    supply.supply = :supply
+                    supply.value = :supply
             ')
             ->setParameter(
                 key: 'supply',

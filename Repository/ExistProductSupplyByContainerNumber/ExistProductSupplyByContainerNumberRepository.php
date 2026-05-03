@@ -28,16 +28,17 @@ namespace BaksDev\Products\Supply\Repository\ExistProductSupplyByContainerNumber
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Products\Supply\Entity\Event\Invariable\ProductSupplyInvariable;
+use BaksDev\Products\Supply\Entity\Event\Personal\ProductSupplyPersonal;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusInterface;
-use BaksDev\Products\Supply\UseCase\Admin\New\Invariable\NewProductSupplyInvariableDTO;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Entity\User;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\DBAL\Types\Types;
+use InvalidArgumentException;
 
 /**
  * Проверяет существование записи с поставкой по номеру контейнера и принадлежности к пользователю
@@ -82,8 +83,23 @@ final class ExistProductSupplyByContainerNumberRepository implements ExistProduc
         return $this;
     }
 
-    public function isExist(NewProductSupplyInvariableDTO $container): bool
+    public function isExist(string $number): bool
     {
+        if(false === ($this->status instanceof ProductSupplyStatus))
+        {
+            throw new InvalidArgumentException('Invalid Argument ProductSupplyStatus');
+        }
+
+        if(false === ($this->user instanceof UserUid))
+        {
+            throw new InvalidArgumentException('Invalid Argument UserUid');
+        }
+
+        if(false === ($this->profile instanceof UserProfileUid))
+        {
+            throw new InvalidArgumentException('Invalid Argument UserProfileUid');
+        }
+
         $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
 
         $dbal->from(ProductSupply::class, 'product_supply');
@@ -96,11 +112,35 @@ final class ExistProductSupplyByContainerNumberRepository implements ExistProduc
                 '
                     product_supply_event.id = product_supply.event AND 
                     product_supply_event.status = :status',
-            )->setParameter(
+            )
+            ->setParameter(
                 key: 'status',
                 value: $this->status,
                 type: ProductSupplyStatus::TYPE,
             );
+
+        $dbal
+            ->join(
+                'product_supply',
+                ProductSupplyPersonal::class,
+                'product_supply_personal',
+                '
+                    product_supply_personal.event = product_supply.event 
+                    AND product_supply_invariable.usr = :usr
+                    AND product_supply_invariable.profile = :profile
+                ',
+            )
+            ->setParameter(
+                key: 'usr',
+                value: $this->user,
+                type: UserUid::TYPE,
+            )
+            ->setParameter(
+                key: 'profile',
+                value: $this->profile,
+                type: UserProfileUid::TYPE,
+            );
+
 
         /** Invariable */
         $dbal
@@ -112,9 +152,10 @@ final class ExistProductSupplyByContainerNumberRepository implements ExistProduc
                 '
                     product_supply_invariable.event = product_supply_event.id AND
                     product_supply_invariable.number = :number',
-            )->setParameter(
+            )
+            ->setParameter(
                 key: 'number',
-                value: $container->getNumber(),
+                value: $number,
                 type: Types::STRING,
             );
 

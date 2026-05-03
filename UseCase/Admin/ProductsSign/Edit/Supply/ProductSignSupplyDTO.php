@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\UseCase\Admin\ProductsSign\Edit\Supply;
 
 use BaksDev\Products\Sign\Entity\Event\Supply\ProductSignSupplyInterface;
+use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -39,16 +40,16 @@ final class ProductSignSupplyDTO implements ProductSignSupplyInterface
     /** Номер контейнера */
     #[Assert\NotBlank]
     #[Assert\Uuid]
-    private string $supply;
+    private ?string $value = null;
 
-    public function getSupply(): string
+    public function getValue(): ?string
     {
-        return $this->supply;
+        return $this->value;
     }
 
-    public function setSupply(string $supply): self
+    public function setValue(ProductSupplyUid $value): self
     {
-        $this->supply = $supply;
+        $this->value = (string) $value;
         return $this;
     }
 }

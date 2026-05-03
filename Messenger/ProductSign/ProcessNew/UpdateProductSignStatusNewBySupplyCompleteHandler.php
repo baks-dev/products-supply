@@ -30,6 +30,7 @@ use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\ProductSign;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
@@ -62,7 +63,8 @@ final readonly class UpdateProductSignStatusNewBySupplyCompleteHandler
     {
         /** Текущее событие поставки */
         $ProductSupplyEvent = $this->currentProductSupplyEventRepository
-            ->find($message->getId());
+            ->forMain($message->getId())
+            ->find();
 
         if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
         {
@@ -86,10 +88,10 @@ final readonly class UpdateProductSignStatusNewBySupplyCompleteHandler
         /** Честные знаки для ввода в оборот - перевод в статус NEW */
         $productSignForProcessNew = $this->allProductSignEventsRelatedProductSupplyRepository
             ->forSupply($ProductSupplyEvent->getMain())
-            ->forStatus(new ProductSignStatusSupply)
+            ->forStatus(new ProductSignStatus(ProductSignStatusSupply::class))
             ->findAll();
 
-        if(false === $productSignForProcessNew)
+        if(false === $productSignForProcessNew || false === $productSignForProcessNew->valid())
         {
             return;
         }

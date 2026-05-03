@@ -109,7 +109,8 @@ final class StatusController extends AbstractController
 
                 /** Активное событие поставки */
                 $ProductSupplyEvent = $currentProductSupplyEventRepository
-                    ->find($ProductSupplyIdDTO->getId());
+                    ->forMain($ProductSupplyIdDTO->getId())
+                    ->find();
 
                 if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
                 {

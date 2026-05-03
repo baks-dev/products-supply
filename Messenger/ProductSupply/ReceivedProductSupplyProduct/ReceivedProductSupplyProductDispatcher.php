@@ -28,6 +28,9 @@ namespace BaksDev\Products\Supply\Messenger\ProductSupply\ReceivedProductSupplyP
 
 use BaksDev\Core\Deduplicator\DeduplicatorInterface;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
+use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierByConstInterface;
+use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierResult;
+use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
 use BaksDev\Products\Stocks\Entity\Stock\Event\ProductStockEvent;
 use BaksDev\Products\Stocks\Entity\Stock\Event\Supply\ProductStockSupply;
 use BaksDev\Products\Stocks\Entity\Stock\Products\ProductStockProduct;
@@ -65,6 +68,7 @@ final readonly class ReceivedProductSupplyProductDispatcher
         private CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
         private OneProductSupplyProductInterface $oneProductSupplyProductRepository,
         private EditProductSupplyHandler $editProductSupplyHandler,
+        private CurrentProductIdentifierByConstInterface $CurrentProductIdentifierByConstRepository
     ) {}
 
     public function __invoke(ProductStockMessage $message): void
@@ -87,8 +91,8 @@ final readonly class ReceivedProductSupplyProductDispatcher
 
         if(false === ($ProductStockEvent instanceof ProductStockEvent))
         {
-            $this->logger->warning(
-                message: 'Не найдено ProductStockEvent',
+            $this->logger->critical(
+                message: 'products-supply: Не найдено события ProductStockEvent',
                 context: [
                     self::class.':'.__LINE__,
                     var_export($message, true),
@@ -111,16 +115,17 @@ final readonly class ReceivedProductSupplyProductDispatcher
          */
         if(false === $ProductStockEvent->getSupply() instanceof ProductStockSupply)
         {
+            $DeduplicatorExecuted->save();
             return;
         }
 
-        /** @var ProductStockProduct $stockProduct */
-        $stockProduct = $ProductStockEvent->getProduct()->current();
-        $stockSupply = new ProductSupplyUid($ProductStockEvent->getSupply()->getSupply());
+        $ProductSupplyUid = new ProductSupplyUid($ProductStockEvent->getSupply()->getValue());
 
         /** Активное событие поставки */
         $ProductSupplyEvent = $this->currentProductSupplyEventRepository
-            ->find($stockSupply);
+            ->forMain($ProductSupplyUid)
+            ->find();
+
 
         if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
         {
@@ -135,26 +140,58 @@ final readonly class ReceivedProductSupplyProductDispatcher
             return;
         }
 
+        /** @var ProductStockProduct $stockProduct */
+        $stockProduct = $ProductStockEvent->getProduct()->current();
+
+        /** Получаем текущее событие продукта */
+        $CurrentProductIdentifierResult = $this->CurrentProductIdentifierByConstRepository
+            ->forProduct($stockProduct->getProduct())
+            ->forOfferConst($stockProduct->getOffer())
+            ->forVariationConst($stockProduct->getVariation())
+            ->forModificationConst($stockProduct->getModification())
+            ->find();
+
+        /** Если идентификатор ProductInvariable не найден - прерываем */
+        if(
+            false === ($CurrentProductIdentifierResult instanceof CurrentProductIdentifierResult)
+            || false === ($CurrentProductIdentifierResult->getProductInvariable() instanceof ProductInvariableUid)
+        )
+        {
+            $this->logger
+                ->critical(
+                    'products-supply: Идентификаторы продукта не найдены',
+                    [
+                        self::class.':'.__LINE__,
+                        'product' => $stockProduct->getProduct(),
+                        'offer' => $stockProduct->getOffer(),
+                        'variation' => $stockProduct->getVariation(),
+                        'modification' => $stockProduct->getModification(),
+                    ],
+                );
+
+            return;
+        }
+
+
         /** Идентификаторы продукта из поставки (supply), соответствующее идентификаторам в заявке (stock) */
         $supplyProductBySupplyStock = $this->oneProductSupplyProductRepository
             ->forSupply($ProductSupplyEvent->getMain())
-            ->forProduct($stockProduct->getProduct())
-            ->forOffer($stockProduct->getOffer())
-            ->forVariation($stockProduct->getVariation())
-            ->forModification($stockProduct->getModification())
+            ->forProduct($CurrentProductIdentifierResult->getProductInvariable())
             ->find();
+
 
         /** Прерываем обработку, если:
          * - статус НЕ РАВЕН delivery (Доставка)
          * - продукт уже был отмечен как "принят на склад"
          */
         if(
-            false === $supplyProductBySupplyStock->getStatus()->equals(ProductSupplyStatusDelivery::class) ||
             true === $supplyProductBySupplyStock->isReceived()
+            || false === $supplyProductBySupplyStock->getStatus()->equals(ProductSupplyStatusDelivery::class)
         )
         {
             return;
         }
+
 
         /**
          * Изменяем поставку
@@ -172,14 +209,7 @@ final readonly class ReceivedProductSupplyProductDispatcher
             ->getProduct()
             ->findFirst(function($k, EditProductSupplyProductDTO $editProductSupplyProductDTO)
             use ($supplyProductBySupplyStock) {
-                return
-                    $editProductSupplyProductDTO->getProduct()->equals($supplyProductBySupplyStock->getProduct())
-                    &&
-                    ((is_null($editProductSupplyProductDTO->getOfferConst()) && is_null($supplyProductBySupplyStock->getOfferConst())) || $editProductSupplyProductDTO->getOfferConst()->equals($supplyProductBySupplyStock->getOfferConst()))
-                    &&
-                    ((is_null($editProductSupplyProductDTO->getVariationConst()) && is_null($supplyProductBySupplyStock->getVariationConst())) || $editProductSupplyProductDTO->getVariationConst()->equals($supplyProductBySupplyStock->getVariationConst()))
-                    &&
-                    ((is_null($editProductSupplyProductDTO->getModificationConst()) && is_null($supplyProductBySupplyStock->getModificationConst())) || $editProductSupplyProductDTO->getModificationConst()->equals($supplyProductBySupplyStock->getModificationConst()));
+                return $editProductSupplyProductDTO->getProduct()->equals($supplyProductBySupplyStock->getProduct());
             });
 
         if(null === $supplyProductForReceived)
@@ -197,7 +227,7 @@ final readonly class ReceivedProductSupplyProductDispatcher
             return;
         }
 
-        /** флаг received = true */
+        /** применяем флаг received = true */
         $supplyProductForReceived->received();
 
         $ProductSupply = $this->editProductSupplyHandler->handle($EditProductSupplyDTO);
@@ -215,33 +245,34 @@ final readonly class ReceivedProductSupplyProductDispatcher
                     var_export($message, true),
                 ],
             );
+
+            return;
         }
 
-        if(true === $ProductSupply instanceof ProductSupply)
-        {
-            $this->logger->info(
-                message: sprintf(
-                    'Поставка %s: Успешно обновили продукт %s (%s) при принятии складской заявки %s',
-                    $ProductSupplyEvent->getInvariable()->getNumber(),
-                    $supplyProductForReceived->getId(),
-                    $message->getId(),
-                    $ProductSupply->getId(),
-                ),
-                context: [
-                    self::class.':'.__LINE__,
-                    var_export($message, true),
-                ],
+
+        $this->logger->info(
+            message: sprintf(
+                'Поставка %s: Успешно обновили продукт %s (%s) при принятии складской заявки %s',
+                $ProductSupplyEvent->getInvariable()->getNumber(),
+                $supplyProductForReceived->getId(),
+                $message->getId(),
+                $ProductSupply->getId(),
+            ),
+            context: [
+                self::class.':'.__LINE__,
+                var_export($message, true),
+            ],
+        );
+
+        /**
+         * Бросаем сообщение для проверки остальных продуктов
+         * и перевода поставки в статус completed (Выполнен)
+         */
+        $this->messageDispatch
+            ->dispatch(
+                message: new CompletedStatusProductSupplyMessage(supply: $ProductSupply->getId()),
+                transport: 'products-supply',
             );
 
-            /**
-             * Бросаем сообщение для проверки остальных продуктов
-             * и перевода поставки в статус completed (Выполнен)
-             */
-            $this->messageDispatch
-                ->dispatch(
-                    message: new CompletedStatusProductSupplyMessage(supply: $ProductSupply->getId()),
-                    transport: 'products-supply',
-                );
-        }
     }
 }

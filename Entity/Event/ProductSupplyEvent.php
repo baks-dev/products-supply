@@ -39,6 +39,7 @@ use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -115,7 +116,6 @@ class ProductSupplyEvent extends EntityEvent
      * Коллекция продуктов в поставке
      */
     #[Assert\Valid]
-    #[Assert\Count(min: 1)]
     #[ORM\OneToMany(targetEntity: ProductSupplyProduct::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
     private Collection $product;
 
@@ -206,6 +206,18 @@ class ProductSupplyEvent extends EntityEvent
     {
         return $this->personal;
     }
+
+
+    public function getSupplyProfile(): UserProfileUid
+    {
+        return $this->personal->getProfile();
+    }
+
+    public function getSupplyUser(): UserUid
+    {
+        return $this->personal->getUsr();
+    }
+
 
     public function getLock(): ProductSupplyLock
     {

@@ -38,7 +38,7 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
- * Обновляет идентификаторы продукта в поставке
+ * Переводи поставку в статус Completed «Выполнен» если вся продукция была принята на склад назначения
  */
 #[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 0)]
@@ -53,7 +53,9 @@ final readonly class CompletedStatusProductSupplyDispatcher
     public function __invoke(CompletedStatusProductSupplyMessage $message): void
     {
         /** Активное событие поставки c продуктом без идентификаторов */
-        $currentSupply = $this->currentProductSupplyEventRepository->find($message->getSupply());
+        $currentSupply = $this->currentProductSupplyEventRepository
+            ->forMain($message->getSupply())
+            ->find();
 
         if(false === ($currentSupply instanceof ProductSupplyEvent))
         {
@@ -113,22 +115,23 @@ final readonly class CompletedStatusProductSupplyDispatcher
                     var_export($message, true),
                 ],
             );
+
+            return;
         }
 
-        if(true === $handle instanceof ProductSupply)
-        {
-            $this->logger->info(
-                message: sprintf(
-                    'Успешно переместили поставку %s со статуса %s в статус %s',
-                    $currentSupply->getInvariable()->getNumber(),
-                    $currentSupply->getStatus(),
-                    $ProductSupplyStatusCompletedDTO->getStatus(),
-                ),
-                context: [
-                    self::class.':'.__LINE__,
-                    var_export($message, true),
-                ],
-            );
-        }
+
+        $this->logger->info(
+            message: sprintf(
+                'Успешно переместили поставку %s со статуса %s в статус %s',
+                $currentSupply->getInvariable()->getNumber(),
+                $currentSupply->getStatus(),
+                $ProductSupplyStatusCompletedDTO->getStatus(),
+            ),
+            context: [
+                self::class.':'.__LINE__,
+                var_export($message, true),
+            ],
+        );
+
     }
 }

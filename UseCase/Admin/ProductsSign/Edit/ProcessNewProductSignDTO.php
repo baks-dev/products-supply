@@ -57,7 +57,7 @@ final class ProcessNewProductSignDTO implements ProductSignEventInterface
         $this->status = new ProductSignStatus(ProductSignStatusNew::class);
     }
 
-    public function setId(ProductSignEventUid $id): ProcessNewProductSignDTO
+    public function setId(ProductSignEventUid $id): self
     {
         $this->id = $id;
         return $this;

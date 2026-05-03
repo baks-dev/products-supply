@@ -58,7 +58,7 @@ final class AddNumberProductSignDTO implements ProductSignEventInterface
     #[Assert\Valid]
     private ProductSignInvariableDTO $invariable;
 
-    public function setId(ProductSignEventUid $id): AddNumberProductSignDTO
+    public function setId(ProductSignEventUid $id): self
     {
         $this->id = $id;
         return $this;

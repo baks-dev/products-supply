@@ -40,6 +40,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'product_supply_personal')]
+#[ORM\Index(columns: ['usr', 'profile'])]
 class ProductSupplyPersonal extends EntityEvent
 {
     /**
@@ -63,6 +64,8 @@ class ProductSupplyPersonal extends EntityEvent
     /**
      * Профиль
      */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
     #[ORM\Column(type: UserProfileUid::TYPE, nullable: false)]
     private readonly UserProfileUid $profile;
 

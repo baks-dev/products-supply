@@ -125,7 +125,6 @@ setTimeout(function Hk91aSnRFfF()
 
 }, 100);
 
-
 executeFunc(function lW9JEBic()
 {
     if(typeof Droppable !== "object" || typeof bootstrap !== "object")
@@ -396,6 +395,18 @@ executeFunc(function lW9JEBic()
                         let lazy = document.createElement("script");
                         lazy.src = "/assets/" + $version + "/js/lazyload.min.js";
                         document.head.appendChild(lazy);
+
+
+                        modal.querySelectorAll("form").forEach(function(forms)
+                        {
+                            /* событие отправки формы */
+                            forms.addEventListener("submit", function(event)
+                            {
+                                event.preventDefault();
+                                submitModalForm(forms);
+                                return false;
+                            });
+                        });
 
                     }
                     else

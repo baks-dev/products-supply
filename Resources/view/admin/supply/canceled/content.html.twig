@@ -1,8 +1,7 @@
-<style></style>
-
 {{ include(_self|replace({ "content.html.twig": baks_settings.device~"/content.html.twig" })) }}
 
 
+{#
 <script nonce='{{ csp_nonce() }}' class='lazy'>
 
     executeFunc(function()
@@ -26,4 +25,4 @@
         return true;
     });
 
-</script>
+</script> #}

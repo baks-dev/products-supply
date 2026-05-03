@@ -116,14 +116,14 @@ final readonly class ProductSupplyFilesHandler
         }
 
         /** Обрабатываем все загруженные файлы */
-        $this->messageDispatch->dispatch(
+        /*$this->messageDispatch->dispatch(
             message: new LoadFilesSignsMessage(
                 dir: $uploadDir,
                 usr: $command->getUsr(),
                 profile: $command->getProfile(),
             ),
             transport: 'products-supply',
-        );
+        );*/
 
 
         return true;

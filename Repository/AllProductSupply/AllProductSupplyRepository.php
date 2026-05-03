@@ -163,6 +163,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
             );
         }
 
+
         /** Invariable */
         $dbal
             ->addSelect('product_supply_invariable.number AS supply_number')
@@ -181,6 +182,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 'product_supply_lock',
                 'product_supply_lock.event = product_supply_event.id',
             );
+
 
         /** Created */
         $dbal
@@ -235,6 +237,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 type: UserUid::TYPE,
             );
 
+
         if($profile)
         {
             $dbal->setParameter(
@@ -262,14 +265,16 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
                 'order_project_personal.event = order_project_profile.event',
             );
 
+
         /** Продукты в Поставке */
         $dbal
-            ->join(
+            ->leftJoin(
                 'product_supply_event',
                 ProductSupplyProduct::class,
                 'product_supply_product',
                 'product_supply_product.event = product_supply_event.id',
             );
+
 
         $dbal->addSelect(
             "JSON_AGG
@@ -277,14 +282,12 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
 					JSONB_BUILD_OBJECT
 					(
 						'product', product_supply_product.product,
-						'offer_const', product_supply_product.offer_const,
-						'variation_const', product_supply_product.variation_const,
-						'modification_const', product_supply_product.modification_const,
 						'total', product_supply_product.total
 					)
-			)
+			) FILTER (WHERE product_supply_product.total IS NOT NULL)
 			AS supply_products",
         );
+
 
         if($this->search && $this->search->getQuery())
         {

@@ -8,10 +8,11 @@
     {% set width_col = (1100 / (statuses|length))|round %}
 
     {# @var status \BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusNew #}
+
     {% for status in statuses %}
 
         {% set color = status.color %}
-        {% set counter = query[status.value]|length %}
+        {# {% set counter = query[status.value]|length %} #}
 
         <div class="w-100 d-flex flex-column gap-2" style="min-width: {{ width_col }}px;">
 
@@ -23,11 +24,6 @@
                 <div class="w-100 badge p-2 sticky-top z-index-5"
                      style="top: 5rem; background-color: {{ color }};">
                     {{ status.value|trans }}
-                </div>
-
-                <div class="text-center"><small>
-                        {# @TODO  #}
-                        {{ counter }} {{ 'num_of_product_supply'|trans({'count': counter}, 'messages') }}</small>
                 </div>
 
                 {# КАРТОЧКИ ЗАКАЗА #}

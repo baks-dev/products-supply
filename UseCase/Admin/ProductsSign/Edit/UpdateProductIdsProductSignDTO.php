@@ -63,7 +63,7 @@ final class UpdateProductIdsProductSignDTO implements ProductSignEventInterface
         $this->invariable = new ProductSignInvariableDTO();
     }
 
-    public function setId(ProductSignEventUid $id): UpdateProductIdsProductSignDTO
+    public function setId(ProductSignEventUid $id): self
     {
         $this->id = $id;
         return $this;

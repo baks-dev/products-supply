@@ -26,16 +26,19 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\Messenger\ProductStock\CreateWarehouse;
 
+use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierByInvariableInterface;
+use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierResult;
 use BaksDev\Products\Stocks\Entity\Stock\ProductStock;
 use BaksDev\Products\Stocks\UseCase\Admin\Warehouse\Products\ProductStockDTO;
 use BaksDev\Products\Stocks\UseCase\Admin\Warehouse\WarehouseProductStockDTO;
 use BaksDev\Products\Stocks\UseCase\Admin\Warehouse\WarehouseProductStockHandler;
-use BaksDev\Products\Supply\Repository\OneProductSupplyByEvent\OneProductSupplyByEventInterface;
-use BaksDev\Products\Supply\Repository\OneProductSupplyByEvent\OneProductSupplyResult;
-use BaksDev\Products\Supply\Repository\OneProductSupplyByEvent\ProductSupplyProductResult;
+use BaksDev\Products\Supply\Entity\Event\Product\ProductSupplyProduct;
+use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
+use BaksDev\Products\Supply\Repository\CurrentProductSupplyEvent\CurrentProductSupplyEventInterface;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusDelivery;
 use BaksDev\Products\Supply\UseCase\Admin\ProductStock\ProductStockSupplyDTO;
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
+use BaksDev\Users\User\Entity\User;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
@@ -51,73 +54,99 @@ final readonly class CreateWarehouseProductStockDispatcher
 {
     public function __construct(
         #[Target('productsStocksLogger')] private LoggerInterface $logger,
-        private OneProductSupplyByEventInterface $oneProductSupplyByEventRepository,
         private UserByUserProfileInterface $userByUserProfileRepository,
         private WarehouseProductStockHandler $WarehouseProductStockHandler,
+        private CurrentProductSupplyEventInterface $CurrentProductSupplyEventRepository,
+        private CurrentProductIdentifierByInvariableInterface $CurrentProductIdentifierByInvariableRepository
     ) {}
 
     public function __invoke(CreateWarehouseProductStockMessage $message): void
     {
-        $OneProductSupply = $this->oneProductSupplyByEventRepository
-            ->find($message->getSupply());
+        $ProductSupplyEvent = $this->CurrentProductSupplyEventRepository
+            ->forMain($message->getSupply())
+            ->find();
 
-        if(false === ($OneProductSupply instanceof OneProductSupplyResult))
+        if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
         {
             $this->logger->critical(
-                message: sprintf('products-supply: Не найдено информации о поставке %s', $message->getSupply()),
-                context: [
-                    self::class.':'.__LINE__,
-                    var_export($message, true),
-                ],
+                'products-supply: Событие ProductSupplyEvent не найдено',
+                [self::class.':'.__LINE__, var_export($message, true)],
             );
 
             return;
         }
 
-        /** Если статус поставки не delivery (Доставка) - прерываем работу */
-        if(false === $OneProductSupply->getStatus()->equals(ProductSupplyStatusDelivery::class))
+        if(false === $ProductSupplyEvent->getStatus()->equals(ProductSupplyStatusDelivery::class))
+        {
+            return;
+        }
+
+        if(true === $ProductSupplyEvent->getProduct()->isEmpty())
         {
             return;
         }
 
         /** Пользователь по ID профиля */
-        $user = $this->userByUserProfileRepository
+        $User = $this->userByUserProfileRepository
             ->forProfile($message->getProfile())
             ->find();
+
+        if(false === ($User instanceof User))
+        {
+            $this->logger->critical(
+                'products-supply: Пользователя по идентификатору профиля не найдено',
+                [self::class.':'.__LINE__, var_export($message, true)],
+            );
+
+            return;
+        }
 
         /**
          * На каждый продукт из поставки создаем заявку на поступление
          *
-         * @var ProductSupplyProductResult $product
+         * @var ProductSupplyProduct $ProductSupplyProduct
          */
-        foreach($OneProductSupply->getProducts() as $product)
+        foreach($ProductSupplyEvent->getProduct() as $ProductSupplyProduct)
         {
+            $CurrentProductIdentifierResult = $this->CurrentProductIdentifierByInvariableRepository
+                ->forProductInvariable($ProductSupplyProduct->getProduct())
+                ->find();
+
+
+            if(false === ($CurrentProductIdentifierResult instanceof CurrentProductIdentifierResult))
+            {
+                $this->logger->critical(
+                    'products-supply: Активные идентификаторы продукта не найдены',
+                    [self::class.':'.__LINE__, $ProductSupplyProduct->getProduct()],
+                );
+
+                continue;
+            }
+
             $WarehouseProductStockDTO = new WarehouseProductStockDTO();
             $WarehouseProductStockDTO->newId(); // для инстанса нового объекта
-
-            /** getComment */
             $WarehouseProductStockDTO->setComment($message->getComment());
 
             /** Product */
             $ProductStockDTO = new ProductStockDTO();
             $ProductStockDTO
-                ->setTotal($product->getTotal())
-                ->setProduct($product->getProduct())
-                ->setOffer($product->getOfferConst())
-                ->setVariation($product->getVariationConst())
-                ->setModification($product->getModificationConst());
+                ->setTotal($ProductSupplyProduct->getTotal())
+                ->setProduct($CurrentProductIdentifierResult->getProduct())
+                ->setOffer($CurrentProductIdentifierResult->getOfferConst())
+                ->setVariation($CurrentProductIdentifierResult->getVariationConst())
+                ->setModification($CurrentProductIdentifierResult->getModificationConst());
 
             $WarehouseProductStockDTO->addProduct($ProductStockDTO);
 
             /** Invariable */
             $WarehouseProductStockDTO->getInvariable()
-                ->setUsr($user->getId())
+                ->setUsr($User->getId())
                 ->setProfile($message->getProfile())
-                ->setNumber($OneProductSupply->getNumber());
+                ->setNumber($ProductSupplyEvent->getInvariable()->getNumber());
 
             /** Связь с поставкой */
-            $ProductStockSupplyDTO = new ProductStockSupplyDTO();
-            $ProductStockSupplyDTO->setSupply((string) $OneProductSupply->getId());
+            $ProductStockSupplyDTO = new ProductStockSupplyDTO()
+                ->setValue((string) $ProductSupplyEvent->getMain());
             $WarehouseProductStockDTO->setSupply($ProductStockSupplyDTO);
 
             $handle = $this->WarehouseProductStockHandler->handle($WarehouseProductStockDTO);
@@ -128,7 +157,7 @@ final readonly class CreateWarehouseProductStockDispatcher
                     message: sprintf(
                         'products-supply: Ошибка при создании заявки %s на поступление продукции на склад для поставки %s',
                         $handle->getId(),
-                        $OneProductSupply->getId(),
+                        $ProductSupplyEvent->getMain(),
                     ),
                     context: [
                         self::class.':'.__LINE__,
@@ -139,20 +168,18 @@ final readonly class CreateWarehouseProductStockDispatcher
                 continue;
             }
 
-            if(true === ($handle instanceof ProductStock))
-            {
-                $this->logger->info(
-                    message: sprintf(
-                        'Создали заявку %s на поступление продукции на склад для поставки %s',
-                        $handle->getId(),
-                        $OneProductSupply->getId(),
-                    ),
-                    context: [
-                        self::class.':'.__LINE__,
-                        var_export($message, true),
-                    ],
-                );
-            }
+
+            $this->logger->info(
+                message: sprintf(
+                    'Создали заявку %s на поступление продукции на склад для поставки %s',
+                    $handle->getId(),
+                    $message->getSupply(),
+                ),
+                context: [
+                    self::class.':'.__LINE__,
+                    var_export($message, true),
+                ],
+            );
         }
     }
 }

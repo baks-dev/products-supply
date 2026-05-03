@@ -32,7 +32,10 @@ use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Products\Product\Repository\ProductDetail\ProductDetailByConstInterface;
 use BaksDev\Products\Product\Repository\ProductDetail\ProductDetailByConstResult;
+use BaksDev\Products\Product\Repository\ProductDetail\ProductDetailByInvariableInterface;
+use BaksDev\Products\Product\Repository\ProductDetail\ProductDetailByInvariableResult;
 use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEvent;
 use BaksDev\Products\Supply\Entity\ProductSupply;
@@ -60,22 +63,24 @@ final class DetailController extends AbstractController
 {
     #[Route('/admin/products/supply/detail/{id}', name: 'admin.supply.detail', methods: ['GET', 'POST'])]
     public function index(
+        #[ParamConverter(ProductSupplyUid::class)] ProductSupplyUid $id,
         Request $request,
         CentrifugoPublishInterface $centrifugo,
         ProductSupplyStatusCollection $statuses,
         EditProductSupplyHandler $handler,
 
         CurrentProductSupplyEventInterface $currentProductSupplyEventRepository,
-        ProductDetailByConstInterface $productDetailByConstRepository,
+        ProductDetailByInvariableInterface $ProductDetailByInvariableRepository,
         GroupProductSignsByProductSupplyInterface $groupProductSignsByProductSupplyRepository,
         ProductSupplyHistoryInterface $productSupplyHistoryRepository,
-        #[ParamConverter(ProductSupplyUid::class)] ProductSupplyUid $id,
+
     ): Response
     {
 
         /** Получаем активное событие */
         $ProductSupplyEvent = $currentProductSupplyEventRepository
-            ->find($id);
+            ->forMain($id)
+            ->find();
 
         if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
         {
@@ -103,20 +108,21 @@ final class DetailController extends AbstractController
          */
         foreach($EditProductSupplyDTO->getProduct() as $product)
         {
-            if(true === $product->getProduct() instanceof ProductUid)
+            if(false === $product->getProduct() instanceof ProductInvariableUid)
             {
-                $ProductDetailByConstResult = $productDetailByConstRepository
-                    ->product($product->getProduct())
-                    ->offerConst($product->getOfferConst())
-                    ->variationConst($product->getVariationConst())
-                    ->modificationConst($product->getModificationConst())
-                    ->findResult();
-
-                if(true === ($ProductDetailByConstResult instanceof ProductDetailByConstResult))
-                {
-                    $product->setCard($ProductDetailByConstResult);
-                }
+                continue;
             }
+
+            $ProductDetailByInvariableResult = $ProductDetailByInvariableRepository
+                ->invariable($product->getProduct())
+                ->find();
+
+            if(false === ($ProductDetailByInvariableResult instanceof ProductDetailByInvariableResult))
+            {
+                continue;
+            }
+
+            $product->setCard($ProductDetailByInvariableResult);
         }
 
         /** Форма редактирования поставки */
@@ -185,7 +191,7 @@ final class DetailController extends AbstractController
             [
                 'id' => $id,
                 'form' => $form->createView(),
-                'product_signs' => $ProductSigns,
+                'product_signs' => $ProductSigns ? iterator_to_array($ProductSigns) : false,
                 'statuses' => $statuses,
                 'histories' => $histories,
             ],

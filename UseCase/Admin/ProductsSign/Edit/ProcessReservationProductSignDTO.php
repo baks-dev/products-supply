@@ -69,7 +69,7 @@ final class ProcessReservationProductSignDTO implements ProductSignEventInterfac
         $this->supply->setSupply((string) $uuid);
     }
 
-    public function setId(ProductSignEventUid $id): ProcessReservationProductSignDTO
+    public function setId(ProductSignEventUid $id): self
     {
         $this->id = $id;
         return $this;

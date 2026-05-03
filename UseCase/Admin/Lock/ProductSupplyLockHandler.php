@@ -38,33 +38,17 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 
 final class ProductSupplyLockHandler extends AbstractHandler
 {
-    public function __construct(
-        #[Target('productsSupplyLogger')] private readonly LoggerInterface $logger,
-
-        EntityManagerInterface $entityManager,
-        MessageDispatchInterface $messageDispatch,
-        ValidatorCollectionInterface $validatorCollection,
-        ImageUploadInterface $imageUpload,
-        FileUploadInterface $fileUpload
-    )
-    {
-        parent::__construct($entityManager, $messageDispatch, $validatorCollection, $imageUpload, $fileUpload);
-    }
-
     public function handle(ProductSupplyLockDTO $command): ProductSupplyLock|string
     {
         /** @var ProductSupplyLock|null $entity */
         $entity = $this->getRepository(ProductSupplyLock::class)
-            ->findOneBy(['event' => $command->getEvent()]);
+            ->find($command->getProductSupplyIdentifier());
 
         if(false === ($entity instanceof ProductSupplyLock))
         {
-            $this->logger->critical(
-                message: 'products-supply: ProductSupplyLock не найдена',
-                context: [
-                    'event' => (string) $command->getEvent(),
-                    self::class.':'.__LINE__,
-                ],
+            $this->validatorCollection->error(
+                sprintf('Событие %s объекта ProductSupplyLock не найдено', $command->getProductSupplyIdentifier()),
+                [self::class.':'.__LINE__],
             );
 
             return 'error';

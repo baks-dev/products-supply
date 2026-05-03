@@ -70,7 +70,7 @@ final class CancelProductSignDTO implements ProductSignEventInterface
         $this->supply = null;
     }
 
-    public function setId(ProductSignEventUid $id): CancelProductSignDTO
+    public function setId(ProductSignEventUid $id): self
     {
         $this->id = $id;
         return $this;

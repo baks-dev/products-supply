@@ -35,7 +35,6 @@ use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Products\Supply\Repository\AllProductSupply\AllProductSupplyInterface;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusCancel;
-use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\Collection\ProductSupplyStatusCompleted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -72,25 +71,31 @@ final class IndexController extends AbstractController
                 continue;
             }
 
-            if($status->equals(ProductSupplyStatusCompleted::class))
-            {
-                $allProductSupplyRepository->setLimit(10);
-            }
+            /** Текущие статусы поставок */
+            $this->statuses[$status->getStatus()::priority()] = $status->getStatus();
+
+            $allProductSupplyRepository->setLimit(20);
 
             $productSupply = $allProductSupplyRepository
                 ->search($search)
                 ->status($status)
                 ->forUser($this->getUsr())
                 ->forProfile($this->getProfileUid())
-                ->findPaginator()
-                ->getData();
+                ->findAll();
+
+
+            if(false === $productSupply || false === $productSupply->valid())
+            {
+                $this->supplys[$status->getStatusValue()] = null;
+                continue;
+            }
+
 
             /** Получаем список поставок с ключом их статуса */
-            $this->supplys[$status->getStatusValue()] =
-                (false !== $productSupply) ? iterator_to_array($productSupply) : null;
+            $this->supplys[$status->getStatusValue()] = $productSupply;
 
-            /** Текущие статусы поставок */
-            $this->statuses[$status->getStatus()::priority()] = $status->getStatus();
+
+            //$this->statuses[$status->getStatus()::priority()] = $status->getStatus();
         }
 
         return $this->render(

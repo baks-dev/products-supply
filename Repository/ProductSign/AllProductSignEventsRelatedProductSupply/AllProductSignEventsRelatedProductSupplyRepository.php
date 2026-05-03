@@ -144,7 +144,7 @@ final class AllProductSignEventsRelatedProductSupplyRepository implements AllPro
                 Join::WITH,
                 '
                     supply.event = main.event AND
-                    supply.supply = :supply
+                    supply.value = :supply
             ')
             ->setParameter(
                 key: 'supply',

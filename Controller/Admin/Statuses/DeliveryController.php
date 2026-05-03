@@ -110,7 +110,8 @@ final class DeliveryController extends AbstractController
 
                 /** Активное событие поставки */
                 $ProductSupplyEvent = $currentProductSupplyEventRepository
-                    ->find($ProductSupplyIdDTO->getId());
+                    ->forMain($ProductSupplyIdDTO->getId())
+                    ->find();
 
                 if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
                 {
@@ -245,7 +246,9 @@ final class DeliveryController extends AbstractController
         foreach($DeliveryProductSupplyDTO->getSupplys() as $supply)
         {
             /** Активное событие поставки */
-            $ProductSupplyEvent = $currentProductSupplyEventRepository->find($supply->getId());
+            $ProductSupplyEvent = $currentProductSupplyEventRepository
+                ->forMain($supply->getId())
+                ->find();
 
             /**
              * Проверка перемещения поставки из корректного статуса

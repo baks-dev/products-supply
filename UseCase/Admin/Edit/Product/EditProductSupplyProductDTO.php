@@ -27,7 +27,9 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\UseCase\Admin\Edit\Product;
 
 use BaksDev\Products\Product\Repository\ProductDetail\ProductDetailByConstResult;
+use BaksDev\Products\Product\Repository\ProductDetail\ProductDetailByInvariableResult;
 use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
@@ -50,28 +52,16 @@ final class EditProductSupplyProductDTO implements ProductSupplyProductInterface
     #[Assert\NotBlank]
     private readonly int $total;
 
-    /** ID продукта (не уникальное) */
+    /** ID Invariable продукта */
     #[Assert\Uuid]
-    private ?ProductUid $product = null;
-
-    /** Константа ТП */
-    #[Assert\Uuid]
-    private ?ProductOfferConst $offerConst = null;
-
-    /** Константа множественного варианта */
-    #[Assert\Uuid]
-    private ?ProductVariationConst $variationConst = null;
-
-    /** Константа модификации множественного варианта */
-    #[Assert\Uuid]
-    private ?ProductModificationConst $modificationConst = null;
+    private ProductInvariableUid $product;
 
     private bool $received;
 
     /** HELPERS */
 
     /** Карточка товара */
-    private ProductDetailByConstResult|null $card = null;
+    private ProductDetailByInvariableResult|null $card = null;
 
     public function __construct()
     {
@@ -102,58 +92,17 @@ final class EditProductSupplyProductDTO implements ProductSupplyProductInterface
     /**
      * Product
      */
-    public function getProduct(): ?ProductUid
+    public function getProduct(): ?ProductInvariableUid
     {
         return $this->product;
     }
 
-    public function setProduct(ProductUid|false|null $product): self
+    public function setProduct(ProductInvariableUid|false|null $product): self
     {
         $this->product = $product ?: null;
         return $this;
     }
 
-    /**
-     * Offer
-     */
-    public function getOfferConst(): ?ProductOfferConst
-    {
-        return $this->offerConst;
-    }
-
-    public function setOfferConst(ProductOfferConst|false|null $offerConst): self
-    {
-        $this->offerConst = $offerConst ?: null;
-        return $this;
-    }
-
-    /**
-     * Variation
-     */
-    public function getVariationConst(): ?ProductVariationConst
-    {
-        return $this->variationConst;
-    }
-
-    public function setVariationConst(ProductVariationConst|false|null $variationConst): self
-    {
-        $this->variationConst = $variationConst ?: null;
-        return $this;
-    }
-
-    /**
-     * Modification
-     */
-    public function getModificationConst(): ?ProductModificationConst
-    {
-        return $this->modificationConst;
-    }
-
-    public function setModificationConst(ProductModificationConst|false|null $modificationConst): self
-    {
-        $this->modificationConst = $modificationConst ?: null;
-        return $this;
-    }
 
     public function getReceived(): bool
     {
@@ -163,13 +112,13 @@ final class EditProductSupplyProductDTO implements ProductSupplyProductInterface
     /**
      * Received
      */
-    public function setReceived(bool $received): EditProductSupplyProductDTO
+    public function setReceived(bool $received): self
     {
         $this->received = $received;
         return $this;
     }
 
-    public function received(): EditProductSupplyProductDTO
+    public function received(): self
     {
         $this->received = true;
         return $this;
@@ -178,12 +127,12 @@ final class EditProductSupplyProductDTO implements ProductSupplyProductInterface
     /** HELPERS */
 
     /** Карточка товара */
-    public function getCard(): ?ProductDetailByConstResult
+    public function getCard(): ?ProductDetailByInvariableResult
     {
         return $this->card;
     }
 
-    public function setCard(bool|ProductDetailByConstResult $card): void
+    public function setCard(ProductDetailByInvariableResult|null|false $card): void
     {
         $this->card = $card ?: null;
     }

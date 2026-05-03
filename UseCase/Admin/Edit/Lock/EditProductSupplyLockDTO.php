@@ -31,11 +31,11 @@ use BaksDev\Products\Supply\Entity\Event\Lock\ProductSupplyLockInterface;
 /** @see ProductSupplyLock */
 final class EditProductSupplyLockDTO implements ProductSupplyLockInterface
 {
-    /** Снимаем блокировку при изменении */
-    private bool $lock = false;
+    /** Всегда ставим блокировку при сохранении */
+    private bool $value = true;
 
-    public function getLock(): bool
+    public function getValue(): bool
     {
-        return $this->lock;
+        return $this->value;
     }
 }

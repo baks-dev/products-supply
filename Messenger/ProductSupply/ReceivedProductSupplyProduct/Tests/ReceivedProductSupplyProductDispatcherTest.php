@@ -57,8 +57,9 @@ class ReceivedProductSupplyProductDispatcherTest extends KernelTestCase
             ->get(ReceivedProductSupplyProductDispatcher::class);
 
         $message = new ProductStockMessage(
-            new ProductStockUid('019a3474-aa13-7e73-8068-f55a9c33c579'),
-            new ProductStockEventUid('019a3519-9d20-7417-87fc-59fe557b8839'),
+            new ProductStockUid('019defb2-c5c8-7e57-adf5-a16ed0049831'),
+            new ProductStockEventUid('019defb3-34ba-7935-8598-d01dbd32f632'),
+            new ProductStockEventUid('019defb2-c5c9-716a-867f-718582a06cc0'),
         );
 
         $UpdateProductSupplyProduct($message);

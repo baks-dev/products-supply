@@ -29,6 +29,7 @@ namespace BaksDev\Products\Supply\UseCase\Admin\Edit;
 use BaksDev\Products\Supply\Entity\Event\ProductSupplyEventInterface;
 use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
+use BaksDev\Products\Supply\UseCase\Admin\Edit\Files\EditProductSupplyFilesDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\Invariable\EditProductSupplyInvariableDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\Personal\EditProductSupplyPersonalDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\Product\EditProductSupplyProductDTO;
@@ -68,10 +69,18 @@ final class EditProductSupplyDTO implements ProductSupplyEventInterface
     #[Assert\Valid]
     private ArrayCollection $product;
 
+
+    /**
+     * Коллекция загружаемых файлов
+     */
+    private EditProductSupplyFilesDTO $files;
+
+
     public function __construct(ProductSupplyEventUid $id)
     {
         $this->id = $id;
         $this->product = new ArrayCollection();
+        $this->files = new EditProductSupplyFilesDTO();
     }
 
     /**
@@ -129,5 +138,20 @@ final class EditProductSupplyDTO implements ProductSupplyEventInterface
     public function removeProduct(EditProductSupplyProductDTO $product): void
     {
         $this->product->removeElement($product);
+    }
+
+    /**
+     * Files
+     */
+
+    public function getFiles(): EditProductSupplyFilesDTO
+    {
+        return $this->files;
+    }
+
+    public function setFiles(EditProductSupplyFilesDTO $files): self
+    {
+        $this->files = $files;
+        return $this;
     }
 }

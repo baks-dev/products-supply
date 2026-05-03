@@ -56,7 +56,8 @@ final readonly class AddNumberProductSignHandler
     {
         /** Текущее событие поставки */
         $ProductSupplyEvent = $this->currentProductSupplyEventRepository
-            ->find($message->getId());
+            ->forMain($message->getId())
+            ->find();
 
         if(false === ($ProductSupplyEvent instanceof ProductSupplyEvent))
         {

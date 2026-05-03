@@ -27,18 +27,18 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\UseCase\Admin\Lock;
 
 use BaksDev\Products\Supply\Entity\Event\Lock\ProductSupplyLockInterface;
-use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
+use BaksDev\Products\Supply\Type\ProductSupplyUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see ProductSupplyLock */
 final class ProductSupplyLockDTO implements ProductSupplyLockInterface
 {
     #[Assert\Uuid]
-    private readonly ProductSupplyEventUid $id;
+    private readonly ProductSupplyUid $id;
 
-    private bool $lock;
+    private bool $value;
 
-    public function __construct(ProductSupplyEventUid $id)
+    public function __construct(ProductSupplyUid $id)
     {
         $this->id = $id;
     }
@@ -46,7 +46,7 @@ final class ProductSupplyLockDTO implements ProductSupplyLockInterface
     /**
      * Event
      */
-    public function getEvent(): ProductSupplyEventUid
+    public function getProductSupplyIdentifier(): ProductSupplyUid
     {
         return $this->id;
     }
@@ -55,20 +55,20 @@ final class ProductSupplyLockDTO implements ProductSupplyLockInterface
      * Lock
      */
 
-    public function getLock(): bool
+    public function getValue(): bool
     {
-        return $this->lock;
+        return $this->value;
     }
 
-    public function unlock()
+    public function unlock(): self
     {
-        $this->lock = false;
+        $this->value = false;
         return $this;
     }
 
-    public function lock()
+    public function lock(): self
     {
-        $this->lock = true;
+        $this->value = true;
         return $this;
     }
 }

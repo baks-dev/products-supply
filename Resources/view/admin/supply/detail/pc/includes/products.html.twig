@@ -35,6 +35,7 @@
 
                             <div class="col-3">
                                 {% set image_path = cdn_image_path(card.productImage, card.productImageExt, card.productImageCdn, 'medium') %}
+
                                 <a href="{{ path('products-product:public.detail', {
                                     category : card.categoryUrl,
                                     url : card.productUrl,
@@ -92,9 +93,6 @@
                         {# Скрытые поля #}
                         <div style="display: none;">
                             {{ form_row(product.product) }}
-                            {{ form_row(product.offerConst) }}
-                            {{ form_row(product.variationConst) }}
-                            {{ form_row(product.modificationConst) }}
                         </div>
                     </td>
 

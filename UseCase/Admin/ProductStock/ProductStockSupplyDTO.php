@@ -39,16 +39,16 @@ final class ProductStockSupplyDTO implements ProductStockSupplyInterface
     /** Номер контейнера */
     #[Assert\NotBlank]
     #[Assert\Uuid]
-    private string $supply;
+    private string $value;
 
-    public function getSupply(): string
+    public function getValue(): string
     {
-        return $this->supply;
+        return $this->value;
     }
 
-    public function setSupply(string $supply): self
+    public function setValue(string $supply): self
     {
-        $this->supply = $supply;
+        $this->value = $supply;
         return $this;
     }
 }

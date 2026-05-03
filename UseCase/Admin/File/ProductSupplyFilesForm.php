@@ -39,7 +39,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 /**
  * Данная форма используется вложенно
  *
- * @see NewProductSupplyForm
+ * @see NewEditProductSupplyForm
  */
 final class ProductSupplyFilesForm extends AbstractType
 {

@@ -31,12 +31,13 @@
 
             </div>
 
-            <div class="card-body d-flex justify-content-between small p-2">
+            <div class="card-body d-flex justify-content-between align-content-center small p-2">
 
-                <div class="d-flex flex-column gap-1 offcanvas-link small"
+                <div class="d-flex flex-column justify-content-center gap-1 w-100 offcanvas-link small"
                      data-href='{{ path('products-supply:admin.supply.detail', { id : supply.id }) }}'
                      data-id='{{ supply.id }}'
-                     style="cursor: help">
+                     style="cursor: help"
+                >
 
                     {# Дата создания и последнего изменения #}
 
@@ -109,20 +110,6 @@
                         </div>
                     {% endif %}
 
-                    {% set total = supply.supplyProducts|reduce((carry, product) => carry + (product.total ?? 0), 0) %}
-
-
-                    <div class="d-flex gap-1 align-items-center">
-                        Продуктов в поставке
-                        <span class="badge small p-1"
-                              style="min-width: 1.7em; background-color: {{ color }} !important;">
-                                {{ supply.supplyProducts|length }}
-                       </span>
-                    </div>
-
-                    <span class="text-muted">
-                       в общем количестве: {{ total }}
-                    </span>
                 </div>
 
                 {# Не даем перемещать поставку в статусе completed "Выполнен" #}
@@ -157,6 +144,22 @@
                     </div>
 
                 {% endif %}
+
+            </div>
+
+            <div class="card-footer d-flex flex-column small p-2">
+
+                <div class="d-flex gap-1 align-items-center">
+                    Продуктов в поставке
+                    <span class="badge small p-1"
+                          style="min-width: 1.7em; background-color: {{ color }} !important;">
+                                {{ supply.getSupplyProductsLength }}
+                       </span>
+                </div>
+
+                <span class="text-muted">
+                    в общем количестве: {{ supply.getSupplyProductsCount }}
+                </span>
 
             </div>
 

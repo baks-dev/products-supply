@@ -140,14 +140,14 @@ final class GroupProductSignsByProductSupplyRepository implements GroupProductSi
 
         /** Только для конкретной поставки */
         $dbal
-            ->addSelect('sign_supply.supply as product_supply_id')
+            ->addSelect('sign_supply.value as product_supply_id')
             ->join(
                 'event',
                 ProductSignSupply::class,
                 'sign_supply',
                 '
                     sign_supply.event = main.event AND
-                    sign_supply.supply = :supply',
+                    sign_supply.value = :supply',
             )
             ->setParameter(
                 'supply',
