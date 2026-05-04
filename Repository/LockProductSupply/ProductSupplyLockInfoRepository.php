@@ -64,7 +64,7 @@ final class ProductSupplyLockInfoRepository implements ProductSupplyLockInfoInte
         $dbal->from(ProductSupplyLock::class, 'product_supply_lock');
 
         $dbal
-            ->where('product_supply_lock.event = :event AND product_supply_lock.lock IS TRUE')
+            ->where('product_supply_lock.event = :event AND product_supply_lock.value IS TRUE')
             ->setParameter(
                 key: 'event',
                 value: $this->event,

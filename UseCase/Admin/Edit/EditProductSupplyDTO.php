@@ -31,6 +31,7 @@ use BaksDev\Products\Supply\Type\Event\ProductSupplyEventUid;
 use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\Files\EditProductSupplyFilesDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\Invariable\EditProductSupplyInvariableDTO;
+use BaksDev\Products\Supply\UseCase\Admin\Edit\Lock\EditProductSupplyLockDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\Personal\EditProductSupplyPersonalDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\Product\EditProductSupplyProductDTO;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -76,11 +77,15 @@ final class EditProductSupplyDTO implements ProductSupplyEventInterface
     private EditProductSupplyFilesDTO $files;
 
 
+    private EditProductSupplyLockDTO $lock;
+
+
     public function __construct(ProductSupplyEventUid $id)
     {
         $this->id = $id;
         $this->product = new ArrayCollection();
         $this->files = new EditProductSupplyFilesDTO();
+        $this->lock = new EditProductSupplyLockDTO();
     }
 
     /**
@@ -153,5 +158,10 @@ final class EditProductSupplyDTO implements ProductSupplyEventInterface
     {
         $this->files = $files;
         return $this;
+    }
+
+    public function getLock(): EditProductSupplyLockDTO
+    {
+        return $this->lock;
     }
 }

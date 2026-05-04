@@ -175,7 +175,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
             );
 
         $dbal
-            ->addSelect('product_supply_lock.lock AS supply_lock')
+            ->addSelect('product_supply_lock.value AS supply_lock')
             ->leftJoin(
                 'product_supply_event',
                 ProductSupplyLock::class,

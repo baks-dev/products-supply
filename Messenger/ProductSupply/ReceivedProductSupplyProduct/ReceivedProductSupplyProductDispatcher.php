@@ -53,7 +53,7 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
- * Отмечает продукт в поставке при его поступления на склад
+ * Отмечает один продукт в поставке при его поступления на склад
  * next @see CompletedStatusProductSupplyDispatcher
  */
 #[Autoconfigure(shared: false)]

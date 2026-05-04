@@ -40,6 +40,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+/** Вводит Честный знак в оборот, переводя в статус New «Новый» */
 #[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 0)]
 final readonly class ProductSignStatusNewDispatcher

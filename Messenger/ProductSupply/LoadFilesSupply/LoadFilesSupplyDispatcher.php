@@ -70,11 +70,38 @@ final readonly class LoadFilesSupplyDispatcher
 
         if(false === $this->filesystem->exists($uploadDir))
         {
+            /**
+             * Снимаем блокировку с поставки добавляя в очередь со сканером с низким приоритетом
+             */
+
+            $ProductSupplyUnlockMessage = new ProductSupplyUnlockMessage($message->getId());
+
+            $this->MessageDispatch->dispatch(
+                message: $ProductSupplyUnlockMessage,
+                transport: 'barcode',
+            );
+
             return;
         }
 
         $directory = new RecursiveDirectoryIterator($uploadDir);
         $iterator = new RecursiveIteratorIterator($directory);
+
+        if(false === $iterator->valid())
+        {
+            /**
+             * Снимаем блокировку с поставки добавляя в очередь со сканером с низким приоритетом
+             */
+
+            $ProductSupplyUnlockMessage = new ProductSupplyUnlockMessage($message->getId());
+
+            $this->MessageDispatch->dispatch(
+                message: $ProductSupplyUnlockMessage,
+                transport: 'barcode',
+            );
+
+            return;
+        }
 
         foreach($iterator as $info)
         {
@@ -152,7 +179,7 @@ final readonly class LoadFilesSupplyDispatcher
 
         $this->MessageDispatch->dispatch(
             message: $ProductSupplyUnlockMessage,
-            transport: 'barcode-low',
+            transport: 'barcode',
         );
     }
 }

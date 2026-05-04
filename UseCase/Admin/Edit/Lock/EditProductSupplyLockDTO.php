@@ -29,10 +29,15 @@ namespace BaksDev\Products\Supply\UseCase\Admin\Edit\Lock;
 use BaksDev\Products\Supply\Entity\Event\Lock\ProductSupplyLockInterface;
 
 /** @see ProductSupplyLock */
-final class EditProductSupplyLockDTO implements ProductSupplyLockInterface
+final readonly class EditProductSupplyLockDTO implements ProductSupplyLockInterface
 {
     /** Всегда ставим блокировку при сохранении */
-    private bool $value = true;
+    private bool $value;
+
+    public function __construct()
+    {
+        $this->value = true;
+    }
 
     public function getValue(): bool
     {

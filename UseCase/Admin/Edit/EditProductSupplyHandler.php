@@ -36,6 +36,7 @@ use BaksDev\Products\Supply\Entity\Event\ProductSupplyEventInterface;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Messenger\ProductSupplyMessage;
 use BaksDev\Products\Supply\Repository\LockProductSupply\ProductSupplyLockInfoInterface;
+use BaksDev\Products\Supply\UseCase\Admin\Edit\Files\File\EditProductSupplyFileDTO;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -47,8 +48,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 final class EditProductSupplyHandler extends AbstractHandler
 {
     public function __construct(
-        #[Target('productsSupplyLogger')] private readonly LoggerInterface $logger,
-        #[Autowire('%kernel.project_dir%')] private string $project_dir,
+        #[Autowire('%kernel.project_dir%')] private readonly string $project_dir,
         private readonly Filesystem $filesystem,
         private readonly ProductSupplyLockInfoInterface $productSupplyLockRepository,
 
@@ -73,18 +73,12 @@ final class EditProductSupplyHandler extends AbstractHandler
 
         if(true === $isLock)
         {
-            $error = uniqid('', true);
-
-            $this->logger->warning(
-                message: sprintf('%s: Поставка заблокирована для изменений',
-                    $error),
-                context: [
-                    'event' => (string) $command->getEvent(),
-                    self::class.':'.__LINE__,
-                ],
+            $this->validatorCollection->error(
+                message: 'Поставка заблокирована для изменений',
+                context: [self::class.':'.__LINE__],
             );
 
-            return $error;
+            //return $this->validatorCollection->getErrorUniqid();
         }
 
         $this
@@ -158,9 +152,10 @@ final class EditProductSupplyHandler extends AbstractHandler
          * Загружаем прикрепленные файлы на сервер
          */
 
+        /** @var EditProductSupplyFileDTO $ProductSupplyFileDTO */
         foreach($command->getFiles()->getFiles() as $ProductSupplyFileDTO)
         {
-            if(empty($ProductSupplyFileDTO->files) || $ProductSupplyFileDTO->files->isEmpty())
+            if(empty($ProductSupplyFileDTO->files))
             {
                 continue;
             }

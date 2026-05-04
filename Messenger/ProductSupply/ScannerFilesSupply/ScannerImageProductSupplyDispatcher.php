@@ -242,7 +242,9 @@ final readonly class ScannerImageProductSupplyDispatcher
          */
 
         $ProductSignNewDTO = new ProductSignNewDTO();
-        $ProductSignNewDTO->getSupply()
+
+        $ProductSignNewDTO
+            ->getSupply()
             ->setValue($message->getSupplyIdentifier());
 
         $ProductSignNewDTO->getCode()
@@ -259,7 +261,6 @@ final readonly class ScannerImageProductSupplyDispatcher
             ->setOffer($ProductIdsByBarcodesResult->getOfferConst())
             ->setVariation($ProductIdsByBarcodesResult->getVariationConst())
             ->setModification($ProductIdsByBarcodesResult->getModificationConst());
-
 
         $ProductSign = $this->productSignHandler->handle($ProductSignNewDTO);
 

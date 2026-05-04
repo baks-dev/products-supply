@@ -47,5 +47,4 @@ final class ProductSignSupplyDTO implements ProductSignSupplyInterface
         $this->value = (string) $supply;
         return $this;
     }
-
 }

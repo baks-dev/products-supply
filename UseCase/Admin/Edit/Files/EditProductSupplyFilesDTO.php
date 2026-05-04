@@ -25,18 +25,18 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Supply\UseCase\Admin\Edit\Files;
 
-use BaksDev\Products\Supply\Forms\ProductSupplyFile\ProductSupplyFileDTO;
+
+use BaksDev\Products\Supply\UseCase\Admin\Edit\Files\File\EditProductSupplyFileDTO;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see NewEditProductSupplyFiles */
 final class EditProductSupplyFilesDTO
 {
-
     /**
      * Коллекция загружаемых файлов
      *
-     * @var ArrayCollection<int, ProductSupplyFileDTO> $files
+     * @var ArrayCollection<int, EditProductSupplyFileDTO> $files
      */
     #[Assert\Valid]
     private ArrayCollection $files;
@@ -46,19 +46,18 @@ final class EditProductSupplyFilesDTO
         $this->files = new ArrayCollection();
 
         /** Для инициализации в форме */
-        $ProductSupplyFileDTO = new ProductSupplyFileDTO();
+        $ProductSupplyFileDTO = new EditProductSupplyFileDTO();
         $this->addFiles($ProductSupplyFileDTO);
     }
 
-
-    public function addFiles(ProductSupplyFileDTO $file): self
+    public function addFiles(EditProductSupplyFileDTO $file): self
     {
         $this->files->add($file);
         return $this;
     }
 
     /**
-     * @return ArrayCollection<int, ProductSupplyFileDTO>
+     * @return ArrayCollection<int, EditProductSupplyFileDTO>
      */
     public function getFiles(): ArrayCollection
     {

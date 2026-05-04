@@ -39,7 +39,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'product_supply_lock')]
-#[ORM\Index(columns: ['lock'])]
+#[ORM\Index(columns: ['value'])]
 class ProductSupplyLock extends EntityReadonly
 {
     /**
@@ -64,7 +64,7 @@ class ProductSupplyLock extends EntityReadonly
      * Значение свойства
      */
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
-    private bool $lock = false;
+    private bool $value = false;
 
     public function __construct(ProductSupplyEvent $event)
     {
@@ -84,7 +84,7 @@ class ProductSupplyLock extends EntityReadonly
 
     public function isLock(): bool
     {
-        return $this->lock === true;
+        return $this->value === true;
     }
 
     public function getDto($dto): mixed

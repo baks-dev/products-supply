@@ -45,7 +45,7 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
- * Создает заявку для поступления на склад каждого продукта из поставки
+ * Создает складскую заявку для поступления на склад каждого продукта из поставки
  * prev @see DeliveryController
  */
 #[Autoconfigure(shared: false)]

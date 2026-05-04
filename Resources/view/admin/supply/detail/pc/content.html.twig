@@ -142,13 +142,17 @@
 
     <div class="w-100 d-flex justify-content-between align-items-center sticky-bottom bottom-0 bg-light p-3 gap-3">
 
-        <div class="w-100">
-            {{ form_widget(form.product_supply_edit, { label: '
+        {% if form.product_supply_edit is defined %}
+
+            <div class="w-100">
+                {{ form_widget(form.product_supply_edit, { label: '
                         <span class="text-nowrap">'~ 'Сохранить изменения'|trans({}, 'core.btn') ~'</span>
                         <span class="spinner-border spinner-border-sm vertical-middle d-none"></span>
                     ', attr: { class: 'btn-danger', title : "Сохранить изменения" }
-            }) }}
-        </div>
+                }) }}
+            </div>
+
+        {% endif %}
 
         <div class="w-100 text-end">
 
