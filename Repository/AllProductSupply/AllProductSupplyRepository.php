@@ -304,7 +304,7 @@ final class AllProductSupplyRepository implements AllProductSupplyInterface
         $dbal->allGroupByExclude();
 
         /** Сортировка по uuid - дата */
-        $dbal->addOrderBy('product_supply.id', 'ASC');
+        $dbal->addOrderBy('product_supply.event', 'DESC');
 
         return $dbal;
     }
