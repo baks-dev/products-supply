@@ -40,6 +40,8 @@ final class ProductSupplyLockHandler extends AbstractHandler
 {
     public function handle(ProductSupplyLockDTO $command): ProductSupplyLock|string
     {
+        $this->setCommand($command);
+
         /** @var ProductSupplyLock|null $entity */
         $entity = $this->getRepository(ProductSupplyLock::class)
             ->find($command->getProductSupplyIdentifier());
@@ -51,7 +53,7 @@ final class ProductSupplyLockHandler extends AbstractHandler
                 [self::class.':'.__LINE__],
             );
 
-            return 'error';
+            return $this->validatorCollection->getErrorUniqid();
         }
 
         $entity->setEntity($command);

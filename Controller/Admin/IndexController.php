@@ -72,17 +72,17 @@ final class IndexController extends AbstractController
             }
 
             /** Текущие статусы поставок */
-            $this->statuses[$status->getStatus()::priority()] = $status->getStatus();
+            $ProductSupplyStatus = $status->getStatus();
+            $this->statuses[$status->getStatus()::priority()] = $ProductSupplyStatus;
 
             $allProductSupplyRepository->setLimit(20);
 
             $productSupply = $allProductSupplyRepository
                 ->search($search)
-                ->status($status)
+                ->status($ProductSupplyStatus)
                 ->forUser($this->getUsr())
                 ->forProfile($this->getProfileUid())
                 ->findAll();
-
 
             if(false === $productSupply || false === $productSupply->valid())
             {
@@ -90,12 +90,8 @@ final class IndexController extends AbstractController
                 continue;
             }
 
-
             /** Получаем список поставок с ключом их статуса */
             $this->supplys[$status->getStatusValue()] = $productSupply;
-
-
-            //$this->statuses[$status->getStatus()::priority()] = $status->getStatus();
         }
 
         return $this->render(
