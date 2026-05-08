@@ -126,8 +126,8 @@ final class ExistProductSupplyByContainerNumberRepository implements ExistProduc
                 'product_supply_personal',
                 '
                     product_supply_personal.event = product_supply.event 
-                    AND product_supply_invariable.usr = :usr
-                    AND product_supply_invariable.profile = :profile
+                    AND product_supply_personal.usr = :usr
+                    AND product_supply_personal.profile = :profile
                 ',
             )
             ->setParameter(

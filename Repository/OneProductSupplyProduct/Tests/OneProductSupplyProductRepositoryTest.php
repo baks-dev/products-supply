@@ -25,6 +25,7 @@
 namespace BaksDev\Products\Supply\Repository\OneProductSupplyProduct\Tests;
 
 use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
@@ -50,10 +51,10 @@ class OneProductSupplyProductRepositoryTest extends KernelTestCase
 
         $result = $OneProductSupplyProductInterface
             ->forSupply(new ProductSupplyUid)
-            ->forProduct(new ProductUid)
-            ->forOffer(new ProductOfferConst)
-            ->forVariation(new ProductVariationConst)
-            ->forModification(new ProductModificationConst)
+            ->forProduct(new ProductInvariableUid())
+            //->forOffer(new ProductOfferConst)
+            //->forVariation(new ProductVariationConst)
+            //->forModification(new ProductModificationConst)
             ->find();
 
         if(false !== $result)
