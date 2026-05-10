@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Supply\UseCase\Admin\New\Tests;
 
 use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
@@ -115,13 +116,10 @@ class NewProductSupplyHandlerTest extends KernelTestCase
          * Продукт
          */
         $NewProductSupplyProductDTO = new NewProductSupplyProductDTO();
-        $NewProductSupplyProductDTO->setTotal(1); // на один Честный знак один продукт !!!
-
         $NewProductSupplyProductDTO
-            ->setProduct(new ProductUid)
-            ->setOfferConst(new ProductOfferConst)
-            ->setVariationConst(new ProductVariationConst)
-            ->setModificationConst(new ProductModificationConst);
+            ->setProduct(new ProductInvariableUid())
+            ->setTotal(1); // на один Честный знак один продукт !!!
+
 
         $NewProductSupplyDTO->addProduct($NewProductSupplyProductDTO);
 

@@ -32,8 +32,8 @@ use BaksDev\Products\Supply\Type\Status\ProductSupplyStatus\ProductSupplyStatusC
 use BaksDev\Products\Supply\UseCase\Admin\Cancel\ProductSupplyStatusCanceledDTO;
 use BaksDev\Products\Supply\UseCase\Admin\Completed\Tests\ProductSupplyStatusCompletedTest;
 use BaksDev\Products\Supply\UseCase\Admin\Edit\EditProductSupplyHandler;
+use BaksDev\Products\Supply\UseCase\Admin\New\Tests\NewProductSupplyHandlerTest;
 use Doctrine\ORM\EntityManagerInterface;
-use NewProductSupplyHandlerTest;
 use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

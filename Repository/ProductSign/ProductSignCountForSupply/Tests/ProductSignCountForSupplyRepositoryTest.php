@@ -32,8 +32,8 @@ use BaksDev\Products\Supply\Entity\Event\Product\ProductSupplyProduct;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Repository\ProductSign\ProductSignCountForSupply\ProductSignCountForSupplyInterface;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
+use BaksDev\Products\Supply\UseCase\Admin\New\Tests\NewProductSupplyHandlerTest;
 use Doctrine\ORM\EntityManagerInterface;
-use NewProductSupplyHandlerTest;
 use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -66,9 +66,6 @@ class ProductSignCountForSupplyRepositoryTest extends KernelTestCase
         $result = $ProductSignCountForSupplyInterface
             ->forSupply($ProductSupply->getId())
             ->forProduct($ProductSupplyProducts->getProduct())
-            ->forOffer($ProductSupplyProducts->getOfferConst())
-            ->forVariation($ProductSupplyProducts->getVariationConst())
-            ->forModification($ProductSupplyProducts->getModificationConst())
             ->count();
     }
 }

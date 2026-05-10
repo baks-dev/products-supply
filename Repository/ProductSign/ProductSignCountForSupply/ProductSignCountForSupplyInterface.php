@@ -28,25 +28,22 @@ namespace BaksDev\Products\Supply\Repository\ProductSign\ProductSignCountForSupp
 
 use BaksDev\Products\Product\Entity\Product;
 use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Supply\Entity\ProductSupply;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 
+#[Autoconfigure(public: true)] /* TODO: удалить !!! */
 interface ProductSignCountForSupplyInterface
 {
     public function forPart(string $part): self;
 
     public function forSupply(ProductSupply|ProductSupplyUid $supply): self;
 
-    public function forProduct(Product|ProductUid $product): self;
-
-    public function forOffer(ProductOfferConst|null $offer): self;
-
-    public function forVariation(ProductVariationConst|null $variation): self;
-
-    public function forModification(ProductModificationConst|null $modification): self;
+    public function forProduct(ProductInvariableUid $product): self;
 
     public function count(): int;
 }

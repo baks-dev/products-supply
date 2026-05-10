@@ -28,6 +28,7 @@ namespace BaksDev\Products\Supply\UseCase\Admin\New\Product;
 
 use BaksDev\Products\Product\Repository\ProductDetail\ProductDetailByConstResult;
 use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
@@ -46,19 +47,7 @@ final class NewProductSupplyProductDTO implements ProductSupplyProductInterface
 
     /** ID продукта (не уникальное) */
     #[Assert\Uuid]
-    private ?ProductUid $product = null;
-
-    /** Константа ТП */
-    #[Assert\Uuid]
-    private ?ProductOfferConst $offerConst = null;
-
-    /** Константа множественного варианта */
-    #[Assert\Uuid]
-    private ?ProductVariationConst $variationConst = null;
-
-    /** Константа модификации множественного варианта */
-    #[Assert\Uuid]
-    private ?ProductModificationConst $modificationConst = null;
+    private ?ProductInvariableUid $product = null;
 
     private bool $received = false;
 
@@ -88,7 +77,7 @@ final class NewProductSupplyProductDTO implements ProductSupplyProductInterface
     /**
      * Total
      */
-    public function setTotal(int $total): NewProductSupplyProductDTO
+    public function setTotal(int $total): self
     {
         $this->total = $total;
         return $this;
@@ -97,58 +86,17 @@ final class NewProductSupplyProductDTO implements ProductSupplyProductInterface
     /**
      * Product
      */
-    public function getProduct(): ?ProductUid
+    public function getProduct(): ?ProductInvariableUid
     {
         return $this->product;
     }
 
-    public function setProduct(ProductUid|false|null $product): self
+    public function setProduct(ProductInvariableUid|false|null $product): self
     {
         $this->product = $product ?: null;
         return $this;
     }
 
-    /**
-     * Offer
-     */
-    public function getOfferConst(): ?ProductOfferConst
-    {
-        return $this->offerConst;
-    }
-
-    public function setOfferConst(ProductOfferConst|false|null $offerConst): self
-    {
-        $this->offerConst = $offerConst ?: null;
-        return $this;
-    }
-
-    /**
-     * Variation
-     */
-    public function getVariationConst(): ?ProductVariationConst
-    {
-        return $this->variationConst;
-    }
-
-    public function setVariationConst(ProductVariationConst|false|null $variationConst): self
-    {
-        $this->variationConst = $variationConst ?: null;
-        return $this;
-    }
-
-    /**
-     * Modification
-     */
-    public function getModificationConst(): ?ProductModificationConst
-    {
-        return $this->modificationConst;
-    }
-
-    public function setModificationConst(ProductModificationConst|false|null $modificationConst): self
-    {
-        $this->modificationConst = $modificationConst ?: null;
-        return $this;
-    }
 
     public function getReceived(): bool
     {
@@ -158,7 +106,7 @@ final class NewProductSupplyProductDTO implements ProductSupplyProductInterface
     /**
      * Received
      */
-    public function setReceived(bool $received): NewProductSupplyProductDTO
+    public function setReceived(bool $received): self
     {
         $this->received = $received;
         return $this;

@@ -29,6 +29,7 @@ namespace BaksDev\Products\Supply\Repository\ProductSign\ProductSignCountForSupp
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Products\Product\Entity\Product;
 use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
@@ -54,13 +55,7 @@ final class ProductSignCountForSupplyRepository implements ProductSignCountForSu
 
     /** Фильтр по продукту */
 
-    private ProductUid|false $product = false;
-
-    private ProductOfferConst|false $offer = false;
-
-    private ProductVariationConst|false $variation = false;
-
-    private ProductModificationConst|false $modification = false;
+    private ProductInvariableUid|false $product = false;
 
     public function __construct(
         private readonly DBALQueryBuilder $DBALQueryBuilder
@@ -87,51 +82,10 @@ final class ProductSignCountForSupplyRepository implements ProductSignCountForSu
         return $this;
     }
 
-    public function forProduct(Product|ProductUid $product): self
+    public function forProduct(ProductInvariableUid $product): self
     {
-        if($product instanceof Product)
-        {
-            $product = $product->getId();
-        }
-
         $this->product = $product;
 
-        return $this;
-    }
-
-    public function forOffer(ProductOfferConst|null $offer): self
-    {
-        if(null === $offer)
-        {
-            $this->offer = false;
-            return $this;
-        }
-
-        $this->offer = $offer;
-        return $this;
-    }
-
-    public function forVariation(ProductVariationConst|null $variation): self
-    {
-        if(null === $variation)
-        {
-            $this->variation = false;
-            return $this;
-        }
-
-        $this->variation = $variation;
-        return $this;
-    }
-
-    public function forModification(ProductModificationConst|null $modification): self
-    {
-        if(null === $modification)
-        {
-            $this->modification = false;
-            return $this;
-        }
-
-        $this->modification = $modification;
         return $this;
     }
 
@@ -184,47 +138,13 @@ final class ProductSignCountForSupplyRepository implements ProductSignCountForSu
 
         $invariableCondition = 'invariable.main = main.id';
 
-        if(true === ($this->product instanceof ProductUid))
+        if(true === ($this->product instanceof ProductInvariableUid))
         {
-            $productParam = '= :product';
-            $dbal->setParameter('product', $this->product, ProductUid::TYPE);
 
-            $offerParam = ' IS NULL';
-            $variationParam = ' IS NULL';
-            $modificationParam = ' IS NULL';
-
-            /**
-             * Offer
-             */
-            if(true === ($this->offer instanceof ProductOfferConst))
-            {
-                $offerParam = '= :offer';
-                $dbal->setParameter('offer', $this->offer, ProductOfferConst::TYPE);
-            }
-
-            /**
-             * Variation
-             */
-            if(true === ($this->variation instanceof ProductVariationConst))
-            {
-                $variationParam = '= :variation';
-                $dbal->setParameter('variation', $this->variation, ProductVariationConst::TYPE);
-            }
-
-            /**
-             * Modification
-             */
-            if(true === ($this->modification instanceof ProductModificationConst))
-            {
-                $modificationParam = '= :modification';
-                $dbal->setParameter('modification', $this->modification, ProductModificationConst::TYPE);
-            }
+            $dbal->setParameter('product', $this->product, ProductInvariableUid::TYPE);
 
             $invariableCondition = 'invariable.main = main.id AND 
-                    invariable.product '.$productParam.' AND
-                    invariable.offer '.$offerParam.' AND
-                    invariable.variation '.$variationParam.' AND
-                    invariable.modification '.$modificationParam;
+                    invariable.product = :product';
         }
 
         /** По номеру партии */
