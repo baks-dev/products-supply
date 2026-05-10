@@ -32,9 +32,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 /** @see ProductSignSupply */
 final class ProductSignSupplyDTO implements ProductSignSupplyInterface
 {
-    /** Идентификатор */
+    /**
+     * Идентификатор
+     *
+     * @note Не валидируем на NULL
+     */
     #[Assert\Uuid]
-    #[Assert\NotNull]
     private ?string $value = null;
 
     public function getValue(): ?string
@@ -42,9 +45,9 @@ final class ProductSignSupplyDTO implements ProductSignSupplyInterface
         return (string) $this->value;
     }
 
-    public function setValue(ProductSupplyUid $supply): self
+    public function setValue(ProductSupplyUid|null|false $supply): self
     {
-        $this->value = (string) $supply;
+        $this->value = empty($supply) ? null : (string) $supply;
         return $this;
     }
 }
