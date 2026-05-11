@@ -313,7 +313,7 @@ final readonly class ScannerImageProductSupplyDispatcher
 
         $this->messageDispatch->dispatch(
             message: $UpdateProductSupplyMessage,
-            transport: 'barcode',
+            transport: 'products-supply',
         );
     }
 }
