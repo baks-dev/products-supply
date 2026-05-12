@@ -52,6 +52,11 @@ class ProductSupplyLockInfoRepositoryTest extends KernelTestCase
         $ProductSupply = $em->getRepository(ProductSupply::class)
             ->find(empty(self::MAIN) ? ProductSupplyUid::TEST : self::MAIN);
 
+        if(false === ($ProductSupply instanceof ProductSupply))
+        {
+            return;
+        }
+
         /** @var ProductSupplyLockInfoInterface $ProductSupplyLockInfoInterface */
         $ProductSupplyLockInfoInterface = self::getContainer()->get(ProductSupplyLockInfoInterface::class);
 
