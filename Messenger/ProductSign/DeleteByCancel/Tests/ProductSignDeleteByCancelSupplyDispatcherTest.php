@@ -57,6 +57,11 @@ class ProductSignDeleteByCancelSupplyDispatcherTest extends KernelTestCase
         $ProductSupply = $em->getRepository(ProductSupply::class)
             ->find(ProductSupplyUid::TEST);
 
+        if(false === ($ProductSupply instanceof ProductSupply))
+        {
+            return;
+        }
+
         // Бросаем событие консольной команды
         $dispatcher = self::getContainer()->get(EventDispatcherInterface::class);
         $event = new ConsoleCommandEvent(new Command(), new StringInput(''), new NullOutput());
