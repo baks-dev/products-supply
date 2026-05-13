@@ -42,7 +42,7 @@
                                     offer: card.productOfferValue,
                                     variation: card.productVariationValue,
                                     modification: card.productModificationValue,
-                                    postfix: (card.productModificationPostfix ?: card.productVariationPostfix ?: card.productOfferPostfix ?: null )|replace({ '/': '-' })
+                                    postfix: (card.productModificationPostfix ?: card.productVariationPostfix ?: card.productOfferPostfix ?: null )|replace({ '/': '-', ' ': '~' })
                                 }) }}"
                                    class="icon rounded-4 mb-2 bg-contain p-1 d-block"
                                    style="width: 60px; height: 60px; background-image: url('{{ image_path }}')"
@@ -58,7 +58,7 @@
                                     offer: card.productOfferValue,
                                     variation: card.productVariationValue,
                                     modification: card.productModificationValue,
-                                    postfix: (card.productModificationPostfix ?: card.productVariationPostfix ?: card.productOfferPostfix ?: null )|replace({ '/': '-' })
+                                    postfix: (card.productModificationPostfix ?: card.productVariationPostfix ?: card.productOfferPostfix ?: null )|replace({ '/': '-', ' ': '~' })
                                 }) }}"
                                    class="text-dark me-3 text-uppercase text-decoration-none text-truncate d-block"
                                    target="_blank"
